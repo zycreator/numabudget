@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -8,10 +9,11 @@ const MONTHS = [
 interface Row {
   description: string;
   amount: string;
+  included: boolean;
 }
 
 const makeRows = (count: number): Row[] =>
-  Array.from({ length: count }, () => ({ description: "", amount: "" }));
+  Array.from({ length: count }, () => ({ description: "", amount: "", included: true }));
 
 const formatPHP = (n: number) =>
   `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -25,7 +27,8 @@ const Index = () => {
     (setter: React.Dispatch<React.SetStateAction<Row[]>>, i: number, field: keyof Row, value: string) => {
       setter((prev) => {
         const next = [...prev];
-        next[i] = { ...next[i], [field]: value };
+        const parsedValue = field === "included" ? value === "true" : value;
+        next[i] = { ...next[i], [field]: parsedValue };
         return next;
       });
     },
@@ -33,11 +36,11 @@ const Index = () => {
   );
 
   const totalIncome = useMemo(
-    () => incomeRows.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0),
+    () => incomeRows.reduce((s, r) => s + (r.included ? (parseFloat(r.amount) || 0) : 0), 0),
     [incomeRows]
   );
   const totalExpenses = useMemo(
-    () => expenseRows.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0),
+    () => expenseRows.reduce((s, r) => s + (r.included ? (parseFloat(r.amount) || 0) : 0), 0),
     [expenseRows]
   );
   const net = totalIncome - totalExpenses;
@@ -124,7 +127,12 @@ const EntryCard = ({ title, total, rows, onChange }: EntryCardProps) => (
     </div>
     <div className="space-y-1.5">
       {rows.map((row, i) => (
-        <div key={i} className="flex gap-2">
+        <div key={i} className={`flex items-center gap-2 ${!row.included ? "opacity-40" : ""}`}>
+          <Checkbox
+            checked={row.included}
+            onCheckedChange={(checked) => onChange(i, "included", String(!!checked))}
+            className="shrink-0"
+          />
           <input
             type="text"
             placeholder="Description"
