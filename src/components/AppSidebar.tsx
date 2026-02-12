@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, Wallet, FileText, Archive, Trash2 } from "lucide-react";
+import logo from "@/assets/logo.png";
 import {
   Sidebar,
   SidebarContent,
@@ -80,7 +81,7 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
   return (
     <Sidebar className="border-r border-border">
       <div className="p-3 flex items-center justify-between border-b border-border">
-        <h2 className="text-sm font-semibold text-foreground">Budgets</h2>
+        <img src={logo} alt="Numa" className="h-8" />
         <SidebarTrigger className="h-6 w-6" />
       </div>
 
