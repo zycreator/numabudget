@@ -21,6 +21,7 @@ export interface PlanItem {
   category_id: string | null;
   included: boolean;
   sort_order: number;
+  paid: boolean;
 }
 
 export const usePlans = () => {
@@ -99,6 +100,7 @@ export const useUpsertPlanItem = () => {
           category_id: item.category_id,
           included: item.included,
           sort_order: item.sort_order,
+          paid: item.paid,
         }).eq("id", item.id);
         if (error) throw error;
       } else {
