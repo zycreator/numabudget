@@ -1,66 +1,38 @@
 
 
-# Debt & Savings Boards
+# Add "Paid" Status Checkbox to Budget Rows
 
-Replace the current Debt & Savings summary cards with full interactive boards (like Income and Expenses), where you can add, edit, and delete individual entries.
+## Overview
+Add a second, smaller checkbox to each expense/income row that marks it as "paid/spent." When checked, the row's fields turn grey to give you an instant visual indicator of what's been settled.
 
----
+## How It Will Work
+- Each row gets two small checkboxes side by side:
+  1. **Green checkbox** (existing) -- toggles whether the row is included in totals
+  2. **Terracotta/muted checkbox** (new) -- marks the row as paid/spent
+- When the "paid" checkbox is ticked, the entire row's fields (description, amount, category) get a grey background and slightly muted text
+- Both checkboxes will be shrunk to the same small size (h-3.5 w-3.5) to keep things minimal and clean
 
-## What You'll Get
+## What Changes
 
-**Debt Board** -- each row tracks:
-- Description (who you owe)
-- Amount owed
-- Due date
+### 1. Database Migration
+- Add a `paid` boolean column (default `false`) to the `budget_items` table
+- Add a `paid` boolean column (default `false`) to the `plan_items` table (for Planner consistency)
 
-**Savings Board** -- each row tracks:
-- Description (what you're saving for)
-- Amount saved so far
-- Target amount (with progress bar)
+### 2. Data Layer Updates
+- **`src/hooks/useBudgetData.ts`**: Add `paid` field to `BudgetItem` interface and include it in the upsert mutation
 
-Both boards are per-budget, so each budget has its own debt and savings entries. Totals are shown at the top of each board.
+### 3. UI Changes
+- **`src/pages/Index.tsx`** (EntryCard component):
+  - Make both checkboxes smaller (h-3.5 w-3.5)
+  - Add second checkbox with a distinct muted/brown color
+  - When `paid` is true: apply grey background and reduced opacity to the row's input fields
+- **`src/pages/PlannerView.tsx`**: Same treatment for plan entry rows
 
----
+### 4. Checkbox Styling
+- The existing "included" checkbox stays green (primary color)
+- The new "paid" checkbox uses a warm grey/brown accent color to differentiate it
+- Both are the same small size to keep the layout clean
 
-## Technical Details
-
-### Database: Two New Tables
-
-**`debt_items`**
-- `id` (uuid, PK)
-- `budget_id` (uuid, NOT NULL)
-- `user_id` (uuid, NOT NULL)
-- `description` (text, default '')
-- `amount` (numeric, default 0)
-- `due_date` (date, nullable)
-- `sort_order` (integer, default 0)
-- `created_at` (timestamptz)
-- RLS: users manage own rows
-
-**`savings_items`**
-- `id` (uuid, PK)
-- `budget_id` (uuid, NOT NULL)
-- `user_id` (uuid, NOT NULL)
-- `description` (text, default '')
-- `saved_amount` (numeric, default 0)
-- `target_amount` (numeric, default 0)
-- `sort_order` (integer, default 0)
-- `created_at` (timestamptz)
-- RLS: users manage own rows
-
-### New Hooks (in `useBudgetData.ts`)
-
-- `useDebtItems(budgetId)` -- fetch debt items for the active budget
-- `useSavingsItems(budgetId)` -- fetch savings items for the active budget
-- `useUpsertDebtItem()` / `useDeleteDebtItem()` -- CRUD for debt
-- `useUpsertSavingsItem()` / `useDeleteSavingsItem()` -- CRUD for savings
-
-### UI Changes (`Index.tsx`)
-
-- Remove the current Debt & Savings summary cards
-- Add a new grid section below Income/Expenses (or alongside) with two boards:
-  - **Debt board**: rows with description input, amount input, date picker, and delete button. Total debt shown in header.
-  - **Savings board**: rows with description input, saved amount input, target amount input, a small progress bar per row, and delete button. Total saved / total target shown in header.
-- Both boards have "+ Add Row" buttons like the existing Income/Expenses cards
-- Debounced input updates (same pattern as EntryCard)
-
+## Visual Behavior
+- **Unchecked (not paid)**: Row looks normal
+- **Checked (paid)**: Row fields get a light grey background tint, text becomes slightly muted -- giving a clear "this is done" feel without a harsh strikethrough
