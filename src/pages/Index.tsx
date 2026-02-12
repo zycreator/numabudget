@@ -342,6 +342,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           total={totalIncome - rolloverAmount}
           items={incomeItems}
           categories={categories}
+          queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
           onAdd={() => handleAddItem("income")} />
@@ -351,6 +352,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           total={totalExpenses}
           items={expenseItems}
           categories={categories}
+          queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
           onAdd={() => handleAddItem("expense")} />
@@ -362,6 +364,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         <DebtBoard
           items={debtItems}
           totalDebt={totalDebt}
+          queryKey={["debt_items", user?.id, budget.id]}
           onUpsert={(item) => upsertDebt.mutate(item)}
           onDelete={(id) => deleteDebt.mutate(id)}
           onAdd={() => upsertDebt.mutate({ budget_id: budget.id, description: "", amount: 0, due_date: null, sort_order: debtItems.length })} />
@@ -370,6 +373,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           items={savingsItems}
           totalSaved={totalSaved}
           totalTarget={totalSavingsTarget}
+          queryKey={["savings_items", user?.id, budget.id]}
           onUpsert={(item) => upsertSaving.mutate(item)}
           onDelete={(id) => deleteSaving.mutate(id)}
           onAdd={() => upsertSaving.mutate({ budget_id: budget.id, description: "", saved_amount: 0, target_amount: 0, sort_order: savingsItems.length })} />
@@ -402,12 +406,13 @@ interface EntryCardProps {
   total: number;
   items: BudgetItem[];
   categories: Category[];
+  queryKey: unknown[];
   onUpdate: (item: BudgetItem) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
 }
 
-const EntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd }: EntryCardProps) => {
+const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd }: EntryCardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: BudgetItem) => {
@@ -418,6 +423,7 @@ const EntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd 
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items,
     onReorder: (reordered) => reordered.forEach((item) => onUpdate(item)),
+    queryKey,
   });
 
   return (
@@ -653,12 +659,13 @@ const RecurringPanel = ({ items, categories, onUpsert, onDelete, onApply }: Recu
 interface DebtBoardProps {
   items: DebtItem[];
   totalDebt: number;
+  queryKey: unknown[];
   onUpsert: (item: Omit<DebtItem, "id"> & {id?: string;}) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
 }
 
-const DebtBoard = ({ items, totalDebt, onUpsert, onDelete, onAdd }: DebtBoardProps) => {
+const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: DebtBoardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: DebtItem) => {
@@ -669,6 +676,7 @@ const DebtBoard = ({ items, totalDebt, onUpsert, onDelete, onAdd }: DebtBoardPro
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items,
     onReorder: (reordered) => reordered.forEach((item) => onUpsert(item)),
+    queryKey,
   });
 
   return (
@@ -748,12 +756,13 @@ interface SavingsBoardProps {
   items: SavingsItem[];
   totalSaved: number;
   totalTarget: number;
+  queryKey: unknown[];
   onUpsert: (item: Omit<SavingsItem, "id"> & {id?: string;}) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
 }
 
-const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAdd }: SavingsBoardProps) => {
+const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDelete, onAdd }: SavingsBoardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: SavingsItem) => {
@@ -764,6 +773,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAd
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items,
     onReorder: (reordered) => reordered.forEach((item) => onUpsert(item)),
+    queryKey,
   });
 
   return (
