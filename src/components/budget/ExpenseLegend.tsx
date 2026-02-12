@@ -1,4 +1,4 @@
-import type { BudgetItem, Category } from "@/hooks/useBudget";
+import type { BudgetItem, Category } from "@/hooks/useBudgetData";
 
 const formatPHP = (n: number) =>
   `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

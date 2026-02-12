@@ -15,21 +15,23 @@ import {
   useUpsertRecurringItem,
   useDeleteRecurringItem,
   useUpsertCategoryLimit,
-  useClearMonth,
+  useClearBudgetItems,
   useApplyRecurring,
+  useRolloverAmount,
   type BudgetItem,
   type Category,
   type RecurringItem,
-} from "@/hooks/useBudget";
+} from "@/hooks/useBudgetData";
+import { useBudgets, useUpdateBudget, type Budget } from "@/hooks/useBudgets";
 import ExpensePieChart from "@/components/budget/ExpensePieChart";
 import ExpenseLegend from "@/components/budget/ExpenseLegend";
 import SummaryCards from "@/components/budget/SummaryCards";
 import CategoryLimitsCard from "@/components/budget/CategoryLimitsCard";
-
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
+import PlannerView from "@/pages/PlannerView";
+import { usePlans, type Plan } from "@/hooks/usePlans";
+import { AppSidebar } from "@/components/AppSidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
 
 const DEFAULT_CATEGORIES = [
   { name: "Food", color: "#A0522D" },
@@ -47,17 +49,99 @@ const formatPHP = (n: number) =>
 
 const Index = () => {
   const { user, signOut } = useAuth();
-  const now = new Date();
-  const [month, setMonth] = useState(now.getMonth());
-  const [year, setYear] = useState(now.getFullYear());
+  const [activeBudgetId, setActiveBudgetId] = useState<string | null>(null);
+  const [activePlanId, setActivePlanId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showRecurring, setShowRecurring] = useState(false);
 
-  const { data: items = [], isLoading } = useBudgetItems(month, year);
+  const { data: budgets = [] } = useBudgets();
+  const { data: plans = [] } = usePlans();
+
+  // Auto-select first budget if none selected
+  const effectiveBudgetId = activeBudgetId ?? (budgets.length > 0 ? budgets[0].id : null);
+  const activeBudget = budgets.find((b) => b.id === effectiveBudgetId) ?? null;
+  const activePlan = plans.find((p) => p.id === activePlanId) ?? null;
+
+  const handleSelectBudget = (id: string) => {
+    setActiveBudgetId(id);
+    setActivePlanId(null);
+  };
+  const handleSelectPlan = (id: string) => {
+    setActivePlanId(id);
+    setActiveBudgetId(null);
+  };
+
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar
+          activeBudgetId={activePlanId ? null : effectiveBudgetId}
+          activePlanId={activePlanId}
+          onSelectBudget={handleSelectBudget}
+          onSelectPlan={handleSelectPlan}
+        />
+        <main className="flex-1 bg-background px-4 py-6 sm:py-10 overflow-auto">
+          <div className="mx-auto max-w-5xl space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger className="h-6 w-6" />
+                <h1 className="text-lg font-semibold text-foreground">Budget</h1>
+              </div>
+              <div className="flex items-center gap-2">
+                {!activePlanId && (
+                  <>
+                    <button onClick={() => setShowRecurring(!showRecurring)} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                      Recurring
+                    </button>
+                    <button onClick={() => setShowSettings(!showSettings)} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                      Settings
+                    </button>
+                  </>
+                )}
+                <button onClick={() => signOut()} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                  Sign Out
+                </button>
+              </div>
+            </div>
+
+            {activePlanId && activePlan ? (
+              <PlannerView plan={activePlan} />
+            ) : effectiveBudgetId && activeBudget ? (
+              <BudgetView
+                budget={activeBudget}
+                showSettings={showSettings}
+                showRecurring={showRecurring}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <p className="text-sm text-muted-foreground">No budgets yet. Create one from the sidebar!</p>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
+  );
+};
+
+// ─── Budget View ─────────────────────────────────────────────
+
+interface BudgetViewProps {
+  budget: Budget;
+  showSettings: boolean;
+  showRecurring: boolean;
+}
+
+const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) => {
+  const { user } = useAuth();
+  const { data: items = [], isLoading } = useBudgetItems(budget.id);
   const { data: categories = [] } = useCategories();
-  const { data: savingsGoal } = useSavingsGoal(month, year);
+  const { data: savingsGoal } = useSavingsGoal(budget.id);
   const { data: recurringItems = [] } = useRecurringItems();
-  const { data: categoryLimits = [] } = useCategoryLimits(month, year);
+  const { data: categoryLimits = [] } = useCategoryLimits(budget.id);
+  const { data: rolloverData } = useRolloverAmount(budget.id);
+  const updateBudget = useUpdateBudget();
 
   const upsertItem = useUpsertBudgetItem();
   const deleteItem = useDeleteBudgetItem();
@@ -67,15 +151,17 @@ const Index = () => {
   const upsertRecurring = useUpsertRecurringItem();
   const deleteRecurring = useDeleteRecurringItem();
   const upsertLimit = useUpsertCategoryLimit();
-  const clearMonth = useClearMonth();
+  const clearItems = useClearBudgetItems();
   const applyRecurring = useApplyRecurring();
+
+  const rolloverAmount = rolloverData?.amount ?? 0;
 
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
 
   const totalIncome = useMemo(
-    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
-    [incomeItems]
+    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0) + rolloverAmount,
+    [incomeItems, rolloverAmount]
   );
   const totalExpenses = useMemo(
     () => expenseItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
@@ -84,10 +170,6 @@ const Index = () => {
   const net = totalIncome - totalExpenses;
   const pctSaved = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
 
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const currentDay = year === now.getFullYear() && month === now.getMonth() ? now.getDate() : daysInMonth;
-
-  // Savings goal progress
   const goalTarget = savingsGoal?.target_amount ?? 0;
   const goalPct = goalTarget > 0 ? Math.min((net / goalTarget) * 100, 100) : 0;
 
@@ -105,8 +187,9 @@ const Index = () => {
       amount: 0,
       type,
       category_id: null,
-      month,
-      year,
+      budget_id: budget.id,
+      month: 0,
+      year: 0,
       included: true,
       sort_order: list.length,
     });
@@ -114,11 +197,10 @@ const Index = () => {
 
   const handleApplyRecurring = () => {
     if (recurringItems.length > 0) {
-      applyRecurring.mutate({ month, year, items: recurringItems });
+      applyRecurring.mutate({ budgetId: budget.id, items: recurringItems });
     }
   };
 
-  // Export to CSV
   const exportCSV = () => {
     const rows = [["Type", "Description", "Category", "Amount", "Included"]];
     const catMap = new Map(categories.map((c) => [c.id, c.name]));
@@ -136,178 +218,160 @@ const Index = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `budget-${MONTHS[month]}-${year}.csv`;
+    a.download = `budget-${budget.name}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </div>
-    );
+    return <div className="flex items-center justify-center p-8"><p className="text-sm text-muted-foreground">Loading...</p></div>;
   }
 
   return (
-    <div className="min-h-screen bg-background px-4 py-6 sm:py-10">
-      <div className="mx-auto max-w-5xl space-y-4">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-foreground">Budget</h1>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowRecurring(!showRecurring)} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-              Recurring
-            </button>
-            <button onClick={() => setShowSettings(!showSettings)} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-              Settings
-            </button>
+    <div className="space-y-4">
+      {/* Settings Panel */}
+      {showSettings && (
+        <SettingsPanel
+          categories={categories}
+          categoryLimits={categoryLimits}
+          budgetId={budget.id}
+          savingsGoal={savingsGoal?.target_amount ?? 0}
+          onUpsertCategory={(c) => upsertCategory.mutate(c)}
+          onDeleteCategory={(id) => deleteCategory.mutate(id)}
+          onSetGoal={(amt) => upsertGoal.mutate({ budget_id: budget.id, target_amount: amt })}
+          onSetLimit={(catId, amt) => upsertLimit.mutate({ category_id: catId, budget_id: budget.id, limit_amount: amt })}
+        />
+      )}
+
+      {/* Recurring Panel */}
+      {showRecurring && (
+        <RecurringPanel
+          items={recurringItems}
+          categories={categories}
+          onUpsert={(item) => upsertRecurring.mutate(item)}
+          onDelete={(id) => deleteRecurring.mutate(id)}
+          onApply={handleApplyRecurring}
+        />
+      )}
+
+      {/* Budget Header */}
+      <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <h2 className="text-sm font-medium text-foreground">{budget.name}</h2>
+            {(budget.start_date || budget.end_date) && (
+              <p className="text-xs text-muted-foreground">
+                {budget.start_date && new Date(budget.start_date).toLocaleDateString()}
+                {budget.start_date && budget.end_date && " – "}
+                {budget.end_date && new Date(budget.end_date).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+              <Switch
+                checked={budget.rollover_enabled}
+                onCheckedChange={(v) => updateBudget.mutate({ id: budget.id, rollover_enabled: v })}
+              />
+              Rollover
+            </label>
             <button onClick={exportCSV} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
               Export
             </button>
-            <button onClick={() => signOut()} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-              Sign Out
-            </button>
           </div>
         </div>
 
-        {/* Settings Panel */}
-        {showSettings && (
-          <SettingsPanel
-            categories={categories}
-            categoryLimits={categoryLimits}
-            month={month}
-            year={year}
-            savingsGoal={savingsGoal?.target_amount ?? 0}
-            onUpsertCategory={(c) => upsertCategory.mutate(c)}
-            onDeleteCategory={(id) => deleteCategory.mutate(id)}
-            onSetGoal={(amt) => upsertGoal.mutate({ month, year, target_amount: amt })}
-            onSetLimit={(catId, amt) => upsertLimit.mutate({ category_id: catId, month, year, limit_amount: amt })}
-          />
+        {/* Rollover banner */}
+        {rolloverData && (
+          <div className="mb-3 rounded-md bg-positive/10 px-3 py-2 text-xs text-positive">
+            Rollover from "{rolloverData.fromBudgetName}": {formatPHP(rolloverData.amount)}
+          </div>
         )}
 
-        {/* Recurring Panel */}
-        {showRecurring && (
-          <RecurringPanel
-            items={recurringItems}
-            categories={categories}
-            onUpsert={(item) => upsertRecurring.mutate(item)}
-            onDelete={(id) => deleteRecurring.mutate(id)}
-            onApply={handleApplyRecurring}
-          />
-        )}
+        <p className={`text-3xl sm:text-4xl font-bold tracking-tight ${net >= 0 ? "text-positive" : "text-negative"}`}>
+          {formatPHP(net)}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
+        </p>
 
-        {/* Monthly Summary */}
-        <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h2 className="text-sm font-medium text-muted-foreground">Monthly Summary</h2>
-            <div className="flex items-center gap-2">
-              <select
-                value={month}
-                onChange={(e) => setMonth(Number(e.target.value))}
-                className="rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                {MONTHS.map((m, i) => (
-                  <option key={m} value={i}>{m}</option>
-                ))}
-              </select>
-              <select
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                className="rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                {Array.from({ length: 5 }, (_, i) => now.getFullYear() - 2 + i).map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+        {goalTarget > 0 && (
+          <div className="mt-3">
+            <div className="flex justify-between text-xs mb-1">
+              <span className="text-muted-foreground">Savings Goal</span>
+              <span className={`font-medium ${goalPct >= 100 ? "text-positive" : "text-foreground"}`}>
+                {formatPHP(Math.max(0, net))} / {formatPHP(goalTarget)}
+              </span>
+            </div>
+            <div className="h-2 rounded-full bg-secondary overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${goalPct >= 100 ? "bg-positive" : "bg-accent"}`}
+                style={{ width: `${Math.max(0, goalPct)}%` }}
+              />
             </div>
           </div>
-          <p className={`text-3xl sm:text-4xl font-bold tracking-tight ${net >= 0 ? "text-positive" : "text-negative"}`}>
-            {formatPHP(net)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
-          </p>
+        )}
+      </div>
 
-          {/* Savings Goal Progress */}
-          {goalTarget > 0 && (
-            <div className="mt-3">
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Savings Goal</span>
-                <span className={`font-medium ${goalPct >= 100 ? "text-positive" : "text-foreground"}`}>
-                  {formatPHP(Math.max(0, net))} / {formatPHP(goalTarget)}
-                </span>
-              </div>
-              <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all ${goalPct >= 100 ? "bg-positive" : "bg-accent"}`}
-                  style={{ width: `${Math.max(0, goalPct)}%` }}
-                />
-              </div>
-            </div>
-          )}
+      {/* Summary Cards */}
+      <SummaryCards
+        items={items}
+        totalIncome={totalIncome}
+        totalExpenses={totalExpenses}
+        daysInMonth={30}
+        currentDay={new Date().getDate()}
+      />
+
+      {/* Expense Breakdown Chart */}
+      {expenseItems.length > 0 && (
+        <div className="rounded-lg border border-border bg-card p-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Expense Breakdown</h3>
+          <ExpensePieChart items={items} categories={categories} />
+          <ExpenseLegend items={items} categories={categories} />
         </div>
+      )}
 
-        {/* Summary Cards */}
-        <SummaryCards
-          items={items}
-          totalIncome={totalIncome}
-          totalExpenses={totalExpenses}
-          daysInMonth={daysInMonth}
-          currentDay={currentDay}
+      {/* Category Limits */}
+      <CategoryLimitsCard items={items} categories={categories} limits={categoryLimits} />
+
+      {/* Income & Expenses */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <EntryCard
+          title="Income"
+          total={totalIncome - rolloverAmount}
+          items={incomeItems}
+          categories={categories}
+          onUpdate={(item) => upsertItem.mutate(item)}
+          onDelete={(id) => deleteItem.mutate(id)}
+          onAdd={() => handleAddItem("income")}
         />
+        <EntryCard
+          title="Expenses"
+          total={totalExpenses}
+          items={expenseItems}
+          categories={categories}
+          onUpdate={(item) => upsertItem.mutate(item)}
+          onDelete={(id) => deleteItem.mutate(id)}
+          onAdd={() => handleAddItem("expense")}
+        />
+      </div>
 
-        {/* Expense Breakdown Chart */}
-        {expenseItems.length > 0 && (
-          <div className="rounded-lg border border-border bg-card p-4">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Expense Breakdown</h3>
-            <ExpensePieChart items={items} categories={categories} />
-            <ExpenseLegend items={items} categories={categories} />
-          </div>
-        )}
-
-        {/* Category Limits */}
-        <CategoryLimitsCard items={items} categories={categories} limits={categoryLimits} />
-
-        {/* Income & Expenses */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <EntryCard
-            title="Income"
-            total={totalIncome}
-            items={incomeItems}
-            categories={categories}
-            onUpdate={(item) => upsertItem.mutate(item)}
-            onDelete={(id) => deleteItem.mutate(id)}
-            onAdd={() => handleAddItem("income")}
-          />
-          <EntryCard
-            title="Expenses"
-            total={totalExpenses}
-            items={expenseItems}
-            categories={categories}
-            onUpdate={(item) => upsertItem.mutate(item)}
-            onDelete={(id) => deleteItem.mutate(id)}
-            onAdd={() => handleAddItem("expense")}
-          />
-        </div>
-
-        {/* Clear / Apply Recurring */}
-        <div className="flex gap-2">
+      {/* Clear / Apply Recurring */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => { if (confirm("Clear all items for this budget?")) clearItems.mutate(budget.id); }}
+          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
+        >
+          Clear All
+        </button>
+        {recurringItems.length > 0 && (
           <button
-            onClick={() => { if (confirm("Clear all items for this month?")) clearMonth.mutate({ month, year }); }}
-            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
+            onClick={handleApplyRecurring}
+            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-secondary hover:text-secondary-foreground"
           >
-            Clear Month
+            Apply Recurring Items
           </button>
-          {recurringItems.length > 0 && (
-            <button
-              onClick={handleApplyRecurring}
-              className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-secondary hover:text-secondary-foreground"
-            >
-              Apply Recurring Items
-            </button>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
@@ -399,8 +463,7 @@ const EntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd 
 interface SettingsPanelProps {
   categories: Category[];
   categoryLimits: { category_id: string; limit_amount: number }[];
-  month: number;
-  year: number;
+  budgetId: string;
   savingsGoal: number;
   onUpsertCategory: (c: { id?: string; name: string; color: string }) => void;
   onDeleteCategory: (id: string) => void;
@@ -427,7 +490,7 @@ const SettingsPanel = ({
 
       {/* Savings Goal */}
       <div>
-        <label className="text-xs text-muted-foreground">Monthly Savings Goal (₱)</label>
+        <label className="text-xs text-muted-foreground">Savings Goal (₱)</label>
         <div className="flex gap-2 mt-1">
           <input
             type="number"
@@ -520,7 +583,7 @@ const RecurringPanel = ({ items, categories, onUpsert, onDelete, onApply }: Recu
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">Recurring Items</h3>
         <button onClick={onApply} className="rounded-md bg-accent px-3 py-1 text-xs font-medium text-accent-foreground hover:bg-accent/90">
-          Apply to Month
+          Apply to Budget
         </button>
       </div>
       <div className="space-y-1.5">
