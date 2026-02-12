@@ -17,6 +17,7 @@ export type Database = {
       budget_items: {
         Row: {
           amount: number
+          budget_id: string | null
           category_id: string | null
           created_at: string
           description: string
@@ -30,6 +31,7 @@ export type Database = {
         }
         Insert: {
           amount?: number
+          budget_id?: string | null
           category_id?: string | null
           created_at?: string
           description?: string
@@ -43,6 +45,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          budget_id?: string | null
           category_id?: string | null
           created_at?: string
           description?: string
@@ -56,6 +59,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_items_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
@@ -63,6 +73,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      budgets: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
+          rollover_enabled: boolean
+          start_date: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          rollover_enabled?: boolean
+          start_date?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          rollover_enabled?: boolean
+          start_date?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       categories: {
         Row: {
@@ -90,6 +133,7 @@ export type Database = {
       }
       category_limits: {
         Row: {
+          budget_id: string | null
           category_id: string
           created_at: string
           id: string
@@ -99,6 +143,7 @@ export type Database = {
           year: number
         }
         Insert: {
+          budget_id?: string | null
           category_id: string
           created_at?: string
           id?: string
@@ -108,6 +153,7 @@ export type Database = {
           year: number
         }
         Update: {
+          budget_id?: string | null
           category_id?: string
           created_at?: string
           id?: string
@@ -118,10 +164,106 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "category_limits_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "category_limits_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_items: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string
+          description: string
+          id: string
+          included: boolean
+          plan_id: string
+          sort_order: number
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          included?: boolean
+          plan_id: string
+          sort_order?: number
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          included?: boolean
+          plan_id?: string
+          sort_order?: number
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          created_at: string
+          id: string
+          include_rollover_from: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          include_rollover_from?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          include_rollover_from?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plans_include_rollover_from_fkey"
+            columns: ["include_rollover_from"]
+            isOneToOne: false
+            referencedRelation: "budgets"
             referencedColumns: ["id"]
           },
         ]
@@ -169,6 +311,7 @@ export type Database = {
       }
       savings_goals: {
         Row: {
+          budget_id: string | null
           created_at: string
           id: string
           month: number
@@ -177,6 +320,7 @@ export type Database = {
           year: number
         }
         Insert: {
+          budget_id?: string | null
           created_at?: string
           id?: string
           month: number
@@ -185,6 +329,7 @@ export type Database = {
           year: number
         }
         Update: {
+          budget_id?: string | null
           created_at?: string
           id?: string
           month?: number
@@ -192,7 +337,15 @@ export type Database = {
           user_id?: string
           year?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "savings_goals_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

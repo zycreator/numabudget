@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { BudgetItem, Category, CategoryLimit } from "@/hooks/useBudget";
+import type { BudgetItem, Category, CategoryLimit } from "@/hooks/useBudgetData";
 
 interface Props {
   items: BudgetItem[];

@@ -1,4 +1,4 @@
-import type { BudgetItem } from "@/hooks/useBudget";
+import type { BudgetItem } from "@/hooks/useBudgetData";
 
 interface Props {
   items: BudgetItem[];

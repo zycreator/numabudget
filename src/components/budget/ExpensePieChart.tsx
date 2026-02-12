@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import type { BudgetItem, Category } from "@/hooks/useBudget";
+import type { BudgetItem, Category } from "@/hooks/useBudgetData";
 
 interface Props {
   items: BudgetItem[];
