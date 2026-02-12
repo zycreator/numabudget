@@ -20,8 +20,8 @@ import {
   useRolloverAmount,
   type BudgetItem,
   type Category,
-  type RecurringItem,
-} from "@/hooks/useBudgetData";
+  type RecurringItem } from
+"@/hooks/useBudgetData";
 import {
   useDebtItems,
   useSavingsItems,
@@ -30,8 +30,8 @@ import {
   useUpsertSavingsItem,
   useDeleteSavingsItem,
   type DebtItem,
-  type SavingsItem,
-} from "@/hooks/useDebtSavingsData";
+  type SavingsItem } from
+"@/hooks/useDebtSavingsData";
 import { useBudgets, useUpdateBudget, type Budget } from "@/hooks/useBudgets";
 import ExpensePieChart from "@/components/budget/ExpensePieChart";
 import ExpenseLegend from "@/components/budget/ExpenseLegend";
@@ -50,7 +50,7 @@ import { Progress } from "@/components/ui/progress";
 
 
 const formatPHP = (n: number) =>
-  `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+`₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -83,9 +83,9 @@ const Index = () => {
           activeBudgetId={activePlanId ? null : effectiveBudgetId}
           activePlanId={activePlanId}
           onSelectBudget={handleSelectBudget}
-          onSelectPlan={handleSelectPlan}
-        />
-        <main className="flex-1 bg-background px-3 sm:px-4 py-4 sm:py-10 overflow-x-hidden overflow-y-auto">
+          onSelectPlan={handleSelectPlan} />
+
+        <main className="flex-1 px-3 sm:px-4 py-4 sm:py-10 overflow-x-hidden overflow-y-auto bg-white">
           <div className="mx-auto max-w-5xl space-y-3 sm:space-y-4">
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -94,8 +94,8 @@ const Index = () => {
                 <h1 className="text-lg font-semibold text-foreground">Budget</h1>
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
-                {!activePlanId && (
-                  <>
+                {!activePlanId &&
+                <>
                     <button onClick={() => setShowRecurring(!showRecurring)} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
                       Recurring
                     </button>
@@ -103,31 +103,31 @@ const Index = () => {
                       Settings
                     </button>
                   </>
-                )}
+                }
                 <button onClick={() => signOut()} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
                   Sign Out
                 </button>
               </div>
             </div>
 
-            {activePlanId && activePlan ? (
-              <PlannerView plan={activePlan} />
-            ) : effectiveBudgetId && activeBudget ? (
-              <BudgetView
-                budget={activeBudget}
-                showSettings={showSettings}
-                showRecurring={showRecurring}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
+            {activePlanId && activePlan ?
+            <PlannerView plan={activePlan} /> :
+            effectiveBudgetId && activeBudget ?
+            <BudgetView
+              budget={activeBudget}
+              showSettings={showSettings}
+              showRecurring={showRecurring} /> :
+
+
+            <div className="flex flex-col items-center justify-center py-20 text-center">
                 <p className="text-sm text-muted-foreground">No budgets yet. Create one from the sidebar!</p>
               </div>
-            )}
+            }
           </div>
         </main>
       </div>
-    </SidebarProvider>
-  );
+    </SidebarProvider>);
+
 };
 
 // ─── Budget View ─────────────────────────────────────────────
@@ -179,10 +179,10 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
     [expenseItems]
   );
   const net = totalIncome - totalExpenses;
-  const pctSaved = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
+  const pctSaved = totalIncome > 0 ? net / totalIncome * 100 : 0;
 
   const goalTarget = savingsGoal?.target_amount ?? 0;
-  const goalPct = goalTarget > 0 ? Math.min((net / goalTarget) * 100, 100) : 0;
+  const goalPct = goalTarget > 0 ? Math.min(net / goalTarget * 100, 100) : 0;
 
   const totalDebt = useMemo(() => debtItems.reduce((s, d) => s + d.amount, 0), [debtItems]);
   const totalSaved = useMemo(() => savingsItems.reduce((s, d) => s + d.saved_amount, 0), [savingsItems]);
@@ -200,7 +200,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       month: 0,
       year: 0,
       included: true,
-      sort_order: list.length,
+      sort_order: list.length
     });
   };
 
@@ -215,12 +215,12 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
     const catMap = new Map(categories.map((c) => [c.id, c.name]));
     for (const item of items) {
       rows.push([
-        item.type,
-        item.description,
-        item.category_id ? catMap.get(item.category_id) ?? "" : "",
-        item.amount.toString(),
-        item.included ? "Yes" : "No",
-      ]);
+      item.type,
+      item.description,
+      item.category_id ? catMap.get(item.category_id) ?? "" : "",
+      item.amount.toString(),
+      item.included ? "Yes" : "No"]
+      );
     }
     const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -239,49 +239,49 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   return (
     <div className="space-y-4">
       {/* Settings Panel */}
-      {showSettings && (
-        <SettingsPanel
-          categories={categories}
-          categoryLimits={categoryLimits}
-          budgetId={budget.id}
-          savingsGoal={savingsGoal?.target_amount ?? 0}
-          onUpsertCategory={(c) => upsertCategory.mutate(c)}
-          onDeleteCategory={(id) => deleteCategory.mutate(id)}
-          onSetGoal={(amt) => upsertGoal.mutate({ budget_id: budget.id, target_amount: amt })}
-          onSetLimit={(catId, amt) => upsertLimit.mutate({ category_id: catId, budget_id: budget.id, limit_amount: amt })}
-        />
-      )}
+      {showSettings &&
+      <SettingsPanel
+        categories={categories}
+        categoryLimits={categoryLimits}
+        budgetId={budget.id}
+        savingsGoal={savingsGoal?.target_amount ?? 0}
+        onUpsertCategory={(c) => upsertCategory.mutate(c)}
+        onDeleteCategory={(id) => deleteCategory.mutate(id)}
+        onSetGoal={(amt) => upsertGoal.mutate({ budget_id: budget.id, target_amount: amt })}
+        onSetLimit={(catId, amt) => upsertLimit.mutate({ category_id: catId, budget_id: budget.id, limit_amount: amt })} />
+
+      }
 
       {/* Recurring Panel */}
-      {showRecurring && (
-        <RecurringPanel
-          items={recurringItems}
-          categories={categories}
-          onUpsert={(item) => upsertRecurring.mutate(item)}
-          onDelete={(id) => deleteRecurring.mutate(id)}
-          onApply={handleApplyRecurring}
-        />
-      )}
+      {showRecurring &&
+      <RecurringPanel
+        items={recurringItems}
+        categories={categories}
+        onUpsert={(item) => upsertRecurring.mutate(item)}
+        onDelete={(id) => deleteRecurring.mutate(id)}
+        onApply={handleApplyRecurring} />
+
+      }
 
       {/* Budget Header */}
-      <div className="rounded-lg border border-border bg-card p-4 sm:p-5">
+      <div className="rounded-lg border border-border p-4 sm:p-5 bg-primary-foreground">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <h2 className="text-sm font-medium text-foreground">{budget.name}</h2>
-            {(budget.start_date || budget.end_date) && (
-              <p className="text-xs text-muted-foreground">
+            {(budget.start_date || budget.end_date) &&
+            <p className="text-xs text-muted-foreground">
                 {budget.start_date && new Date(budget.start_date).toLocaleDateString()}
                 {budget.start_date && budget.end_date && " – "}
                 {budget.end_date && new Date(budget.end_date).toLocaleDateString()}
               </p>
-            )}
+            }
           </div>
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
               <Switch
                 checked={budget.rollover_enabled}
-                onCheckedChange={(v) => updateBudget.mutate({ id: budget.id, rollover_enabled: v })}
-              />
+                onCheckedChange={(v) => updateBudget.mutate({ id: budget.id, rollover_enabled: v })} />
+
               Rollover
             </label>
             <button onClick={exportCSV} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
@@ -291,11 +291,11 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         </div>
 
         {/* Rollover banner */}
-        {rolloverData && (
-          <div className="mb-3 rounded-md bg-positive/10 px-3 py-2 text-xs text-positive">
+        {rolloverData &&
+        <div className="mb-3 rounded-md bg-positive/10 px-3 py-2 text-xs text-positive">
             Rollover from "{rolloverData.fromBudgetName}": {formatPHP(rolloverData.amount)}
           </div>
-        )}
+        }
 
         <p className={`text-3xl sm:text-4xl font-bold tracking-tight ${net >= 0 ? "text-positive" : "text-negative"}`}>
           {formatPHP(net)}
@@ -304,8 +304,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
         </p>
 
-        {goalTarget > 0 && (
-          <div className="mt-3">
+        {goalTarget > 0 &&
+        <div className="mt-3">
             <div className="flex justify-between text-xs mb-1">
               <span className="text-muted-foreground">Savings Goal</span>
               <span className={`font-medium ${goalPct >= 100 ? "text-positive" : "text-foreground"}`}>
@@ -314,22 +314,22 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
             </div>
             <div className="h-2 rounded-full bg-secondary overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${goalPct >= 100 ? "bg-positive" : "bg-accent"}`}
-                style={{ width: `${Math.max(0, goalPct)}%` }}
-              />
+              className={`h-full rounded-full transition-all ${goalPct >= 100 ? "bg-positive" : "bg-accent"}`}
+              style={{ width: `${Math.max(0, goalPct)}%` }} />
+
             </div>
           </div>
-        )}
+        }
       </div>
 
       {/* Expense Breakdown Chart */}
-      {expenseItems.length > 0 && (
-        <div className="rounded-lg border border-border bg-card p-4">
+      {expenseItems.length > 0 &&
+      <div className="rounded-lg border border-border p-4 bg-primary-foreground">
           <h3 className="text-sm font-medium text-muted-foreground mb-2">Expense Breakdown</h3>
           <ExpensePieChart items={items} categories={categories} />
           <ExpenseLegend items={items} categories={categories} />
         </div>
-      )}
+      }
 
       {/* Category Limits */}
       <CategoryLimitsCard items={items} categories={categories} limits={categoryLimits} />
@@ -343,8 +343,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           categories={categories}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={() => handleAddItem("income")}
-        />
+          onAdd={() => handleAddItem("income")} />
+
         <EntryCard
           title="Expenses"
           total={totalExpenses}
@@ -352,8 +352,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           categories={categories}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={() => handleAddItem("expense")}
-        />
+          onAdd={() => handleAddItem("expense")} />
+
       </div>
 
       {/* Debt & Savings Boards */}
@@ -363,36 +363,36 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           totalDebt={totalDebt}
           onUpsert={(item) => upsertDebt.mutate(item)}
           onDelete={(id) => deleteDebt.mutate(id)}
-          onAdd={() => upsertDebt.mutate({ budget_id: budget.id, description: "", amount: 0, due_date: null, sort_order: debtItems.length })}
-        />
+          onAdd={() => upsertDebt.mutate({ budget_id: budget.id, description: "", amount: 0, due_date: null, sort_order: debtItems.length })} />
+
         <SavingsBoard
           items={savingsItems}
           totalSaved={totalSaved}
           totalTarget={totalSavingsTarget}
           onUpsert={(item) => upsertSaving.mutate(item)}
           onDelete={(id) => deleteSaving.mutate(id)}
-          onAdd={() => upsertSaving.mutate({ budget_id: budget.id, description: "", saved_amount: 0, target_amount: 0, sort_order: savingsItems.length })}
-        />
+          onAdd={() => upsertSaving.mutate({ budget_id: budget.id, description: "", saved_amount: 0, target_amount: 0, sort_order: savingsItems.length })} />
+
       </div>
 
       <div className="flex gap-2">
         <button
-          onClick={() => { if (confirm("Clear all items for this budget?")) clearItems.mutate(budget.id); }}
-          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
-        >
+          onClick={() => {if (confirm("Clear all items for this budget?")) clearItems.mutate(budget.id);}}
+          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+
           Clear All
         </button>
-        {recurringItems.length > 0 && (
-          <button
-            onClick={handleApplyRecurring}
-            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-secondary hover:text-secondary-foreground"
-          >
+        {recurringItems.length > 0 &&
+        <button
+          onClick={handleApplyRecurring}
+          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-secondary hover:text-secondary-foreground">
+
             Apply Recurring Items
           </button>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 // ─── Entry Card ──────────────────────────────────────────────
@@ -415,75 +415,75 @@ const EntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd 
   }, [onUpdate]);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-lg border border-border p-4 bg-primary-foreground">
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
         <span className="text-sm font-semibold text-foreground">{formatPHP(total)}</span>
       </div>
       <div className="space-y-1.5">
-        {items.map((item) => (
-          <div key={item.id} className={`flex flex-wrap items-center gap-1.5 sm:gap-2 ${!item.included ? "opacity-40" : ""}`}>
+        {items.map((item) =>
+        <div key={item.id} className={`flex flex-wrap items-center gap-1.5 sm:gap-2 ${!item.included ? "opacity-40" : ""}`}>
             <Checkbox
-              checked={item.included}
-              onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })}
-              className="shrink-0"
-            />
+            checked={item.included}
+            onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })}
+            className="shrink-0" />
+
             <input
-              type="text"
-              placeholder="Description"
-              defaultValue={item.description}
-              onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-              className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-            {title === "Expenses" && (
-              <select
-                defaultValue={item.category_id ?? ""}
-                onChange={(e) => onUpdate({ ...item, category_id: e.target.value || null })}
-                className="w-16 sm:w-20 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              >
+            type="text"
+            placeholder="Description"
+            defaultValue={item.description}
+            onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
+            className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
+
+            {title === "Expenses" &&
+          <select
+            defaultValue={item.category_id ?? ""}
+            onChange={(e) => onUpdate({ ...item, category_id: e.target.value || null })}
+            className="w-16 sm:w-20 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+
                 <option value="">—</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+                {categories.map((c) =>
+            <option key={c.id} value={c.id}>{c.name}</option>
             )}
+              </select>
+          }
             <div className="relative w-20 sm:w-24 shrink-0">
               <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
               <input
-                type="number"
-                placeholder="0.00"
-                defaultValue={item.amount || ""}
-                onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
-                className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                step="0.01"
-              />
+              type="number"
+              placeholder="0.00"
+              defaultValue={item.amount || ""}
+              onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
+              className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              step="0.01" />
+
             </div>
             <button
-              onClick={() => onDelete(item.id)}
-              className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs"
-            >
+            onClick={() => onDelete(item.id)}
+            className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">
+
               ✕
             </button>
           </div>
-        ))}
+        )}
       </div>
       <button
         onClick={onAdd}
-        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors"
-      >
+        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors">
+
         + Add Row
       </button>
-    </div>
-  );
+    </div>);
+
 };
 
 // ─── Settings Panel ──────────────────────────────────────────
 interface SettingsPanelProps {
   categories: Category[];
-  categoryLimits: { category_id: string; limit_amount: number }[];
+  categoryLimits: {category_id: string;limit_amount: number;}[];
   budgetId: string;
   savingsGoal: number;
-  onUpsertCategory: (c: { id?: string; name: string; color: string }) => void;
+  onUpsertCategory: (c: {id?: string;name: string;color: string;}) => void;
   onDeleteCategory: (id: string) => void;
   onSetGoal: (amt: number) => void;
   onSetLimit: (catId: string, amt: number) => void;
@@ -491,14 +491,14 @@ interface SettingsPanelProps {
 
 const SettingsPanel = ({
   categories, categoryLimits, savingsGoal,
-  onUpsertCategory, onDeleteCategory, onSetGoal, onSetLimit,
+  onUpsertCategory, onDeleteCategory, onSetGoal, onSetLimit
 }: SettingsPanelProps) => {
   const [newCatName, setNewCatName] = useState("");
   const [newCatColor, setNewCatColor] = useState("#8B7355");
   const [goalInput, setGoalInput] = useState(String(savingsGoal || ""));
   const limitMap = useMemo(() => {
     const m: Record<string, number> = {};
-    categoryLimits.forEach((l) => (m[l.category_id] = l.limit_amount));
+    categoryLimits.forEach((l) => m[l.category_id] = l.limit_amount);
     return m;
   }, [categoryLimits]);
 
@@ -515,8 +515,8 @@ const SettingsPanel = ({
             value={goalInput}
             onChange={(e) => setGoalInput(e.target.value)}
             className="flex-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="0.00"
-          />
+            placeholder="0.00" />
+
           <button onClick={() => onSetGoal(parseFloat(goalInput) || 0)} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
             Set
           </button>
@@ -527,52 +527,52 @@ const SettingsPanel = ({
       <div>
         <label className="text-xs text-muted-foreground">Categories</label>
         <div className="space-y-1 mt-1">
-          {categories.map((c) => (
-            <div key={c.id} className="flex items-center gap-2 text-xs">
+          {categories.map((c) =>
+          <div key={c.id} className="flex items-center gap-2 text-xs">
               <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
               <span className="flex-1 text-foreground">{c.name}</span>
               <input
-                type="number"
-                placeholder="Limit"
-                defaultValue={limitMap[c.id] || ""}
-                onChange={(e) => onSetLimit(c.id, parseFloat(e.target.value) || 0)}
-                className="w-20 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground text-right focus:outline-none focus:ring-1 focus:ring-ring"
-              />
+              type="number"
+              placeholder="Limit"
+              defaultValue={limitMap[c.id] || ""}
+              onChange={(e) => onSetLimit(c.id, parseFloat(e.target.value) || 0)}
+              className="w-20 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground text-right focus:outline-none focus:ring-1 focus:ring-ring" />
+
               <button onClick={() => onDeleteCategory(c.id)} className="text-muted-foreground/40 hover:text-negative">✕</button>
             </div>
-          ))}
+          )}
         </div>
         <div className="flex gap-2 mt-2">
           <input
             type="color"
             value={newCatColor}
             onChange={(e) => setNewCatColor(e.target.value)}
-            className="h-7 w-7 rounded border border-border cursor-pointer"
-          />
+            className="h-7 w-7 rounded border border-border cursor-pointer" />
+
           <input
             type="text"
             value={newCatName}
             onChange={(e) => setNewCatName(e.target.value)}
             placeholder="New category"
-            className="flex-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-          />
+            className="flex-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring" />
+
           <button
-            onClick={() => { if (newCatName.trim()) { onUpsertCategory({ name: newCatName.trim(), color: newCatColor }); setNewCatName(""); } }}
-            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-          >
+            onClick={() => {if (newCatName.trim()) {onUpsertCategory({ name: newCatName.trim(), color: newCatColor });setNewCatName("");}}}
+            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
+
             Add
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 // ─── Recurring Panel ─────────────────────────────────────────
 interface RecurringPanelProps {
   items: RecurringItem[];
   categories: Category[];
-  onUpsert: (item: Omit<RecurringItem, "id"> & { id?: string }) => void;
+  onUpsert: (item: Omit<RecurringItem, "id"> & {id?: string;}) => void;
   onDelete: (id: string) => void;
   onApply: () => void;
 }
@@ -590,7 +590,7 @@ const RecurringPanel = ({ items, categories, onUpsert, onDelete, onApply }: Recu
       amount: parseFloat(amount) || 0,
       type,
       category_id: catId || null,
-      is_active: true,
+      is_active: true
     });
     setDesc("");
     setAmount("");
@@ -605,8 +605,8 @@ const RecurringPanel = ({ items, categories, onUpsert, onDelete, onApply }: Recu
         </button>
       </div>
       <div className="space-y-1.5">
-        {items.map((item) => (
-          <div key={item.id} className="flex items-center gap-2 text-xs">
+        {items.map((item) =>
+        <div key={item.id} className="flex items-center gap-2 text-xs">
             <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${item.type === "income" ? "bg-positive/10 text-positive" : "bg-negative/10 text-negative"}`}>
               {item.type === "income" ? "INC" : "EXP"}
             </span>
@@ -614,7 +614,7 @@ const RecurringPanel = ({ items, categories, onUpsert, onDelete, onApply }: Recu
             <span className="text-muted-foreground">{formatPHP(item.amount)}</span>
             <button onClick={() => onDelete(item.id)} className="text-muted-foreground/40 hover:text-negative">✕</button>
           </div>
-        ))}
+        )}
       </div>
       <div className="flex gap-2">
         <select value={type} onChange={(e) => setType(e.target.value as "income" | "expense")} className="rounded-md border border-border bg-background px-1.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
@@ -622,24 +622,24 @@ const RecurringPanel = ({ items, categories, onUpsert, onDelete, onApply }: Recu
           <option value="expense">Expense</option>
         </select>
         <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Description" className="flex-1 min-w-0 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring" />
-        {type === "expense" && (
-          <select value={catId} onChange={(e) => setCatId(e.target.value)} className="w-20 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+        {type === "expense" &&
+        <select value={catId} onChange={(e) => setCatId(e.target.value)} className="w-20 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
             <option value="">—</option>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
-        )}
+        }
         <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₱" className="w-20 rounded-md border border-border bg-background px-2 py-1.5 text-xs text-right text-foreground focus:outline-none focus:ring-1 focus:ring-ring" step="0.01" />
         <button onClick={handleAdd} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">Add</button>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 // ─── Debt Board ──────────────────────────────────────────────
 interface DebtBoardProps {
   items: DebtItem[];
   totalDebt: number;
-  onUpsert: (item: Omit<DebtItem, "id"> & { id?: string }) => void;
+  onUpsert: (item: Omit<DebtItem, "id"> & {id?: string;}) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
 }
@@ -653,67 +653,67 @@ const DebtBoard = ({ items, totalDebt, onUpsert, onDelete, onAdd }: DebtBoardPro
   }, [onUpsert]);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-lg border border-border p-4 bg-primary-foreground">
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">Debt</h3>
         <span className="text-sm font-semibold text-negative">{formatPHP(totalDebt)}</span>
       </div>
       <div className="space-y-1.5">
-        {items.map((item) => (
-          <div key={item.id} className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        {items.map((item) =>
+        <div key={item.id} className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <input
-              type="text"
-              placeholder="Who you owe"
-              defaultValue={item.description}
-              onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-              className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
-            />
+            type="text"
+            placeholder="Who you owe"
+            defaultValue={item.description}
+            onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
+            className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
+
             <div className="relative w-20 sm:w-24 shrink-0">
               <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
               <input
-                type="number"
-                placeholder="0.00"
-                defaultValue={item.amount || ""}
-                onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
-                className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                step="0.01"
-              />
+              type="number"
+              placeholder="0.00"
+              defaultValue={item.amount || ""}
+              onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
+              className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              step="0.01" />
+
             </div>
             <Popover>
               <PopoverTrigger asChild>
                 <button className={cn(
-                  "shrink-0 rounded-md border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-ring",
-                  item.due_date ? "text-foreground" : "text-muted-foreground/50"
-                )}>
+                "shrink-0 rounded-md border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-ring",
+                item.due_date ? "text-foreground" : "text-muted-foreground/50"
+              )}>
                   {item.due_date ? format(new Date(item.due_date), "MMM d") : "Due"}
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
-                  mode="single"
-                  selected={item.due_date ? new Date(item.due_date) : undefined}
-                  onSelect={(date) => onUpsert({ ...item, due_date: date ? format(date, "yyyy-MM-dd") : null })}
-                  className={cn("p-3 pointer-events-auto")}
-                />
+                mode="single"
+                selected={item.due_date ? new Date(item.due_date) : undefined}
+                onSelect={(date) => onUpsert({ ...item, due_date: date ? format(date, "yyyy-MM-dd") : null })}
+                className={cn("p-3 pointer-events-auto")} />
+
               </PopoverContent>
             </Popover>
             <button
-              onClick={() => onDelete(item.id)}
-              className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs"
-            >
+            onClick={() => onDelete(item.id)}
+            className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">
+
               ✕
             </button>
           </div>
-        ))}
+        )}
       </div>
       <button
         onClick={onAdd}
-        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors"
-      >
+        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors">
+
         + Add Debt
       </button>
-    </div>
-  );
+    </div>);
+
 };
 
 // ─── Savings Board ───────────────────────────────────────────
@@ -721,7 +721,7 @@ interface SavingsBoardProps {
   items: SavingsItem[];
   totalSaved: number;
   totalTarget: number;
-  onUpsert: (item: Omit<SavingsItem, "id"> & { id?: string }) => void;
+  onUpsert: (item: Omit<SavingsItem, "id"> & {id?: string;}) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
 }
@@ -735,7 +735,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAd
   }, [onUpsert]);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-lg border border-border p-4 bg-primary-foreground">
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">Savings</h3>
         <span className="text-sm font-semibold text-positive">
@@ -744,7 +744,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAd
       </div>
       <div className="space-y-2.5">
         {items.map((item) => {
-          const pct = item.target_amount > 0 ? Math.min((item.saved_amount / item.target_amount) * 100, 100) : 0;
+          const pct = item.target_amount > 0 ? Math.min(item.saved_amount / item.target_amount * 100, 100) : 0;
           return (
             <div key={item.id} className="space-y-1">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -753,8 +753,8 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAd
                   placeholder="Saving for..."
                   defaultValue={item.description}
                   onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-                  className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
-                />
+                  className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
+
                 <div className="relative w-20 shrink-0">
                   <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
                   <input
@@ -763,8 +763,8 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAd
                     defaultValue={item.saved_amount || ""}
                     onChange={(e) => debouncedUpdate({ ...item, saved_amount: parseFloat(e.target.value) || 0 })}
                     className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                    step="0.01"
-                  />
+                    step="0.01" />
+
                 </div>
                 <span className="text-[10px] text-muted-foreground/50">/</span>
                 <div className="relative w-20 shrink-0">
@@ -775,34 +775,34 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAd
                     defaultValue={item.target_amount || ""}
                     onChange={(e) => debouncedUpdate({ ...item, target_amount: parseFloat(e.target.value) || 0 })}
                     className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                    step="0.01"
-                  />
+                    step="0.01" />
+
                 </div>
                 <button
                   onClick={() => onDelete(item.id)}
-                  className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs"
-                >
+                  className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">
+
                   ✕
                 </button>
               </div>
-              {item.target_amount > 0 && (
-                <div className="flex items-center gap-2">
+              {item.target_amount > 0 &&
+              <div className="flex items-center gap-2">
                   <Progress value={pct} className="h-1.5 flex-1" />
                   <span className="text-[10px] text-muted-foreground">{pct.toFixed(0)}%</span>
                 </div>
-              )}
-            </div>
-          );
+              }
+            </div>);
+
         })}
       </div>
       <button
         onClick={onAdd}
-        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors"
-      >
+        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors">
+
         + Add Savings Goal
       </button>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Index;

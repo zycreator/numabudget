@@ -10,8 +10,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+  SidebarTrigger } from
+"@/components/ui/sidebar";
 import { useBudgets, useCreateBudget, useDeleteBudget, type Budget } from "@/hooks/useBudgets";
 import { usePlans, useCreatePlan, useDeletePlan, type Plan } from "@/hooks/usePlans";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -54,7 +54,7 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
       name: budgetName.trim(),
       start_date: startDate ? format(startDate, "yyyy-MM-dd") : null,
       end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
-      rollover_enabled: rollover,
+      rollover_enabled: rollover
     }, {
       onSuccess: (data) => {
         onSelectBudget(data.id);
@@ -63,7 +63,7 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
         setEndDate(undefined);
         setRollover(false);
         setShowNewBudget(false);
-      },
+      }
     });
   };
 
@@ -74,13 +74,13 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
         onSelectPlan(data.id);
         setPlanName("");
         setShowNewPlan(false);
-      },
+      }
     });
   };
 
   return (
     <Sidebar className="border-r border-border">
-      <div className="p-3 flex items-center justify-between border-b border-border">
+      <div className="p-3 flex items-center justify-between border-b border-border bg-secondary">
         <img src={logo} alt="Numa" className="h-8" />
         <SidebarTrigger className="h-6 w-6" />
       </div>
@@ -91,25 +91,25 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
           <SidebarGroupLabel className="text-xs text-muted-foreground">Active Budgets</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {activeBudgets.map((b) => (
-                <SidebarMenuItem key={b.id}>
+              {activeBudgets.map((b) =>
+              <SidebarMenuItem key={b.id}>
                   <SidebarMenuButton
-                    onClick={() => onSelectBudget(b.id)}
-                    className={`justify-between group ${activeBudgetId === b.id ? "bg-secondary text-foreground font-medium" : ""}`}
-                  >
+                  onClick={() => onSelectBudget(b.id)}
+                  className={`justify-between group ${activeBudgetId === b.id ? "bg-secondary text-foreground font-medium" : ""}`}>
+
                     <span className="flex items-center gap-2 truncate">
                       <Wallet className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate text-xs">{b.name}</span>
                     </span>
                     <button
-                      onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${b.name}"?`)) deleteBudget.mutate(b.id); }}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-negative"
-                    >
+                    onClick={(e) => {e.stopPropagation();if (confirm(`Delete "${b.name}"?`)) deleteBudget.mutate(b.id);}}
+                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-negative">
+
                       <Trash2 className="h-3 w-3" />
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -176,25 +176,25 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
           <SidebarGroupLabel className="text-xs text-muted-foreground">Plans</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {plans.map((p) => (
-                <SidebarMenuItem key={p.id}>
+              {plans.map((p) =>
+              <SidebarMenuItem key={p.id}>
                   <SidebarMenuButton
-                    onClick={() => onSelectPlan(p.id)}
-                    className={`justify-between group ${activePlanId === p.id ? "bg-secondary text-foreground font-medium" : ""}`}
-                  >
+                  onClick={() => onSelectPlan(p.id)}
+                  className={`justify-between group ${activePlanId === p.id ? "bg-secondary text-foreground font-medium" : ""}`}>
+
                     <span className="flex items-center gap-2 truncate">
                       <FileText className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate text-xs">{p.name}</span>
                     </span>
                     <button
-                      onClick={(e) => { e.stopPropagation(); if (confirm(`Delete plan "${p.name}"?`)) deletePlan.mutate(p.id); }}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-negative"
-                    >
+                    onClick={(e) => {e.stopPropagation();if (confirm(`Delete plan "${p.name}"?`)) deletePlan.mutate(p.id);}}
+                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-negative">
+
                       <Trash2 className="h-3 w-3" />
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -225,29 +225,29 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
         </div>
 
         {/* Archived */}
-        {archivedBudgets.length > 0 && (
-          <SidebarGroup>
+        {archivedBudgets.length > 0 &&
+        <SidebarGroup>
             <SidebarGroupLabel className="text-xs text-muted-foreground">
               <Archive className="h-3 w-3 mr-1 inline" /> Archived
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {archivedBudgets.map((b) => (
-                  <SidebarMenuItem key={b.id}>
+                {archivedBudgets.map((b) =>
+              <SidebarMenuItem key={b.id}>
                     <SidebarMenuButton
-                      onClick={() => onSelectBudget(b.id)}
-                      className={`${activeBudgetId === b.id ? "bg-secondary text-foreground font-medium" : "text-muted-foreground"}`}
-                    >
+                  onClick={() => onSelectBudget(b.id)}
+                  className={`${activeBudgetId === b.id ? "bg-secondary text-foreground font-medium" : "text-muted-foreground"}`}>
+
                       <Wallet className="h-3.5 w-3.5 shrink-0 mr-2" />
                       <span className="truncate text-xs">{b.name}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
+              )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        )}
+        }
       </SidebarContent>
-    </Sidebar>
-  );
+    </Sidebar>);
+
 }
