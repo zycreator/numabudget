@@ -22,6 +22,16 @@ import {
   type Category,
   type RecurringItem,
 } from "@/hooks/useBudgetData";
+import {
+  useDebtItems,
+  useSavingsItems,
+  useUpsertDebtItem,
+  useDeleteDebtItem,
+  useUpsertSavingsItem,
+  useDeleteSavingsItem,
+  type DebtItem,
+  type SavingsItem,
+} from "@/hooks/useDebtSavingsData";
 import { useBudgets, useUpdateBudget, type Budget } from "@/hooks/useBudgets";
 import ExpensePieChart from "@/components/budget/ExpensePieChart";
 import ExpenseLegend from "@/components/budget/ExpenseLegend";
@@ -32,6 +42,11 @@ import { usePlans, type Plan } from "@/hooks/usePlans";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Progress } from "@/components/ui/progress";
 
 
 const formatPHP = (n: number) =>
@@ -131,6 +146,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   const { data: recurringItems = [] } = useRecurringItems();
   const { data: categoryLimits = [] } = useCategoryLimits(budget.id);
   const { data: rolloverData } = useRolloverAmount(budget.id);
+  const { data: debtItems = [] } = useDebtItems(budget.id);
+  const { data: savingsItems = [] } = useSavingsItems(budget.id);
   const updateBudget = useUpdateBudget();
 
   const upsertItem = useUpsertBudgetItem();
@@ -143,6 +160,10 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   const upsertLimit = useUpsertCategoryLimit();
   const clearItems = useClearBudgetItems();
   const applyRecurring = useApplyRecurring();
+  const upsertDebt = useUpsertDebtItem();
+  const deleteDebt = useDeleteDebtItem();
+  const upsertSaving = useUpsertSavingsItem();
+  const deleteSaving = useDeleteSavingsItem();
 
   const rolloverAmount = rolloverData?.amount ?? 0;
 
@@ -162,6 +183,10 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
 
   const goalTarget = savingsGoal?.target_amount ?? 0;
   const goalPct = goalTarget > 0 ? Math.min((net / goalTarget) * 100, 100) : 0;
+
+  const totalDebt = useMemo(() => debtItems.reduce((s, d) => s + d.amount, 0), [debtItems]);
+  const totalSaved = useMemo(() => savingsItems.reduce((s, d) => s + d.saved_amount, 0), [savingsItems]);
+  const totalSavingsTarget = useMemo(() => savingsItems.reduce((s, d) => s + d.target_amount, 0), [savingsItems]);
 
 
   const handleAddItem = (type: "income" | "expense") => {
@@ -297,20 +322,23 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         )}
       </div>
 
-      {/* Debt & Savings Board */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Debt</h3>
-          <p className="text-2xl font-bold text-negative">{formatPHP(0)}</p>
-          <p className="mt-1 text-xs text-muted-foreground">No debts tracked yet</p>
-        </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Savings</h3>
-          <p className="text-2xl font-bold text-positive">{formatPHP(Math.max(0, net))}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {goalTarget > 0 ? `${goalPct.toFixed(0)}% of ${formatPHP(goalTarget)} goal` : "No savings goal set"}
-          </p>
-        </div>
+      {/* Debt & Savings Boards */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <DebtBoard
+          items={debtItems}
+          totalDebt={totalDebt}
+          onUpsert={(item) => upsertDebt.mutate(item)}
+          onDelete={(id) => deleteDebt.mutate(id)}
+          onAdd={() => upsertDebt.mutate({ budget_id: budget.id, description: "", amount: 0, due_date: null, sort_order: debtItems.length })}
+        />
+        <SavingsBoard
+          items={savingsItems}
+          totalSaved={totalSaved}
+          totalTarget={totalSavingsTarget}
+          onUpsert={(item) => upsertSaving.mutate(item)}
+          onDelete={(id) => deleteSaving.mutate(id)}
+          onAdd={() => upsertSaving.mutate({ budget_id: budget.id, description: "", saved_amount: 0, target_amount: 0, sort_order: savingsItems.length })}
+        />
       </div>
 
       {/* Expense Breakdown Chart */}
@@ -604,6 +632,176 @@ const RecurringPanel = ({ items, categories, onUpsert, onDelete, onApply }: Recu
         <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₱" className="w-20 rounded-md border border-border bg-background px-2 py-1.5 text-xs text-right text-foreground focus:outline-none focus:ring-1 focus:ring-ring" step="0.01" />
         <button onClick={handleAdd} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">Add</button>
       </div>
+    </div>
+  );
+};
+
+// ─── Debt Board ──────────────────────────────────────────────
+interface DebtBoardProps {
+  items: DebtItem[];
+  totalDebt: number;
+  onUpsert: (item: Omit<DebtItem, "id"> & { id?: string }) => void;
+  onDelete: (id: string) => void;
+  onAdd: () => void;
+}
+
+const DebtBoard = ({ items, totalDebt, onUpsert, onDelete, onAdd }: DebtBoardProps) => {
+  const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const debouncedUpdate = useCallback((item: DebtItem) => {
+    if (debounceRef.current[item.id]) clearTimeout(debounceRef.current[item.id]);
+    debounceRef.current[item.id] = setTimeout(() => onUpsert(item), 500);
+  }, [onUpsert]);
+
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h3 className="text-sm font-medium text-muted-foreground">Debt</h3>
+        <span className="text-sm font-semibold text-negative">{formatPHP(totalDebt)}</span>
+      </div>
+      <div className="space-y-1.5">
+        {items.map((item) => (
+          <div key={item.id} className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <input
+              type="text"
+              placeholder="Who you owe"
+              defaultValue={item.description}
+              onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
+              className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+            <div className="relative w-20 sm:w-24 shrink-0">
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
+              <input
+                type="number"
+                placeholder="0.00"
+                defaultValue={item.amount || ""}
+                onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
+                className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                step="0.01"
+              />
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className={cn(
+                  "shrink-0 rounded-md border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-ring",
+                  item.due_date ? "text-foreground" : "text-muted-foreground/50"
+                )}>
+                  {item.due_date ? format(new Date(item.due_date), "MMM d") : "Due"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={item.due_date ? new Date(item.due_date) : undefined}
+                  onSelect={(date) => onUpsert({ ...item, due_date: date ? format(date, "yyyy-MM-dd") : null })}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <button
+              onClick={() => onDelete(item.id)}
+              className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={onAdd}
+        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors"
+      >
+        + Add Debt
+      </button>
+    </div>
+  );
+};
+
+// ─── Savings Board ───────────────────────────────────────────
+interface SavingsBoardProps {
+  items: SavingsItem[];
+  totalSaved: number;
+  totalTarget: number;
+  onUpsert: (item: Omit<SavingsItem, "id"> & { id?: string }) => void;
+  onDelete: (id: string) => void;
+  onAdd: () => void;
+}
+
+const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAdd }: SavingsBoardProps) => {
+  const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const debouncedUpdate = useCallback((item: SavingsItem) => {
+    if (debounceRef.current[item.id]) clearTimeout(debounceRef.current[item.id]);
+    debounceRef.current[item.id] = setTimeout(() => onUpsert(item), 500);
+  }, [onUpsert]);
+
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h3 className="text-sm font-medium text-muted-foreground">Savings</h3>
+        <span className="text-sm font-semibold text-positive">
+          {formatPHP(totalSaved)}{totalTarget > 0 ? ` / ${formatPHP(totalTarget)}` : ""}
+        </span>
+      </div>
+      <div className="space-y-2.5">
+        {items.map((item) => {
+          const pct = item.target_amount > 0 ? Math.min((item.saved_amount / item.target_amount) * 100, 100) : 0;
+          return (
+            <div key={item.id} className="space-y-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <input
+                  type="text"
+                  placeholder="Saving for..."
+                  defaultValue={item.description}
+                  onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
+                  className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <div className="relative w-20 shrink-0">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
+                  <input
+                    type="number"
+                    placeholder="Saved"
+                    defaultValue={item.saved_amount || ""}
+                    onChange={(e) => debouncedUpdate({ ...item, saved_amount: parseFloat(e.target.value) || 0 })}
+                    className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    step="0.01"
+                  />
+                </div>
+                <span className="text-[10px] text-muted-foreground/50">/</span>
+                <div className="relative w-20 shrink-0">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
+                  <input
+                    type="number"
+                    placeholder="Target"
+                    defaultValue={item.target_amount || ""}
+                    onChange={(e) => debouncedUpdate({ ...item, target_amount: parseFloat(e.target.value) || 0 })}
+                    className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    step="0.01"
+                  />
+                </div>
+                <button
+                  onClick={() => onDelete(item.id)}
+                  className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs"
+                >
+                  ✕
+                </button>
+              </div>
+              {item.target_amount > 0 && (
+                <div className="flex items-center gap-2">
+                  <Progress value={pct} className="h-1.5 flex-1" />
+                  <span className="text-[10px] text-muted-foreground">{pct.toFixed(0)}%</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <button
+        onClick={onAdd}
+        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors"
+      >
+        + Add Savings Goal
+      </button>
     </div>
   );
 };
