@@ -24,6 +24,7 @@ export type Database = {
           id: string
           included: boolean
           month: number
+          paid: boolean
           sort_order: number
           type: string
           user_id: string
@@ -38,6 +39,7 @@ export type Database = {
           id?: string
           included?: boolean
           month: number
+          paid?: boolean
           sort_order?: number
           type: string
           user_id: string
@@ -52,6 +54,7 @@ export type Database = {
           id?: string
           included?: boolean
           month?: number
+          paid?: boolean
           sort_order?: number
           type?: string
           user_id?: string
@@ -228,6 +231,7 @@ export type Database = {
           description: string
           id: string
           included: boolean
+          paid: boolean
           plan_id: string
           sort_order: number
           type: string
@@ -240,6 +244,7 @@ export type Database = {
           description?: string
           id?: string
           included?: boolean
+          paid?: boolean
           plan_id: string
           sort_order?: number
           type: string
@@ -252,6 +257,7 @@ export type Database = {
           description?: string
           id?: string
           included?: boolean
+          paid?: boolean
           plan_id?: string
           sort_order?: number
           type?: string

@@ -201,7 +201,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       month: 0,
       year: 0,
       included: true,
-      sort_order: list.length
+      sort_order: list.length,
+      paid: false
     });
   };
 
@@ -441,25 +442,29 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
           onDragOver={(e) => handleDragOver(idx, e)}
           onDragEnd={handleDragEnd}
           onDragLeave={handleDragLeave}
-          className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-opacity ${!item.included ? "opacity-40" : ""} ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
+          className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
             <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
             <Checkbox
             checked={item.included}
             onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })}
-            className="shrink-0" />
+            className="shrink-0 h-3.5 w-3.5" />
+            <Checkbox
+            checked={item.paid}
+            onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })}
+            className="shrink-0 h-3.5 w-3.5 border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
 
             <input
             type="text"
             placeholder="Description"
             defaultValue={item.description}
             onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-            className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
+            className={`flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`} />
 
             {title === "Expenses" &&
           <select
             defaultValue={item.category_id ?? ""}
             onChange={(e) => onUpdate({ ...item, category_id: e.target.value || null })}
-            className="w-16 sm:w-20 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+            className={`w-16 sm:w-20 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
 
                 <option value="">—</option>
                 {categories.map((c) =>
@@ -474,7 +479,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
               placeholder="0.00"
               defaultValue={item.amount || ""}
               onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
-              className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              className={`w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
               step="0.01" />
 
             </div>
