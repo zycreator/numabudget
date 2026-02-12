@@ -322,25 +322,6 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         )}
       </div>
 
-      {/* Debt & Savings Boards */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <DebtBoard
-          items={debtItems}
-          totalDebt={totalDebt}
-          onUpsert={(item) => upsertDebt.mutate(item)}
-          onDelete={(id) => deleteDebt.mutate(id)}
-          onAdd={() => upsertDebt.mutate({ budget_id: budget.id, description: "", amount: 0, due_date: null, sort_order: debtItems.length })}
-        />
-        <SavingsBoard
-          items={savingsItems}
-          totalSaved={totalSaved}
-          totalTarget={totalSavingsTarget}
-          onUpsert={(item) => upsertSaving.mutate(item)}
-          onDelete={(id) => deleteSaving.mutate(id)}
-          onAdd={() => upsertSaving.mutate({ budget_id: budget.id, description: "", saved_amount: 0, target_amount: 0, sort_order: savingsItems.length })}
-        />
-      </div>
-
       {/* Expense Breakdown Chart */}
       {expenseItems.length > 0 && (
         <div className="rounded-lg border border-border bg-card p-4">
@@ -375,7 +356,25 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         />
       </div>
 
-      {/* Clear / Apply Recurring */}
+      {/* Debt & Savings Boards */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <DebtBoard
+          items={debtItems}
+          totalDebt={totalDebt}
+          onUpsert={(item) => upsertDebt.mutate(item)}
+          onDelete={(id) => deleteDebt.mutate(id)}
+          onAdd={() => upsertDebt.mutate({ budget_id: budget.id, description: "", amount: 0, due_date: null, sort_order: debtItems.length })}
+        />
+        <SavingsBoard
+          items={savingsItems}
+          totalSaved={totalSaved}
+          totalTarget={totalSavingsTarget}
+          onUpsert={(item) => upsertSaving.mutate(item)}
+          onDelete={(id) => deleteSaving.mutate(id)}
+          onAdd={() => upsertSaving.mutate({ budget_id: budget.id, description: "", saved_amount: 0, target_amount: 0, sort_order: savingsItems.length })}
+        />
+      </div>
+
       <div className="flex gap-2">
         <button
           onClick={() => { if (confirm("Clear all items for this budget?")) clearItems.mutate(budget.id); }}
