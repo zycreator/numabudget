@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from "react";
+import { useDragReorder } from "@/hooks/useDragReorder";
 import { useAuth } from "@/hooks/useAuth";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -414,6 +415,11 @@ const EntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd 
     debounceRef.current[item.id] = setTimeout(() => onUpdate(item), 500);
   }, [onUpdate]);
 
+  const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
+    items,
+    onReorder: (reordered) => reordered.forEach((item) => onUpdate(item)),
+  });
+
   return (
     <div className="rounded-lg border border-border p-4 bg-primary-foreground">
       <div className="mb-3 flex items-baseline justify-between">
@@ -421,8 +427,16 @@ const EntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd 
         <span className="text-sm font-semibold text-foreground">{formatPHP(total)}</span>
       </div>
       <div className="space-y-1.5">
-        {items.map((item) =>
-        <div key={item.id} className={`flex flex-wrap items-center gap-1.5 sm:gap-2 ${!item.included ? "opacity-40" : ""}`}>
+        {items.map((item, idx) =>
+        <div
+          key={item.id}
+          draggable
+          onDragStart={(e) => handleDragStart(idx, e)}
+          onDragOver={(e) => handleDragOver(idx, e)}
+          onDragEnd={handleDragEnd}
+          onDragLeave={handleDragLeave}
+          className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-opacity ${!item.included ? "opacity-40" : ""} ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
+            <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
             <Checkbox
             checked={item.included}
             onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })}
@@ -652,6 +666,11 @@ const DebtBoard = ({ items, totalDebt, onUpsert, onDelete, onAdd }: DebtBoardPro
     debounceRef.current[item.id] = setTimeout(() => onUpsert(item), 500);
   }, [onUpsert]);
 
+  const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
+    items,
+    onReorder: (reordered) => reordered.forEach((item) => onUpsert(item)),
+  });
+
   return (
     <div className="rounded-lg border border-border p-4 bg-primary-foreground">
       <div className="mb-3 flex items-baseline justify-between">
@@ -659,8 +678,16 @@ const DebtBoard = ({ items, totalDebt, onUpsert, onDelete, onAdd }: DebtBoardPro
         <span className="text-sm font-semibold text-negative">{formatPHP(totalDebt)}</span>
       </div>
       <div className="space-y-1.5">
-        {items.map((item) =>
-        <div key={item.id} className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        {items.map((item, idx) =>
+        <div
+          key={item.id}
+          draggable
+          onDragStart={(e) => handleDragStart(idx, e)}
+          onDragOver={(e) => handleDragOver(idx, e)}
+          onDragEnd={handleDragEnd}
+          onDragLeave={handleDragLeave}
+          className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-opacity ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
+            <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
             <input
             type="text"
             placeholder="Who you owe"
@@ -734,6 +761,11 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAd
     debounceRef.current[item.id] = setTimeout(() => onUpsert(item), 500);
   }, [onUpsert]);
 
+  const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
+    items,
+    onReorder: (reordered) => reordered.forEach((item) => onUpsert(item)),
+  });
+
   return (
     <div className="rounded-lg border border-border p-4 bg-primary-foreground">
       <div className="mb-3 flex items-baseline justify-between">
@@ -743,11 +775,19 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAd
         </span>
       </div>
       <div className="space-y-2.5">
-        {items.map((item) => {
+        {items.map((item, idx) => {
           const pct = item.target_amount > 0 ? Math.min(item.saved_amount / item.target_amount * 100, 100) : 0;
           return (
-            <div key={item.id} className="space-y-1">
+            <div
+              key={item.id}
+              draggable
+              onDragStart={(e) => handleDragStart(idx, e)}
+              onDragOver={(e) => handleDragOver(idx, e)}
+              onDragEnd={handleDragEnd}
+              onDragLeave={handleDragLeave}
+              className={`space-y-1 transition-opacity ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
                 <input
                   type="text"
                   placeholder="Saving for..."
@@ -786,7 +826,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, onUpsert, onDelete, onAd
                 </button>
               </div>
               {item.target_amount > 0 &&
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 pl-5">
                   <Progress value={pct} className="h-1.5 flex-1" />
                   <span className="text-[10px] text-muted-foreground">{pct.toFixed(0)}%</span>
                 </div>
