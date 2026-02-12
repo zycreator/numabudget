@@ -80,26 +80,26 @@ const Index = () => {
           onSelectBudget={handleSelectBudget}
           onSelectPlan={handleSelectPlan}
         />
-        <main className="flex-1 bg-background px-4 py-6 sm:py-10 overflow-auto">
-          <div className="mx-auto max-w-5xl space-y-4">
+        <main className="flex-1 bg-background px-3 sm:px-4 py-4 sm:py-10 overflow-x-hidden overflow-y-auto">
+          <div className="mx-auto max-w-5xl space-y-3 sm:space-y-4">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="h-6 w-6" />
                 <h1 className="text-lg font-semibold text-foreground">Budget</h1>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
                 {!activePlanId && (
                   <>
-                    <button onClick={() => setShowRecurring(!showRecurring)} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                    <button onClick={() => setShowRecurring(!showRecurring)} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
                       Recurring
                     </button>
-                    <button onClick={() => setShowSettings(!showSettings)} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                    <button onClick={() => setShowSettings(!showSettings)} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
                       Settings
                     </button>
                   </>
                 )}
-                <button onClick={() => signOut()} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                <button onClick={() => signOut()} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
                   Sign Out
                 </button>
               </div>
@@ -404,7 +404,7 @@ const EntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd 
       </div>
       <div className="space-y-1.5">
         {items.map((item) => (
-          <div key={item.id} className={`flex items-center gap-2 ${!item.included ? "opacity-40" : ""}`}>
+          <div key={item.id} className={`flex flex-wrap items-center gap-1.5 sm:gap-2 ${!item.included ? "opacity-40" : ""}`}>
             <Checkbox
               checked={item.included}
               onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })}
@@ -415,13 +415,13 @@ const EntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd 
               placeholder="Description"
               defaultValue={item.description}
               onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-              className="flex-1 min-w-0 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
+              className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
             />
             {title === "Expenses" && (
               <select
                 defaultValue={item.category_id ?? ""}
                 onChange={(e) => onUpdate({ ...item, category_id: e.target.value || null })}
-                className="w-20 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-16 sm:w-20 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 <option value="">—</option>
                 {categories.map((c) => (
@@ -429,14 +429,14 @@ const EntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd 
                 ))}
               </select>
             )}
-            <div className="relative w-24 shrink-0">
+            <div className="relative w-20 sm:w-24 shrink-0">
               <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
               <input
                 type="number"
                 placeholder="0.00"
                 defaultValue={item.amount || ""}
                 onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
-                className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-2 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 step="0.01"
               />
             </div>
