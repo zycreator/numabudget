@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from "react";
+import { useDragReorder } from "@/hooks/useDragReorder";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { usePlanItems, useUpsertPlanItem, useDeletePlanItem, useConvertPlanToBudget, type Plan, type PlanItem } from "@/hooks/usePlans";
@@ -153,6 +154,11 @@ const PlanEntryCard = ({ title, total, items, categories, onUpdate, onDelete, on
     debounceRef.current[item.id] = setTimeout(() => onUpdate(item), 500);
   }, [onUpdate]);
 
+  const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
+    items,
+    onReorder: (reordered) => reordered.forEach((item) => onUpdate(item)),
+  });
+
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="mb-3 flex items-baseline justify-between">
@@ -160,8 +166,16 @@ const PlanEntryCard = ({ title, total, items, categories, onUpdate, onDelete, on
         <span className="text-sm font-semibold text-foreground">{formatPHP(total)}</span>
       </div>
       <div className="space-y-1.5">
-        {items.map((item) => (
-          <div key={item.id} className={`flex items-center gap-2 ${!item.included ? "opacity-40" : ""}`}>
+        {items.map((item, idx) => (
+          <div
+            key={item.id}
+            draggable
+            onDragStart={(e) => handleDragStart(idx, e)}
+            onDragOver={(e) => handleDragOver(idx, e)}
+            onDragEnd={handleDragEnd}
+            onDragLeave={handleDragLeave}
+            className={`flex items-center gap-2 transition-opacity ${!item.included ? "opacity-40" : ""} ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
+            <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
             <Checkbox
               checked={item.included}
               onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })}
