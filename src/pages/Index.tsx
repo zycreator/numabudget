@@ -25,7 +25,7 @@ import {
 import { useBudgets, useUpdateBudget, type Budget } from "@/hooks/useBudgets";
 import ExpensePieChart from "@/components/budget/ExpensePieChart";
 import ExpenseLegend from "@/components/budget/ExpenseLegend";
-import SummaryCards from "@/components/budget/SummaryCards";
+
 import CategoryLimitsCard from "@/components/budget/CategoryLimitsCard";
 import PlannerView from "@/pages/PlannerView";
 import { usePlans, type Plan } from "@/hooks/usePlans";
@@ -297,14 +297,21 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         )}
       </div>
 
-      {/* Summary Cards */}
-      <SummaryCards
-        items={items}
-        totalIncome={totalIncome}
-        totalExpenses={totalExpenses}
-        daysInMonth={30}
-        currentDay={new Date().getDate()}
-      />
+      {/* Debt & Savings Board */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="rounded-lg border border-border bg-card p-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">Debt</h3>
+          <p className="text-2xl font-bold text-negative">{formatPHP(0)}</p>
+          <p className="mt-1 text-xs text-muted-foreground">No debts tracked yet</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">Savings</h3>
+          <p className="text-2xl font-bold text-positive">{formatPHP(Math.max(0, net))}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {goalTarget > 0 ? `${goalPct.toFixed(0)}% of ${formatPHP(goalTarget)} goal` : "No savings goal set"}
+          </p>
+        </div>
+      </div>
 
       {/* Expense Breakdown Chart */}
       {expenseItems.length > 0 && (
