@@ -179,6 +179,47 @@ export type Database = {
           },
         ]
       }
+      debt_items: {
+        Row: {
+          amount: number
+          budget_id: string
+          created_at: string
+          description: string
+          due_date: string | null
+          id: string
+          sort_order: number
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          budget_id: string
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          sort_order?: number
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          budget_id?: string
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          sort_order?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debt_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plan_items: {
         Row: {
           amount: number
@@ -340,6 +381,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "savings_goals_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_items: {
+        Row: {
+          budget_id: string
+          created_at: string
+          description: string
+          id: string
+          saved_amount: number
+          sort_order: number
+          target_amount: number
+          user_id: string
+        }
+        Insert: {
+          budget_id: string
+          created_at?: string
+          description?: string
+          id?: string
+          saved_amount?: number
+          sort_order?: number
+          target_amount?: number
+          user_id: string
+        }
+        Update: {
+          budget_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          saved_amount?: number
+          sort_order?: number
+          target_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_items_budget_id_fkey"
             columns: ["budget_id"]
             isOneToOne: false
             referencedRelation: "budgets"
