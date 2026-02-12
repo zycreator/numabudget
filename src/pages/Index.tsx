@@ -33,16 +33,6 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Switch } from "@/components/ui/switch";
 
-const DEFAULT_CATEGORIES = [
-  { name: "Food", color: "#A0522D" },
-  { name: "Rent", color: "#6B8E6B" },
-  { name: "Transport", color: "#B8860B" },
-  { name: "Utilities", color: "#708090" },
-  { name: "Health", color: "#CD5C5C" },
-  { name: "Entertainment", color: "#9370DB" },
-  { name: "Savings", color: "#2E8B57" },
-  { name: "Other", color: "#8B8682" },
-];
 
 const formatPHP = (n: number) =>
   `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -173,12 +163,6 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   const goalTarget = savingsGoal?.target_amount ?? 0;
   const goalPct = goalTarget > 0 ? Math.min((net / goalTarget) * 100, 100) : 0;
 
-  // Init default categories if none exist
-  const hasInitRef = useRef(false);
-  if (categories.length === 0 && user && !hasInitRef.current) {
-    hasInitRef.current = true;
-    DEFAULT_CATEGORIES.forEach((c) => upsertCategory.mutate(c));
-  }
 
   const handleAddItem = (type: "income" | "expense") => {
     const list = type === "income" ? incomeItems : expenseItems;
