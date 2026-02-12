@@ -118,6 +118,7 @@ const PlannerView = ({ plan }: PlannerViewProps) => {
           total={totalIncome - rolloverAmount}
           items={incomeItems}
           categories={categories}
+          queryKey={["plan_items", plan.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
           onAdd={() => handleAddItem("income")}
@@ -127,6 +128,7 @@ const PlannerView = ({ plan }: PlannerViewProps) => {
           total={totalExpenses}
           items={expenseItems}
           categories={categories}
+          queryKey={["plan_items", plan.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
           onAdd={() => handleAddItem("expense")}
@@ -141,12 +143,13 @@ interface PlanEntryCardProps {
   total: number;
   items: PlanItem[];
   categories: Category[];
+  queryKey: unknown[];
   onUpdate: (item: PlanItem) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
 }
 
-const PlanEntryCard = ({ title, total, items, categories, onUpdate, onDelete, onAdd }: PlanEntryCardProps) => {
+const PlanEntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd }: PlanEntryCardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: PlanItem) => {
@@ -157,6 +160,7 @@ const PlanEntryCard = ({ title, total, items, categories, onUpdate, onDelete, on
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items,
     onReorder: (reordered) => reordered.forEach((item) => onUpdate(item)),
+    queryKey,
   });
 
   return (
