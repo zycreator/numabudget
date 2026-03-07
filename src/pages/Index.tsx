@@ -749,7 +749,7 @@ const SplitBudgetGrid = ({
     >
       <div className="space-y-1.5">
         {items.map((item, idx) =>
-          renderRow(item, idx, drag.dragIndex, drag.overIndex, drag.handleDragStart, drag.handleDragOver, drag.handleDragEnd, drag.handleDragLeave, showCategory)
+          renderRow(item, idx, drag.dragIndex, drag.overIndex, drag.handleDragStart, drag.handleDragOver, drag.handleDragEnd, drag.handleDragLeave, showCategory, items)
         )}
       </div>
       <div className="mt-auto">
