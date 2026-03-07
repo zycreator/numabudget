@@ -172,14 +172,20 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
 
-  // Period-level totals for balance calculation
-  const incomePeriod1Total = useMemo(() => incomeItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [incomeItems, splitEnabled]);
-  const incomePeriod2Total = useMemo(() => splitEnabled ? incomeItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [incomeItems, splitEnabled]);
-  const expensePeriod1Total = useMemo(() => expenseItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [expenseItems, splitEnabled]);
-  const expensePeriod2Total = useMemo(() => splitEnabled ? expenseItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [expenseItems, splitEnabled]);
+  // Period-level totals: checked (actual) and all (budgeted)
+  const incomePeriod1Checked = useMemo(() => incomeItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [incomeItems, splitEnabled]);
+  const incomePeriod1All = useMemo(() => incomeItems.filter(i => i.pay_period === 1 || !splitEnabled).reduce((s, i) => s + i.amount, 0), [incomeItems, splitEnabled]);
+  const incomePeriod2Checked = useMemo(() => splitEnabled ? incomeItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [incomeItems, splitEnabled]);
+  const incomePeriod2All = useMemo(() => splitEnabled ? incomeItems.filter(i => i.pay_period === 2).reduce((s, i) => s + i.amount, 0) : 0, [incomeItems, splitEnabled]);
+  const expensePeriod1Checked = useMemo(() => expenseItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [expenseItems, splitEnabled]);
+  const expensePeriod1All = useMemo(() => expenseItems.filter(i => i.pay_period === 1 || !splitEnabled).reduce((s, i) => s + i.amount, 0), [expenseItems, splitEnabled]);
+  const expensePeriod2Checked = useMemo(() => splitEnabled ? expenseItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [expenseItems, splitEnabled]);
+  const expensePeriod2All = useMemo(() => splitEnabled ? expenseItems.filter(i => i.pay_period === 2).reduce((s, i) => s + i.amount, 0) : 0, [expenseItems, splitEnabled]);
 
-  const periodBalance1 = incomePeriod1Total - expensePeriod1Total;
-  const periodBalance2 = incomePeriod2Total - expensePeriod2Total;
+  const periodBalance1Checked = incomePeriod1Checked - expensePeriod1Checked;
+  const periodBalance1Budgeted = incomePeriod1All - expensePeriod1All;
+  const periodBalance2Checked = incomePeriod2Checked - expensePeriod2Checked;
+  const periodBalance2Budgeted = incomePeriod2All - expensePeriod2All;
 
   const handleToggleSplit = (enabled: boolean) => {
     setSplitEnabled(enabled);
@@ -378,8 +384,10 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           onAdd={(payPeriod) => handleAddItem("income", payPeriod)}
           splitEnabled={splitEnabled}
           onToggleSplit={handleToggleSplit}
-          periodBalance1={periodBalance1}
-          periodBalance2={periodBalance2} />
+          periodBalance1Checked={periodBalance1Checked}
+          periodBalance1Budgeted={periodBalance1Budgeted}
+          periodBalance2Checked={periodBalance2Checked}
+          periodBalance2Budgeted={periodBalance2Budgeted} />
 
         <EntryCard
           title="Expenses"
@@ -392,8 +400,10 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           onAdd={(payPeriod) => handleAddItem("expense", payPeriod)}
           splitEnabled={splitEnabled}
           onToggleSplit={handleToggleSplit}
-          periodBalance1={periodBalance1}
-          periodBalance2={periodBalance2} />
+          periodBalance1Checked={periodBalance1Checked}
+          periodBalance1Budgeted={periodBalance1Budgeted}
+          periodBalance2Checked={periodBalance2Checked}
+          periodBalance2Budgeted={periodBalance2Budgeted} />
 
       </div>
 
@@ -450,11 +460,13 @@ interface EntryCardProps {
   onAdd: (payPeriod?: number) => void;
   splitEnabled: boolean;
   onToggleSplit: (enabled: boolean) => void;
-  periodBalance1: number;
-  periodBalance2: number;
+  periodBalance1Checked: number;
+  periodBalance1Budgeted: number;
+  periodBalance2Checked: number;
+  periodBalance2Budgeted: number;
 }
 
-const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit, periodBalance1, periodBalance2 }: EntryCardProps) => {
+const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit, periodBalance1Checked, periodBalance1Budgeted, periodBalance2Checked, periodBalance2Budgeted }: EntryCardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: BudgetItem) => {
@@ -465,8 +477,11 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
   const period1Items = useMemo(() => items.filter(i => i.pay_period === 1 || !splitEnabled), [items, splitEnabled]);
   const period2Items = useMemo(() => splitEnabled ? items.filter(i => i.pay_period === 2) : [], [items, splitEnabled]);
 
-  const period1Total = useMemo(() => period1Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period1Items]);
-  const period2Total = useMemo(() => period2Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period2Items]);
+  // Checked (actual) totals per period
+  const period1Checked = useMemo(() => period1Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period1Items]);
+  const period1All = useMemo(() => period1Items.reduce((s, i) => s + i.amount, 0), [period1Items]);
+  const period2Checked = useMemo(() => period2Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period2Items]);
+  const period2All = useMemo(() => period2Items.reduce((s, i) => s + i.amount, 0), [period2Items]);
 
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items: splitEnabled ? period1Items : items,
@@ -620,11 +635,18 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
-                <span className="text-[10px] font-medium text-muted-foreground">₱{period1Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <span className={`text-[10px] font-semibold ${periodBalance1 < 0 ? "text-negative" : "text-positive"}`}>
-                Balance: {formatPHP(periodBalance1)}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-semibold ${periodBalance1Checked < 0 ? "text-negative" : "text-positive"}`}>
+                  {formatPHP(periodBalance1Checked)}
+                </span>
+                <span className="text-[10px] text-muted-foreground/50">/</span>
+                <span className="text-[10px] text-muted-foreground">{formatPHP(periodBalance1Budgeted)}</span>
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between mb-1">
+              <span className="text-sm font-semibold text-foreground">{formatPHP(period1Checked)}</span>
+              <span className="text-[10px] text-muted-foreground">of {formatPHP(period1All)}</span>
             </div>
             <div className="space-y-1.5">
               {period1Items.map((item, idx) => (
@@ -658,11 +680,18 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
-                <span className="text-[10px] font-medium text-muted-foreground">₱{period2Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <span className={`text-[10px] font-semibold ${periodBalance2 < 0 ? "text-negative" : "text-positive"}`}>
-                Balance: {formatPHP(periodBalance2)}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-semibold ${periodBalance2Checked < 0 ? "text-negative" : "text-positive"}`}>
+                  {formatPHP(periodBalance2Checked)}
+                </span>
+                <span className="text-[10px] text-muted-foreground/50">/</span>
+                <span className="text-[10px] text-muted-foreground">{formatPHP(periodBalance2Budgeted)}</span>
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between mb-1">
+              <span className="text-sm font-semibold text-foreground">{formatPHP(period2Checked)}</span>
+              <span className="text-[10px] text-muted-foreground">of {formatPHP(period2All)}</span>
             </div>
             <div className="space-y-1.5">
               {period2Items.map((item, idx) => (

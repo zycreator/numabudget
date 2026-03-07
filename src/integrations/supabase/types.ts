@@ -25,6 +25,7 @@ export type Database = {
           included: boolean
           month: number
           paid: boolean
+          pay_period: number | null
           sort_order: number
           type: string
           user_id: string
@@ -40,6 +41,7 @@ export type Database = {
           included?: boolean
           month: number
           paid?: boolean
+          pay_period?: number | null
           sort_order?: number
           type: string
           user_id: string
@@ -55,6 +57,7 @@ export type Database = {
           included?: boolean
           month?: number
           paid?: boolean
+          pay_period?: number | null
           sort_order?: number
           type?: string
           user_id?: string
