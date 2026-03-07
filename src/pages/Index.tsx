@@ -375,38 +375,41 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         }
 
       {splitEnabled ? (
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
           {/* Column 1: Overall Summary */}
-          <div className="rounded-md bg-secondary/50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Overall</p>
-            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${(totalIncomeAll - totalExpensesAll) >= 0 ? "text-positive" : "text-negative"}`}>
-              {formatPHP(totalIncomeAll - totalExpensesAll)}
+          <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+            <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5 sm:mb-1">Overall</p>
+            <p className={`text-sm sm:text-2xl font-bold tracking-tight ${(totalIncomeAll - totalExpensesAll) >= 0 ? "text-positive" : "text-negative"}`}>
+              <span className="sm:hidden">{formatPHPCompact(totalIncomeAll - totalExpensesAll)}</span>
+              <span className="hidden sm:inline">{formatPHP(totalIncomeAll - totalExpensesAll)}</span>
             </p>
-            <div className="mt-1 space-y-0.5 text-[10px] text-muted-foreground">
-              <p>Inc: <span className="text-positive">{formatPHP(totalIncomeChecked - rolloverAmount)}</span> / {formatPHP(totalIncomeAll - rolloverAmount)}</p>
-              <p>Exp: <span className="text-positive">{formatPHP(totalExpensesChecked)}</span> / {formatPHP(totalExpensesAll)}</p>
+            <div className="mt-0.5 sm:mt-1 space-y-0 sm:space-y-0.5 text-[8px] sm:text-[10px] text-muted-foreground">
+              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(totalIncomeChecked - rolloverAmount)}</span><span className="hidden sm:inline"> / {formatPHP(totalIncomeAll - rolloverAmount)}</span></p>
+              <p className="truncate">Exp: <span className="text-positive">{formatPHPCompact(totalExpensesChecked)}</span><span className="hidden sm:inline"> / {formatPHP(totalExpensesAll)}</span></p>
             </div>
           </div>
           {/* Column 2: Period 1 Summary */}
-          <div className="rounded-md bg-secondary/50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Period 1</p>
-            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
-              {formatPHP(periodBalance1Checked)}
+          <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+            <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5 sm:mb-1">Period 1</p>
+            <p className={`text-sm sm:text-2xl font-bold tracking-tight ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
+              <span className="sm:hidden">{formatPHPCompact(periodBalance1Checked)}</span>
+              <span className="hidden sm:inline">{formatPHP(periodBalance1Checked)}</span>
             </p>
-            <div className="mt-1 space-y-0.5 text-[10px] text-muted-foreground">
-              <p>Inc: <span className="text-positive">{formatPHP(incomePeriod1Checked)}</span> / {formatPHP(incomePeriod1All)}</p>
-              <p>Exp: <span className="text-positive">{formatPHP(expensePeriod1Checked)}</span> / {formatPHP(expensePeriod1All)}</p>
+            <div className="mt-0.5 sm:mt-1 space-y-0 sm:space-y-0.5 text-[8px] sm:text-[10px] text-muted-foreground">
+              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(incomePeriod1Checked)}</span><span className="hidden sm:inline"> / {formatPHP(incomePeriod1All)}</span></p>
+              <p className="truncate">Exp: <span className="text-positive">{formatPHPCompact(expensePeriod1Checked)}</span><span className="hidden sm:inline"> / {formatPHP(expensePeriod1All)}</span></p>
             </div>
           </div>
           {/* Column 3: Period 2 Summary */}
-          <div className="rounded-md bg-secondary/50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Period 2</p>
-            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
-              {formatPHP(periodBalance2Checked)}
+          <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+            <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5 sm:mb-1">Period 2</p>
+            <p className={`text-sm sm:text-2xl font-bold tracking-tight ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
+              <span className="sm:hidden">{formatPHPCompact(periodBalance2Checked)}</span>
+              <span className="hidden sm:inline">{formatPHP(periodBalance2Checked)}</span>
             </p>
-            <div className="mt-1 space-y-0.5 text-[10px] text-muted-foreground">
-              <p>Inc: <span className="text-positive">{formatPHP(incomePeriod2Checked)}</span> / {formatPHP(incomePeriod2All)}</p>
-              <p>Exp: <span className="text-positive">{formatPHP(expensePeriod2Checked)}</span> / {formatPHP(expensePeriod2All)}</p>
+            <div className="mt-0.5 sm:mt-1 space-y-0 sm:space-y-0.5 text-[8px] sm:text-[10px] text-muted-foreground">
+              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(incomePeriod2Checked)}</span><span className="hidden sm:inline"> / {formatPHP(incomePeriod2All)}</span></p>
+              <p className="truncate">Exp: <span className="text-positive">{formatPHPCompact(expensePeriod2Checked)}</span><span className="hidden sm:inline"> / {formatPHP(expensePeriod2All)}</span></p>
             </div>
           </div>
         </div>
