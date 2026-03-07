@@ -14,6 +14,7 @@ export interface BudgetItem {
   included: boolean;
   sort_order: number;
   paid: boolean;
+  pay_period: number;
 }
 
 export interface Category {
@@ -148,6 +149,7 @@ export const useUpsertBudgetItem = () => {
           included: item.included,
           sort_order: item.sort_order,
           paid: item.paid,
+          pay_period: item.pay_period,
         }).eq("id", item.id);
         if (error) throw error;
       } else {
