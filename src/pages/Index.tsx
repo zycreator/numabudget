@@ -117,7 +117,10 @@ const Index = () => {
             <BudgetView
               budget={activeBudget}
               showSettings={showSettings}
-              showRecurring={showRecurring} /> :
+              showRecurring={showRecurring}
+              onToggleSettings={() => setShowSettings(!showSettings)}
+              onToggleRecurring={() => setShowRecurring(!showRecurring)}
+              onSignOut={() => signOut()} /> :
 
 
             <div className="flex flex-col items-center justify-center py-20 text-center">
