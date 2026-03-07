@@ -172,14 +172,20 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
 
-  // Period-level totals for balance calculation
-  const incomePeriod1Total = useMemo(() => incomeItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [incomeItems, splitEnabled]);
-  const incomePeriod2Total = useMemo(() => splitEnabled ? incomeItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [incomeItems, splitEnabled]);
-  const expensePeriod1Total = useMemo(() => expenseItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [expenseItems, splitEnabled]);
-  const expensePeriod2Total = useMemo(() => splitEnabled ? expenseItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [expenseItems, splitEnabled]);
+  // Period-level totals: checked (actual) and all (budgeted)
+  const incomePeriod1Checked = useMemo(() => incomeItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [incomeItems, splitEnabled]);
+  const incomePeriod1All = useMemo(() => incomeItems.filter(i => i.pay_period === 1 || !splitEnabled).reduce((s, i) => s + i.amount, 0), [incomeItems, splitEnabled]);
+  const incomePeriod2Checked = useMemo(() => splitEnabled ? incomeItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [incomeItems, splitEnabled]);
+  const incomePeriod2All = useMemo(() => splitEnabled ? incomeItems.filter(i => i.pay_period === 2).reduce((s, i) => s + i.amount, 0) : 0, [incomeItems, splitEnabled]);
+  const expensePeriod1Checked = useMemo(() => expenseItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [expenseItems, splitEnabled]);
+  const expensePeriod1All = useMemo(() => expenseItems.filter(i => i.pay_period === 1 || !splitEnabled).reduce((s, i) => s + i.amount, 0), [expenseItems, splitEnabled]);
+  const expensePeriod2Checked = useMemo(() => splitEnabled ? expenseItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [expenseItems, splitEnabled]);
+  const expensePeriod2All = useMemo(() => splitEnabled ? expenseItems.filter(i => i.pay_period === 2).reduce((s, i) => s + i.amount, 0) : 0, [expenseItems, splitEnabled]);
 
-  const periodBalance1 = incomePeriod1Total - expensePeriod1Total;
-  const periodBalance2 = incomePeriod2Total - expensePeriod2Total;
+  const periodBalance1Checked = incomePeriod1Checked - expensePeriod1Checked;
+  const periodBalance1Budgeted = incomePeriod1All - expensePeriod1All;
+  const periodBalance2Checked = incomePeriod2Checked - expensePeriod2Checked;
+  const periodBalance2Budgeted = incomePeriod2All - expensePeriod2All;
 
   const handleToggleSplit = (enabled: boolean) => {
     setSplitEnabled(enabled);
