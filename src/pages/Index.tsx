@@ -306,6 +306,12 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         <p className="mt-1 text-xs text-muted-foreground">
           {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
         </p>
+        {(totalDebt > 0 || totalSaved > 0) && (
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            {totalDebt > 0 && <span>Debt: <span className="font-medium text-foreground">{formatPHP(totalDebt)}</span></span>}
+            {totalSaved > 0 && <span>Savings: <span className="font-medium text-foreground">{formatPHP(totalSaved)}</span></span>}
+          </div>
+        )}
 
         {goalTarget > 0 &&
         <div className="mt-3">
@@ -325,12 +331,12 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         }
       </div>
 
-      {/* Expense Breakdown Chart */}
-      {expenseItems.length > 0 &&
+      {/* Budget Breakdown Chart */}
+      {(expenseItems.length > 0 || totalDebt > 0 || totalSaved > 0) &&
       <div className="rounded-lg border border-border p-4 bg-primary-foreground">
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Expense Breakdown</h3>
-          <ExpensePieChart items={items} categories={categories} />
-          <ExpenseLegend items={items} categories={categories} />
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Budget Breakdown</h3>
+          <ExpensePieChart items={items} categories={categories} totalDebt={totalDebt} totalSaved={totalSaved} />
+          <ExpenseLegend items={items} categories={categories} totalDebt={totalDebt} totalSaved={totalSaved} />
         </div>
       }
 
