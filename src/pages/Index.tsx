@@ -770,27 +770,27 @@ const SplitBudgetGrid = ({
   return (
     <div className="space-y-0">
       {/* Card headers row */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
         <div className="rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground flex items-baseline justify-between">
-          <h3 className="text-sm font-medium text-muted-foreground">Income</h3>
-          <span className="text-sm font-semibold text-foreground">{formatPHP(totalIncome)}</span>
+          <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Income</h3>
+          <span className="text-xs sm:text-sm font-semibold text-foreground">{formatPHP(totalIncome)}</span>
         </div>
-        <div className="rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground flex items-baseline justify-between">
-          <h3 className="text-sm font-medium text-muted-foreground">Expenses</h3>
-          <span className="text-sm font-semibold text-foreground">{formatPHP(totalExpenses)}</span>
+        <div className="rounded-t-lg sm:rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground flex items-baseline justify-between max-sm:rounded-none max-sm:border-t-0">
+          <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Expenses</h3>
+          <span className="text-xs sm:text-sm font-semibold text-foreground">{formatPHP(totalExpenses)}</span>
         </div>
       </div>
 
-      {/* Period 1 row — both sides share same grid row = same height */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="border-x border-border bg-primary-foreground px-3 pb-2">
+      {/* Period 1 row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 pb-2">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP1))}</span>
           </div>
           {renderPeriodSection(incomeP1, incomeP1Drag, "income-1", 1, false, () => onAddIncome(1), "income")}
         </div>
-        <div className="border-x border-border bg-primary-foreground px-3 pb-2">
+        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 pb-2 max-sm:border-t max-sm:border-border/30">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP1))}</span>
@@ -800,30 +800,30 @@ const SplitBudgetGrid = ({
       </div>
 
       {/* Split toggle divider */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="border-x border-border bg-primary-foreground px-3">
-          <div className="flex items-center gap-2 py-2 border-t border-b border-border/40">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3">
+          <div className="flex items-center gap-2 py-2.5 sm:py-2 border-t border-b border-border/40">
             <Switch checked={true} onCheckedChange={onToggleSplit} className="scale-75 origin-left" />
             <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
           </div>
         </div>
-        <div className="border-x border-border bg-primary-foreground px-3">
+        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 max-sm:hidden">
           <div className="py-2 border-t border-b border-border/40">
             <span className="text-[10px] text-muted-foreground/40">&nbsp;</span>
           </div>
         </div>
       </div>
 
-      {/* Period 2 row — both sides share same grid row = same height */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-3 pb-3">
+      {/* Period 2 row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+        <div className="rounded-b-lg sm:rounded-b-lg border border-t-0 border-border bg-primary-foreground px-2 sm:px-3 pb-3 max-sm:rounded-none">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP2))}</span>
           </div>
           {renderPeriodSection(incomeP2, incomeP2Drag, "income-2", 2, false, () => onAddIncome(2), "income")}
         </div>
-        <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-3 pb-3">
+        <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-2 sm:px-3 pb-3">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP2))}</span>
