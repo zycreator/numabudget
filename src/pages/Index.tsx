@@ -675,20 +675,8 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             onDrop={(e) => handlePeriodDrop(e, 1)}
           >
             <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-semibold ${periodBalance1Checked < 0 ? "text-negative" : "text-positive"}`}>
-                  {formatPHP(periodBalance1Checked)}
-                </span>
-                <span className="text-[10px] text-muted-foreground/50">/</span>
-                <span className="text-[10px] text-muted-foreground">{formatPHP(periodBalance1Budgeted)}</span>
-              </div>
-            </div>
-            <div className="flex items-baseline justify-between mb-1">
-              <span className="text-sm font-semibold text-foreground">{formatPHP(period1Checked)}</span>
-              <span className="text-[10px] text-muted-foreground">of {formatPHP(period1All)}</span>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
+              <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(period1Checked)} <span className="text-muted-foreground/50">/</span> {formatPHP(period1All)}</span>
             </div>
             <div className="space-y-1.5">
               {period1Items.map((item, idx) =>
