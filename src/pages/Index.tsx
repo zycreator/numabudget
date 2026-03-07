@@ -615,7 +615,7 @@ const SplitBudgetGrid = ({
     e.preventDefault();
     e.stopPropagation();
   };
-  const handleContainerDrop = (e: React.DragEvent, targetPeriod: number) => {
+  const handleContainerDrop = (e: React.DragEvent, targetPeriod: number, targetType: "income" | "expense") => {
     e.preventDefault();
     e.stopPropagation();
     dragCounterRef.current = {};
@@ -623,7 +623,11 @@ const SplitBudgetGrid = ({
     const draggedId = e.dataTransfer.getData("text/plain");
     const draggedItem = allItems.find(i => i.id === draggedId);
     if (draggedItem && draggedItem.pay_period !== targetPeriod) {
-      onUpdate({ ...draggedItem, pay_period: targetPeriod });
+      const movedItem = { ...draggedItem, pay_period: targetPeriod };
+      onUpdate(movedItem);
+      // Re-sort the target period after a tick so the item lands in date order
+      const targetItems = (targetType === "income" ? incomeItems : expenseItems).filter(i => i.pay_period === targetPeriod);
+      setTimeout(() => resortPeriodByDate(targetItems, movedItem), 100);
     }
   };
   const handleGlobalDragEnd = () => {
