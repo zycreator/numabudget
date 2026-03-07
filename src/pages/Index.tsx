@@ -507,6 +507,22 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
     onUpdate({ ...item, pay_period: targetPeriod });
   };
 
+  // Shared drag-over handler for period containers
+  const handlePeriodDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handlePeriodDrop = (e: React.DragEvent, targetPeriod: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const draggedId = e.dataTransfer.getData("text/plain");
+    const draggedItem = items.find(i => i.id === draggedId);
+    if (draggedItem && draggedItem.pay_period !== targetPeriod) {
+      handleCrossDrop(draggedItem, targetPeriod);
+    }
+  };
+
   const renderRow = (
     item: BudgetItem,
     idx: number,
@@ -516,26 +532,22 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
     onDragOverFn: (index: number, e: React.DragEvent) => void,
     onDragEndFn: () => void,
     onDragLeaveFn: () => void,
-    crossPeriod?: number
   ) => (
     <div
       key={item.id}
       draggable
-      onDragStart={(e) => onDragStartFn(idx, e)}
-      onDragOver={(e) => onDragOverFn(idx, e)}
+      onDragStart={(e) => {
+        e.dataTransfer.setData("text/plain", item.id);
+        e.dataTransfer.effectAllowed = "move";
+        onDragStartFn(idx, e);
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDragOverFn(idx, e);
+      }}
       onDragEnd={onDragEndFn}
       onDragLeave={onDragLeaveFn}
-      onDrop={(e) => {
-        e.preventDefault();
-        if (crossPeriod !== undefined) {
-          // Check if dragged item is from the other period
-          const draggedId = e.dataTransfer.getData("text/plain");
-          const draggedItem = items.find(i => i.id === draggedId);
-          if (draggedItem && draggedItem.pay_period !== crossPeriod) {
-            handleCrossDrop(draggedItem, crossPeriod);
-          }
-        }
-      }}
       className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-50" : ""} ${oIdx === idx ? "border-t-2 border-accent" : ""}`}>
       <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
       <Checkbox
@@ -585,30 +597,6 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
       + Add Row
     </button>
   );
-
-  const renderDropZone = (targetPeriod: number) => (
-    <div
-      className="min-h-[8px] rounded transition-colors"
-      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("bg-accent/20"); }}
-      onDragLeave={(e) => { e.currentTarget.classList.remove("bg-accent/20"); }}
-      onDrop={(e) => {
-        e.preventDefault();
-        e.currentTarget.classList.remove("bg-accent/20");
-        const draggedId = e.dataTransfer.getData("text/plain");
-        const draggedItem = items.find(i => i.id === draggedId);
-        if (draggedItem && draggedItem.pay_period !== targetPeriod) {
-          handleCrossDrop(draggedItem, targetPeriod);
-        }
-      }}
-    />
-  );
-
-  // Patch drag start to store item id in dataTransfer
-  const wrapDragStart = (originalFn: (index: number, e: React.DragEvent) => void) =>
-    (idx: number, itemId: string) => (e: React.DragEvent) => {
-      e.dataTransfer.setData("text/plain", itemId);
-      originalFn(idx, e);
-    };
 
   return (
     <div className="rounded-lg border border-border p-4 bg-primary-foreground flex flex-col">
