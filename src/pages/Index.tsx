@@ -146,6 +146,7 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">No budgets yet. Create one from the sidebar!</p>
               </div>
             }
+          <div className="pb-10" />
           </div>
         </main>
       </div>
