@@ -138,9 +138,12 @@ interface BudgetViewProps {
   budget: Budget;
   showSettings: boolean;
   showRecurring: boolean;
+  onToggleSettings: () => void;
+  onToggleRecurring: () => void;
+  onSignOut: () => void;
 }
 
-const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) => {
+const BudgetView = ({ budget, showSettings, showRecurring, onToggleSettings, onToggleRecurring, onSignOut }: BudgetViewProps) => {
   const { user } = useAuth();
   const { data: items = [], isLoading } = useBudgetItems(budget.id);
   const { data: categories = [] } = useCategories();
