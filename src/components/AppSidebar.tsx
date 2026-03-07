@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Wallet, FileText, Archive, Trash2, Copy } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, Wallet, FileText, Archive, Trash2, Copy, Pencil } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
   Sidebar,
@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger } from
 "@/components/ui/sidebar";
-import { useBudgets, useCreateBudget, useDeleteBudget, useDuplicateBudget, type Budget } from "@/hooks/useBudgets";
+import { useBudgets, useCreateBudget, useDeleteBudget, useDuplicateBudget, useUpdateBudget, type Budget } from "@/hooks/useBudgets";
 import { usePlans, useCreatePlan, useDeletePlan, type Plan } from "@/hooks/usePlans";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -37,6 +37,7 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
   const createPlan = useCreatePlan();
   const deletePlan = useDeletePlan();
   const duplicateBudget = useDuplicateBudget();
+  const updateBudget = useUpdateBudget();
 
   const [showNewBudget, setShowNewBudget] = useState(false);
   const [showNewPlan, setShowNewPlan] = useState(false);
@@ -45,9 +46,37 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [rollover, setRollover] = useState(false);
   const [planName, setPlanName] = useState("");
+  const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingBudgetId && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editingBudgetId]);
+
+  const handleStartEdit = (b: Budget, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingBudgetId(b.id);
+    setEditingName(b.name);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingBudgetId && editingName.trim()) {
+      updateBudget.mutate({ id: editingBudgetId, name: editingName.trim() });
+    }
+    setEditingBudgetId(null);
+  };
 
   const activeBudgets = budgets.filter((b) => b.is_active);
   const archivedBudgets = budgets.filter((b) => !b.is_active);
+
+  const handleEditKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSaveEdit();
+    if (e.key === "Escape") setEditingBudgetId(null);
+  };
 
   const handleCreateBudget = () => {
     if (!budgetName.trim()) return;
@@ -94,28 +123,47 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
             <SidebarMenu>
               {activeBudgets.map((b) =>
               <SidebarMenuItem key={b.id}>
+                {editingBudgetId === b.id ? (
+                  <div className="flex items-center gap-1 px-2 py-1">
+                    <Wallet className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <input
+                      ref={editInputRef}
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onBlur={handleSaveEdit}
+                      onKeyDown={handleEditKeyDown}
+                      className="flex-1 bg-background border border-input rounded px-1.5 py-0.5 text-xs outline-none focus:ring-1 focus:ring-ring min-w-0"
+                    />
+                  </div>
+                ) : (
                   <SidebarMenuButton
                   onClick={() => onSelectBudget(b.id)}
                   className={`justify-between group ${activeBudgetId === b.id ? "bg-secondary text-foreground font-medium" : ""}`}>
-
                     <span className="flex items-center gap-2 truncate">
                       <Wallet className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate text-xs">{b.name}</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <button
+                      onClick={(e) => handleStartEdit(b, e)}
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground p-1 -m-1"
+                      title="Rename budget">
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                      <button
                       onClick={(e) => {e.stopPropagation();duplicateBudget.mutate(b.id, { onSuccess: (data) => onSelectBudget(data.id) });}}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground"
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground p-1 -m-1"
                       title="Duplicate budget">
                         <Copy className="h-3 w-3" />
                       </button>
                       <button
                       onClick={(e) => {e.stopPropagation();if (confirm(`Delete "${b.name}"?`)) deleteBudget.mutate(b.id);}}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-1 -m-1">
                         <Trash2 className="h-3 w-3" />
                       </button>
                     </span>
                   </SidebarMenuButton>
+                )}
                 </SidebarMenuItem>
               )}
             </SidebarMenu>
