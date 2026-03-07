@@ -354,7 +354,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={() => handleAddItem("income")} />
+          onAdd={(payPeriod) => handleAddItem("income", payPeriod)} />
 
         <EntryCard
           title="Expenses"
@@ -364,7 +364,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={() => handleAddItem("expense")} />
+          onAdd={(payPeriod) => handleAddItem("expense", payPeriod)} />
 
       </div>
 
