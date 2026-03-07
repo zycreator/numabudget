@@ -330,7 +330,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
 
       {/* Budget Header */}
       <div className="rounded-lg border border-border p-4 sm:p-5 bg-primary-foreground">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="group relative inline-flex items-center gap-1.5">
             <input
               type="text"
@@ -358,7 +358,6 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
               <Switch
                 checked={budget.rollover_enabled}
                 onCheckedChange={(v) => updateBudget.mutate({ id: budget.id, rollover_enabled: v })} />
-
               Rollover
             </label>
             <button onClick={exportCSV} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
@@ -369,15 +368,18 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
 
         {/* Rollover banner */}
         {rolloverData &&
-        <div className="mb-3 rounded-md bg-positive/10 px-3 py-2 text-xs text-positive">
+        <div className="mt-3 rounded-md bg-positive/10 px-3 py-2 text-xs text-positive">
             Rollover from "{rolloverData.fromBudgetName}": {formatPHP(rolloverData.amount)}
           </div>
         }
+      </div>
 
+      {/* Sticky Summary Section */}
+      <div className="sticky top-0 z-30 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 bg-background/95 backdrop-blur-sm border-b border-transparent [&:not(:first-child)]:shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.08)]">
       {splitEnabled ? (
         <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
           {/* Column 1: Overall Summary */}
-          <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+          <div className="rounded-md bg-secondary/50 p-1.5 sm:p-3">
             <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5 sm:mb-1">Overall</p>
             <p className={`text-sm sm:text-2xl font-bold tracking-tight ${(totalIncomeAll - totalExpensesAll) >= 0 ? "text-positive" : "text-negative"}`}>
               <span className="sm:hidden">{formatPHPCompact(totalIncomeAll - totalExpensesAll)}</span>
@@ -389,7 +391,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
             </div>
           </div>
           {/* Column 2: Period 1 Summary */}
-          <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+          <div className="rounded-md bg-secondary/50 p-1.5 sm:p-3">
             <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5 sm:mb-1">Period 1</p>
             <p className={`text-sm sm:text-2xl font-bold tracking-tight ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
               <span className="sm:hidden">{formatPHPCompact(periodBalance1Checked)}</span>
@@ -401,7 +403,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
             </div>
           </div>
           {/* Column 3: Period 2 Summary */}
-          <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+          <div className="rounded-md bg-secondary/50 p-1.5 sm:p-3">
             <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5 sm:mb-1">Period 2</p>
             <p className={`text-sm sm:text-2xl font-bold tracking-tight ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
               <span className="sm:hidden">{formatPHPCompact(periodBalance2Checked)}</span>
@@ -414,24 +416,24 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           </div>
         </div>
       ) : (
-        <>
-          <p className={`text-3xl sm:text-4xl font-bold tracking-tight ${net >= 0 ? "text-positive" : "text-negative"}`}>
+        <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+          <p className={`text-2xl sm:text-4xl font-bold tracking-tight ${net >= 0 ? "text-positive" : "text-negative"}`}>
             {formatPHP(net)}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             of {formatPHP(netBudgeted)} budgeted · {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
           </p>
-        </>
+        </div>
       )}
         {(totalDebt > 0 || totalSaved > 0) &&
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
             {totalDebt > 0 && <span>Debt: <span className="font-medium text-foreground">{formatPHP(totalDebt)}</span></span>}
             {totalSaved > 0 && <span>Savings: <span className="font-medium text-foreground">{formatPHP(totalSaved)}</span></span>}
           </div>
         }
 
         {goalTarget > 0 &&
-        <div className="mt-3">
+        <div className="mt-2">
             <div className="flex justify-between text-xs mb-1">
               <span className="text-muted-foreground">Savings Goal</span>
               <span className={`font-medium ${goalPct >= 100 ? "text-positive" : "text-foreground"}`}>
@@ -442,7 +444,6 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
               <div
               className={`h-full rounded-full transition-all ${goalPct >= 100 ? "bg-positive" : "bg-accent"}`}
               style={{ width: `${Math.max(0, goalPct)}%` }} />
-
             </div>
           </div>
         }
