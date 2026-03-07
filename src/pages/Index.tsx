@@ -454,11 +454,11 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             <Checkbox
             checked={item.included}
             onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })}
-            className="shrink-0 h-3.5 w-3.5" />
+            />
             <Checkbox
             checked={item.paid}
             onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })}
-            className="shrink-0 h-3.5 w-3.5 border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
+            className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
 
             <input
             type="text"
