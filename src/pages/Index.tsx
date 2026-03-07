@@ -53,6 +53,22 @@ import { Progress } from "@/components/ui/progress";
 const formatPHP = (n: number) =>
 `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+const formatDateShort = (dateStr: string | null) => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr + "T00:00:00");
+  return `${d.getMonth() + 1}-${d.getDate()}`;
+};
+
+const toISODate = (shortStr: string): string | null => {
+  const parts = shortStr.trim().split("-");
+  if (parts.length !== 2) return null;
+  const m = parseInt(parts[0], 10);
+  const d = parseInt(parts[1], 10);
+  if (!m || !d || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const y = new Date().getFullYear();
+  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+};
+
 const Index = () => {
   const { user, signOut } = useAuth();
   const [activeBudgetId, setActiveBudgetId] = useState<string | null>(null);
