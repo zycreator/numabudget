@@ -460,11 +460,13 @@ interface EntryCardProps {
   onAdd: (payPeriod?: number) => void;
   splitEnabled: boolean;
   onToggleSplit: (enabled: boolean) => void;
-  periodBalance1: number;
-  periodBalance2: number;
+  periodBalance1Checked: number;
+  periodBalance1Budgeted: number;
+  periodBalance2Checked: number;
+  periodBalance2Budgeted: number;
 }
 
-const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit, periodBalance1, periodBalance2 }: EntryCardProps) => {
+const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit, periodBalance1Checked, periodBalance1Budgeted, periodBalance2Checked, periodBalance2Budgeted }: EntryCardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: BudgetItem) => {
@@ -475,8 +477,11 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
   const period1Items = useMemo(() => items.filter(i => i.pay_period === 1 || !splitEnabled), [items, splitEnabled]);
   const period2Items = useMemo(() => splitEnabled ? items.filter(i => i.pay_period === 2) : [], [items, splitEnabled]);
 
-  const period1Total = useMemo(() => period1Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period1Items]);
-  const period2Total = useMemo(() => period2Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period2Items]);
+  // Checked (actual) totals per period
+  const period1Checked = useMemo(() => period1Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period1Items]);
+  const period1All = useMemo(() => period1Items.reduce((s, i) => s + i.amount, 0), [period1Items]);
+  const period2Checked = useMemo(() => period2Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period2Items]);
+  const period2All = useMemo(() => period2Items.reduce((s, i) => s + i.amount, 0), [period2Items]);
 
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items: splitEnabled ? period1Items : items,
