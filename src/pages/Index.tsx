@@ -448,28 +448,19 @@ interface EntryCardProps {
   onUpdate: (item: BudgetItem) => void;
   onDelete: (id: string) => void;
   onAdd: (payPeriod?: number) => void;
+  splitEnabled: boolean;
+  onToggleSplit: (enabled: boolean) => void;
+  periodBalance1: number;
+  periodBalance2: number;
 }
 
-const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd }: EntryCardProps) => {
-  const [splitEnabled, setSplitEnabled] = useState(false);
+const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit, periodBalance1, periodBalance2 }: EntryCardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: BudgetItem) => {
     if (debounceRef.current[item.id]) clearTimeout(debounceRef.current[item.id]);
     debounceRef.current[item.id] = setTimeout(() => onUpdate(item), 500);
   }, [onUpdate]);
-
-  // When toggling split ON, move all items to period 1
-  const handleToggleSplit = (enabled: boolean) => {
-    setSplitEnabled(enabled);
-    if (enabled) {
-      items.forEach(item => {
-        if (item.pay_period !== 1) {
-          onUpdate({ ...item, pay_period: 1 });
-        }
-      });
-    }
-  };
 
   const period1Items = useMemo(() => items.filter(i => i.pay_period === 1 || !splitEnabled), [items, splitEnabled]);
   const period2Items = useMemo(() => splitEnabled ? items.filter(i => i.pay_period === 2) : [], [items, splitEnabled]);
