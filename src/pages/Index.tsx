@@ -389,32 +389,47 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       <CategoryLimitsCard items={items} categories={categories} limits={categoryLimits} />
 
       {/* Income & Expenses */}
-      <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
-        <EntryCard
-          title="Income"
-          total={totalIncome - rolloverAmount}
-          items={incomeItems}
+      {splitEnabled ? (
+        <SplitBudgetGrid
+          incomeItems={incomeItems}
+          expenseItems={expenseItems}
           categories={categories}
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={(payPeriod) => handleAddItem("income", payPeriod)}
-          splitEnabled={splitEnabled}
-          onToggleSplit={handleToggleSplit} />
+          onAddIncome={(pp) => handleAddItem("income", pp)}
+          onAddExpense={(pp) => handleAddItem("expense", pp)}
+          onToggleSplit={handleToggleSplit}
+          totalIncome={totalIncome - rolloverAmount}
+          totalExpenses={totalExpenses}
+        />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
+          <EntryCard
+            title="Income"
+            total={totalIncome - rolloverAmount}
+            items={incomeItems}
+            categories={categories}
+            queryKey={["budget_items", user?.id, budget.id]}
+            onUpdate={(item) => upsertItem.mutate(item)}
+            onDelete={(id) => deleteItem.mutate(id)}
+            onAdd={(payPeriod) => handleAddItem("income", payPeriod)}
+            splitEnabled={false}
+            onToggleSplit={handleToggleSplit} />
 
-        <EntryCard
-          title="Expenses"
-          total={totalExpenses}
-          items={expenseItems}
-          categories={categories}
-          queryKey={["budget_items", user?.id, budget.id]}
-          onUpdate={(item) => upsertItem.mutate(item)}
-          onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={(payPeriod) => handleAddItem("expense", payPeriod)}
-          splitEnabled={splitEnabled}
-          onToggleSplit={handleToggleSplit} />
-
-      </div>
+          <EntryCard
+            title="Expenses"
+            total={totalExpenses}
+            items={expenseItems}
+            categories={categories}
+            queryKey={["budget_items", user?.id, budget.id]}
+            onUpdate={(item) => upsertItem.mutate(item)}
+            onDelete={(id) => deleteItem.mutate(id)}
+            onAdd={(payPeriod) => handleAddItem("expense", payPeriod)}
+            splitEnabled={false}
+            onToggleSplit={handleToggleSplit} />
+        </div>
+      )}
 
       {/* Debt & Savings Boards */}
       <div className="grid gap-4 sm:grid-cols-2">
