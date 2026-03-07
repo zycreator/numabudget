@@ -2,14 +2,19 @@ import { useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { BudgetItem, Category } from "@/hooks/useBudgetData";
 
+const DEBT_COLOR = "#C97B6B";
+const SAVINGS_COLOR = "#6B9C7A";
+
 interface Props {
   items: BudgetItem[];
   categories: Category[];
+  totalDebt?: number;
+  totalSaved?: number;
 }
 
 const FALLBACK_COLOR = "hsl(30, 10%, 75%)";
 
-const ExpensePieChart = ({ items, categories }: Props) => {
+const ExpensePieChart = ({ items, categories, totalDebt = 0, totalSaved = 0 }: Props) => {
   const data = useMemo(() => {
     const expenses = items.filter((i) => i.type === "expense" && i.included && i.amount > 0);
     const catMap = new Map(categories.map((c) => [c.id, c]));
@@ -23,8 +28,11 @@ const ExpensePieChart = ({ items, categories }: Props) => {
       }
       grouped[key].value += item.amount;
     }
-    return Object.values(grouped);
-  }, [items, categories]);
+    const result = Object.values(grouped);
+    if (totalDebt > 0) result.push({ name: "Debt", value: totalDebt, color: DEBT_COLOR });
+    if (totalSaved > 0) result.push({ name: "Savings", value: totalSaved, color: SAVINGS_COLOR });
+    return result;
+  }, [items, categories, totalDebt, totalSaved]);
 
   if (data.length === 0) {
     return (
