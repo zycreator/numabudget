@@ -13,7 +13,7 @@ interface Props {
   totalSaved?: number;
 }
 
-const ExpenseLegend = ({ items, categories }: Props) => {
+const ExpenseLegend = ({ items, categories, totalDebt = 0, totalSaved = 0 }: Props) => {
   const expenses = items.filter((i) => i.type === "expense" && i.included && i.amount > 0);
   const catMap = new Map(categories.map((c) => [c.id, c]));
   const grouped: Record<string, { name: string; color: string; total: number }> = {};
@@ -26,6 +26,8 @@ const ExpenseLegend = ({ items, categories }: Props) => {
   }
 
   const sorted = Object.values(grouped).sort((a, b) => b.total - a.total);
+  if (totalDebt > 0) sorted.push({ name: "Debt", color: DEBT_COLOR, total: totalDebt });
+  if (totalSaved > 0) sorted.push({ name: "Savings", color: SAVINGS_COLOR, total: totalSaved });
   if (sorted.length === 0) return null;
 
   return (
