@@ -1031,9 +1031,8 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
 
   return (
     <div className="rounded-lg border border-border p-4 bg-primary-foreground flex flex-col">
-      <div className="mb-3 flex items-baseline justify-between">
+      <div className="mb-3">
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-        <span className="text-sm font-semibold text-foreground">{formatPHP(total)}</span>
       </div>
 
       {!splitEnabled && (
