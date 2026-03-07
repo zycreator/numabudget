@@ -389,32 +389,47 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       <CategoryLimitsCard items={items} categories={categories} limits={categoryLimits} />
 
       {/* Income & Expenses */}
-      <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
-        <EntryCard
-          title="Income"
-          total={totalIncome - rolloverAmount}
-          items={incomeItems}
+      {splitEnabled ? (
+        <SplitBudgetGrid
+          incomeItems={incomeItems}
+          expenseItems={expenseItems}
           categories={categories}
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={(payPeriod) => handleAddItem("income", payPeriod)}
-          splitEnabled={splitEnabled}
-          onToggleSplit={handleToggleSplit} />
+          onAddIncome={(pp) => handleAddItem("income", pp)}
+          onAddExpense={(pp) => handleAddItem("expense", pp)}
+          onToggleSplit={handleToggleSplit}
+          totalIncome={totalIncome - rolloverAmount}
+          totalExpenses={totalExpenses}
+        />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
+          <EntryCard
+            title="Income"
+            total={totalIncome - rolloverAmount}
+            items={incomeItems}
+            categories={categories}
+            queryKey={["budget_items", user?.id, budget.id]}
+            onUpdate={(item) => upsertItem.mutate(item)}
+            onDelete={(id) => deleteItem.mutate(id)}
+            onAdd={(payPeriod) => handleAddItem("income", payPeriod)}
+            splitEnabled={false}
+            onToggleSplit={handleToggleSplit} />
 
-        <EntryCard
-          title="Expenses"
-          total={totalExpenses}
-          items={expenseItems}
-          categories={categories}
-          queryKey={["budget_items", user?.id, budget.id]}
-          onUpdate={(item) => upsertItem.mutate(item)}
-          onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={(payPeriod) => handleAddItem("expense", payPeriod)}
-          splitEnabled={splitEnabled}
-          onToggleSplit={handleToggleSplit} />
-
-      </div>
+          <EntryCard
+            title="Expenses"
+            total={totalExpenses}
+            items={expenseItems}
+            categories={categories}
+            queryKey={["budget_items", user?.id, budget.id]}
+            onUpdate={(item) => upsertItem.mutate(item)}
+            onDelete={(id) => deleteItem.mutate(id)}
+            onAdd={(payPeriod) => handleAddItem("expense", payPeriod)}
+            splitEnabled={false}
+            onToggleSplit={handleToggleSplit} />
+        </div>
+      )}
 
       {/* Debt & Savings Boards */}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -457,7 +472,254 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
 
 };
 
-// ─── Entry Card ──────────────────────────────────────────────
+// ─── Split Budget Grid (Period-aligned layout) ──────────────
+interface SplitBudgetGridProps {
+  incomeItems: BudgetItem[];
+  expenseItems: BudgetItem[];
+  categories: Category[];
+  queryKey: unknown[];
+  onUpdate: (item: BudgetItem) => void;
+  onDelete: (id: string) => void;
+  onAddIncome: (payPeriod: number) => void;
+  onAddExpense: (payPeriod: number) => void;
+  onToggleSplit: (enabled: boolean) => void;
+  totalIncome: number;
+  totalExpenses: number;
+}
+
+const SplitBudgetGrid = ({
+  incomeItems, expenseItems, categories, queryKey,
+  onUpdate, onDelete, onAddIncome, onAddExpense, onToggleSplit,
+  totalIncome, totalExpenses,
+}: SplitBudgetGridProps) => {
+  const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const debouncedUpdate = useCallback((item: BudgetItem) => {
+    if (debounceRef.current[item.id]) clearTimeout(debounceRef.current[item.id]);
+    debounceRef.current[item.id] = setTimeout(() => onUpdate(item), 500);
+  }, [onUpdate]);
+
+  const allItems = useMemo(() => [...incomeItems, ...expenseItems], [incomeItems, expenseItems]);
+
+  const incomeP1 = useMemo(() => incomeItems.filter(i => i.pay_period === 1), [incomeItems]);
+  const incomeP2 = useMemo(() => incomeItems.filter(i => i.pay_period === 2), [incomeItems]);
+  const expenseP1 = useMemo(() => expenseItems.filter(i => i.pay_period === 1), [expenseItems]);
+  const expenseP2 = useMemo(() => expenseItems.filter(i => i.pay_period === 2), [expenseItems]);
+
+  const sumChecked = (items: BudgetItem[]) => items.filter(i => i.included).reduce((s, i) => s + i.amount, 0);
+  const sumAll = (items: BudgetItem[]) => items.reduce((s, i) => s + i.amount, 0);
+
+  // Drag reorder hooks for each of the 4 sections
+  const incomeP1Drag = useDragReorder({ items: incomeP1, onReorder: (r) => r.forEach(onUpdate), queryKey });
+  const incomeP2Drag = useDragReorder({ items: incomeP2, onReorder: (r) => r.forEach(onUpdate), queryKey });
+  const expenseP1Drag = useDragReorder({ items: expenseP1, onReorder: (r) => r.forEach(onUpdate), queryKey });
+  const expenseP2Drag = useDragReorder({ items: expenseP2, onReorder: (r) => r.forEach(onUpdate), queryKey });
+
+  // Cross-period drop state
+  const [dropTarget, setDropTarget] = useState<string | null>(null); // e.g. "income-1", "expense-2"
+  const dragCounterRef = useRef<Record<string, number>>({});
+
+  const handleContainerDragEnter = (e: React.DragEvent, key: string) => {
+    e.preventDefault();
+    dragCounterRef.current[key] = (dragCounterRef.current[key] || 0) + 1;
+    setDropTarget(key);
+  };
+  const handleContainerDragLeave = (e: React.DragEvent, key: string) => {
+    dragCounterRef.current[key] = (dragCounterRef.current[key] || 0) - 1;
+    if (dragCounterRef.current[key] <= 0) {
+      dragCounterRef.current[key] = 0;
+      setDropTarget(prev => prev === key ? null : prev);
+    }
+  };
+  const handleContainerDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  const handleContainerDrop = (e: React.DragEvent, targetPeriod: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = {};
+    setDropTarget(null);
+    const draggedId = e.dataTransfer.getData("text/plain");
+    const draggedItem = allItems.find(i => i.id === draggedId);
+    if (draggedItem && draggedItem.pay_period !== targetPeriod) {
+      onUpdate({ ...draggedItem, pay_period: targetPeriod });
+    }
+  };
+  const handleGlobalDragEnd = () => {
+    dragCounterRef.current = {};
+    setDropTarget(null);
+  };
+
+  const renderRow = (
+    item: BudgetItem,
+    idx: number,
+    dIdx: number | null,
+    oIdx: number | null,
+    onDragStartFn: (index: number, e: React.DragEvent) => void,
+    onDragOverFn: (index: number, e: React.DragEvent) => void,
+    onDragEndFn: () => void,
+    onDragLeaveFn: () => void,
+    showCategory: boolean,
+  ) => (
+    <div
+      key={item.id}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("text/plain", item.id);
+        e.dataTransfer.effectAllowed = "move";
+        onDragStartFn(idx, e);
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDragOverFn(idx, e);
+      }}
+      onDragEnd={() => { onDragEndFn(); handleGlobalDragEnd(); }}
+      onDragLeave={onDragLeaveFn}
+      className={`relative flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-30 scale-95" : ""}`}
+    >
+      {oIdx === idx && (
+        <div className="absolute -top-[2px] left-0 right-0 h-[3px] rounded-full bg-accent z-10" />
+      )}
+      <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
+      <Checkbox checked={item.included} onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })} />
+      <Checkbox checked={item.paid} onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })} className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
+      <input
+        type="text"
+        placeholder="Description"
+        defaultValue={item.description}
+        onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
+        className={`flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+      />
+      {showCategory && (
+        <select
+          defaultValue={item.category_id ?? ""}
+          onChange={(e) => onUpdate({ ...item, category_id: e.target.value || null })}
+          className={`w-16 sm:w-20 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+        >
+          <option value="">—</option>
+          {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      )}
+      <div className="relative w-20 sm:w-24 shrink-0">
+        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
+        <input
+          type="number"
+          placeholder="0.00"
+          defaultValue={item.amount || ""}
+          onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
+          className={`w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+          step="0.01"
+        />
+      </div>
+      <button onClick={() => onDelete(item.id)} className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">✕</button>
+    </div>
+  );
+
+  const renderAddButton = (onClick: () => void) => (
+    <button
+      onClick={onClick}
+      className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors"
+    >
+      + Add Row
+    </button>
+  );
+
+  const renderPeriodSection = (
+    items: BudgetItem[],
+    drag: ReturnType<typeof useDragReorder<BudgetItem>>,
+    containerKey: string,
+    targetPeriod: number,
+    showCategory: boolean,
+    onAdd: () => void,
+  ) => (
+    <div
+      className={`flex-1 flex flex-col rounded-md p-2 transition-colors min-h-[60px] ${dropTarget === containerKey ? "bg-accent/10 ring-2 ring-accent/30 ring-inset" : ""}`}
+      onDragOver={handleContainerDragOver}
+      onDragEnter={(e) => handleContainerDragEnter(e, containerKey)}
+      onDragLeave={(e) => handleContainerDragLeave(e, containerKey)}
+      onDrop={(e) => handleContainerDrop(e, targetPeriod)}
+    >
+      <div className="space-y-1.5">
+        {items.map((item, idx) =>
+          renderRow(item, idx, drag.dragIndex, drag.overIndex, drag.handleDragStart, drag.handleDragOver, drag.handleDragEnd, drag.handleDragLeave, showCategory)
+        )}
+      </div>
+      <div className="mt-auto">
+        {renderAddButton(onAdd)}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-0">
+      {/* Card headers row */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground flex items-baseline justify-between">
+          <h3 className="text-sm font-medium text-muted-foreground">Income</h3>
+          <span className="text-sm font-semibold text-foreground">{formatPHP(totalIncome)}</span>
+        </div>
+        <div className="rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground flex items-baseline justify-between">
+          <h3 className="text-sm font-medium text-muted-foreground">Expenses</h3>
+          <span className="text-sm font-semibold text-foreground">{formatPHP(totalExpenses)}</span>
+        </div>
+      </div>
+
+      {/* Period 1 row — both sides share same grid row = same height */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="border-x border-border bg-primary-foreground px-3 pb-2">
+          <div className="flex items-center justify-between mb-1.5 pt-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
+            <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP1))}</span>
+          </div>
+          {renderPeriodSection(incomeP1, incomeP1Drag, "income-1", 1, false, () => onAddIncome(1))}
+        </div>
+        <div className="border-x border-border bg-primary-foreground px-3 pb-2">
+          <div className="flex items-center justify-between mb-1.5 pt-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
+            <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP1))}</span>
+          </div>
+          {renderPeriodSection(expenseP1, expenseP1Drag, "expense-1", 1, true, () => onAddExpense(1))}
+        </div>
+      </div>
+
+      {/* Split toggle divider */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="border-x border-border bg-primary-foreground px-3">
+          <div className="flex items-center gap-2 py-2 border-t border-b border-border/40">
+            <Switch checked={true} onCheckedChange={onToggleSplit} className="scale-75 origin-left" />
+            <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
+          </div>
+        </div>
+        <div className="border-x border-border bg-primary-foreground px-3">
+          <div className="py-2 border-t border-b border-border/40">
+            <span className="text-[10px] text-muted-foreground/40">&nbsp;</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Period 2 row — both sides share same grid row = same height */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-3 pb-3">
+          <div className="flex items-center justify-between mb-1.5 pt-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
+            <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP2))}</span>
+          </div>
+          {renderPeriodSection(incomeP2, incomeP2Drag, "income-2", 2, false, () => onAddIncome(2))}
+        </div>
+        <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-3 pb-3">
+          <div className="flex items-center justify-between mb-1.5 pt-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
+            <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP2))}</span>
+          </div>
+          {renderPeriodSection(expenseP2, expenseP2Drag, "expense-2", 2, true, () => onAddExpense(2))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 interface EntryCardProps {
   title: string;
   total: number;
