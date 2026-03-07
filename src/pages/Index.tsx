@@ -108,7 +108,7 @@ const Index = () => {
           onSelectBudget={handleSelectBudget}
           onSelectPlan={handleSelectPlan} />
 
-        <main className="flex-1 px-3 sm:px-4 py-4 sm:py-10 overflow-x-hidden overflow-y-auto bg-secondary">
+        <main className="flex-1 px-3 sm:px-4 py-4 sm:py-10 overflow-y-auto bg-secondary">
           <div className="mx-auto max-w-5xl space-y-3 sm:space-y-4">
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-2">
