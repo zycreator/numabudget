@@ -507,7 +507,24 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
     onUpdate({ ...item, pay_period: targetPeriod });
   };
 
-  // Shared drag-over handler for period containers
+  // Track which period container is being hovered during cross-period drag
+  const [dropTargetPeriod, setDropTargetPeriod] = useState<number | null>(null);
+  const dragCounterRef = useRef<Record<number, number>>({ 1: 0, 2: 0 });
+
+  const handlePeriodDragEnter = (e: React.DragEvent, period: number) => {
+    e.preventDefault();
+    dragCounterRef.current[period] = (dragCounterRef.current[period] || 0) + 1;
+    setDropTargetPeriod(period);
+  };
+
+  const handlePeriodDragLeaveEvt = (e: React.DragEvent, period: number) => {
+    dragCounterRef.current[period] = (dragCounterRef.current[period] || 0) - 1;
+    if (dragCounterRef.current[period] <= 0) {
+      dragCounterRef.current[period] = 0;
+      setDropTargetPeriod((prev) => (prev === period ? null : prev));
+    }
+  };
+
   const handlePeriodDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -516,11 +533,18 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
   const handlePeriodDrop = (e: React.DragEvent, targetPeriod: number) => {
     e.preventDefault();
     e.stopPropagation();
+    dragCounterRef.current = { 1: 0, 2: 0 };
+    setDropTargetPeriod(null);
     const draggedId = e.dataTransfer.getData("text/plain");
     const draggedItem = items.find(i => i.id === draggedId);
     if (draggedItem && draggedItem.pay_period !== targetPeriod) {
       handleCrossDrop(draggedItem, targetPeriod);
     }
+  };
+
+  const handleGlobalDragEnd = () => {
+    dragCounterRef.current = { 1: 0, 2: 0 };
+    setDropTargetPeriod(null);
   };
 
   const renderRow = (
@@ -546,9 +570,16 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         e.stopPropagation();
         onDragOverFn(idx, e);
       }}
-      onDragEnd={onDragEndFn}
+      onDragEnd={() => {
+        onDragEndFn();
+        handleGlobalDragEnd();
+      }}
       onDragLeave={onDragLeaveFn}
-      className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-50" : ""} ${oIdx === idx ? "border-t-2 border-accent" : ""}`}>
+      className={`relative flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-30 scale-95" : ""}`}>
+      {/* Drop indicator line */}
+      {oIdx === idx && (
+        <div className="absolute -top-[2px] left-0 right-0 h-[3px] rounded-full bg-accent z-10" />
+      )}
       <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
       <Checkbox
         checked={item.included}
@@ -620,8 +651,10 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         <div className="flex flex-col flex-1">
           {/* Period 1 — entire section is a drop target */}
           <div
-            className="flex-1 flex flex-col rounded-md transition-colors"
+            className={`flex-1 flex flex-col rounded-md p-2 -m-2 transition-colors ${dropTargetPeriod === 1 ? "bg-accent/10 ring-2 ring-accent/30 ring-inset" : ""}`}
             onDragOver={handlePeriodDragOver}
+            onDragEnter={(e) => handlePeriodDragEnter(e, 1)}
+            onDragLeave={(e) => handlePeriodDragLeaveEvt(e, 1)}
             onDrop={(e) => handlePeriodDrop(e, 1)}
           >
             <div className="flex items-center justify-between mb-1.5">
@@ -663,8 +696,10 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
 
           {/* Period 2 — entire section is a drop target */}
           <div
-            className="flex-1 flex flex-col rounded-md transition-colors"
+            className={`flex-1 flex flex-col rounded-md p-2 -m-2 transition-colors ${dropTargetPeriod === 2 ? "bg-accent/10 ring-2 ring-accent/30 ring-inset" : ""}`}
             onDragOver={handlePeriodDragOver}
+            onDragEnter={(e) => handlePeriodDragEnter(e, 2)}
+            onDragLeave={(e) => handlePeriodDragLeaveEvt(e, 2)}
             onDrop={(e) => handlePeriodDrop(e, 2)}
           >
             <div className="flex items-center justify-between mb-1.5">
