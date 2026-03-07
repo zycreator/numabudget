@@ -343,8 +343,14 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           {formatPHP(net)}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
+          of {formatPHP(netBudgeted)} budgeted · {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
         </p>
+        {splitEnabled && (
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span>Income: <span className="font-medium text-foreground">{formatPHP(totalIncomeChecked)}</span> <span className="text-muted-foreground/50">/ {formatPHP(totalIncomeAll)}</span></span>
+            <span>Expenses: <span className="font-medium text-foreground">{formatPHP(totalExpensesChecked)}</span> <span className="text-muted-foreground/50">/ {formatPHP(totalExpensesAll)}</span></span>
+          </div>
+        )}
         {(totalDebt > 0 || totalSaved > 0) &&
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
             {totalDebt > 0 && <span>Debt: <span className="font-medium text-foreground">{formatPHP(totalDebt)}</span></span>}
