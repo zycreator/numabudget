@@ -696,8 +696,10 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
 
           {/* Period 2 — entire section is a drop target */}
           <div
-            className="flex-1 flex flex-col rounded-md transition-colors"
+            className={`flex-1 flex flex-col rounded-md p-2 -m-2 transition-colors ${dropTargetPeriod === 2 ? "bg-accent/10 ring-2 ring-accent/30 ring-inset" : ""}`}
             onDragOver={handlePeriodDragOver}
+            onDragEnter={(e) => handlePeriodDragEnter(e, 2)}
+            onDragLeave={(e) => handlePeriodDragLeaveEvt(e, 2)}
             onDrop={(e) => handlePeriodDrop(e, 2)}
           >
             <div className="flex items-center justify-between mb-1.5">
