@@ -191,7 +191,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
 
 
 
-  const handleAddItem = (type: "income" | "expense") => {
+  const handleAddItem = (type: "income" | "expense", payPeriod: number = 1) => {
     const list = type === "income" ? incomeItems : expenseItems;
     upsertItem.mutate({
       description: "",
@@ -203,7 +203,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       year: 0,
       included: true,
       sort_order: list.length,
-      paid: false
+      paid: false,
+      pay_period: payPeriod
     });
   };
 

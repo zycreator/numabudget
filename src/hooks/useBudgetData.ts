@@ -78,7 +78,7 @@ export const useBudgetItems = (budgetId: string | null) => {
         .eq("budget_id", budgetId!)
         .order("sort_order");
       if (error) throw error;
-      return data as BudgetItem[];
+      return (data as unknown as BudgetItem[]).map(item => ({ ...item, pay_period: item.pay_period ?? 1 }));
     },
     enabled: !!user && !!budgetId,
   });
