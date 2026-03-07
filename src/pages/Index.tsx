@@ -732,13 +732,14 @@ const SplitBudgetGrid = ({
     targetPeriod: number,
     showCategory: boolean,
     onAdd: () => void,
+    targetType: "income" | "expense",
   ) => (
     <div
       className={`flex-1 flex flex-col rounded-md p-2 transition-colors min-h-[60px] ${dropTarget === containerKey ? "bg-accent/10 ring-2 ring-accent/30 ring-inset" : ""}`}
       onDragOver={handleContainerDragOver}
       onDragEnter={(e) => handleContainerDragEnter(e, containerKey)}
       onDragLeave={(e) => handleContainerDragLeave(e, containerKey)}
-      onDrop={(e) => handleContainerDrop(e, targetPeriod)}
+      onDrop={(e) => handleContainerDrop(e, targetPeriod, targetType)}
     >
       <div className="space-y-1.5">
         {items.map((item, idx) =>
