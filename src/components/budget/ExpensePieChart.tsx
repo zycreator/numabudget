@@ -2,9 +2,14 @@ import { useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { BudgetItem, Category } from "@/hooks/useBudgetData";
 
+const DEBT_COLOR = "#C97B6B";
+const SAVINGS_COLOR = "#6B9C7A";
+
 interface Props {
   items: BudgetItem[];
   categories: Category[];
+  totalDebt?: number;
+  totalSaved?: number;
 }
 
 const FALLBACK_COLOR = "hsl(30, 10%, 75%)";

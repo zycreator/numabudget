@@ -179,7 +179,11 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
     () => expenseItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
     [expenseItems]
   );
-  const net = totalIncome - totalExpenses;
+  const totalDebt = useMemo(() => debtItems.reduce((s, d) => s + d.amount, 0), [debtItems]);
+  const totalSaved = useMemo(() => savingsItems.reduce((s, d) => s + d.saved_amount, 0), [savingsItems]);
+  const totalSavingsTarget = useMemo(() => savingsItems.reduce((s, d) => s + d.target_amount, 0), [savingsItems]);
+
+  const net = totalIncome - totalExpenses - totalDebt - totalSaved;
   const pctSaved = totalIncome > 0 ? net / totalIncome * 100 : 0;
 
   const goalTarget = savingsGoal?.target_amount ?? 0;

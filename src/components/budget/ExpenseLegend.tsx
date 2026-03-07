@@ -3,9 +3,14 @@ import type { BudgetItem, Category } from "@/hooks/useBudgetData";
 const formatPHP = (n: number) =>
   `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+const DEBT_COLOR = "#C97B6B";
+const SAVINGS_COLOR = "#6B9C7A";
+
 interface Props {
   items: BudgetItem[];
   categories: Category[];
+  totalDebt?: number;
+  totalSaved?: number;
 }
 
 const ExpenseLegend = ({ items, categories }: Props) => {
