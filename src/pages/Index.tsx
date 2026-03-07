@@ -198,19 +198,30 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
     }
   };
 
-  const totalIncome = useMemo(
+  const totalIncomeChecked = useMemo(
     () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0) + rolloverAmount,
     [incomeItems, rolloverAmount]
   );
-  const totalExpenses = useMemo(
+  const totalIncomeAll = useMemo(
+    () => incomeItems.reduce((s, r) => s + r.amount, 0) + rolloverAmount,
+    [incomeItems, rolloverAmount]
+  );
+  const totalIncome = totalIncomeChecked;
+  const totalExpensesChecked = useMemo(
     () => expenseItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
     [expenseItems]
   );
+  const totalExpensesAll = useMemo(
+    () => expenseItems.reduce((s, r) => s + r.amount, 0),
+    [expenseItems]
+  );
+  const totalExpenses = totalExpensesChecked;
   const totalDebt = useMemo(() => debtItems.reduce((s, d) => s + d.amount, 0), [debtItems]);
   const totalSaved = useMemo(() => savingsItems.reduce((s, d) => s + d.saved_amount, 0), [savingsItems]);
   const totalSavingsTarget = useMemo(() => savingsItems.reduce((s, d) => s + d.target_amount, 0), [savingsItems]);
 
   const net = totalIncome - totalExpenses - totalDebt - totalSaved;
+  const netBudgeted = totalIncomeAll - totalExpensesAll - totalDebt - totalSaved;
   const pctSaved = totalIncome > 0 ? net / totalIncome * 100 : 0;
 
   const goalTarget = savingsGoal?.target_amount ?? 0;
@@ -332,8 +343,14 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           {formatPHP(net)}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
+          of {formatPHP(netBudgeted)} budgeted · {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
         </p>
+        {splitEnabled && (
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span>Income: <span className="font-medium text-foreground">{formatPHP(totalIncomeChecked)}</span> <span className="text-muted-foreground/50">/ {formatPHP(totalIncomeAll)}</span></span>
+            <span>Expenses: <span className="font-medium text-foreground">{formatPHP(totalExpensesChecked)}</span> <span className="text-muted-foreground/50">/ {formatPHP(totalExpensesAll)}</span></span>
+          </div>
+        )}
         {(totalDebt > 0 || totalSaved > 0) &&
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
             {totalDebt > 0 && <span>Debt: <span className="font-medium text-foreground">{formatPHP(totalDebt)}</span></span>}
@@ -383,11 +400,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           onDelete={(id) => deleteItem.mutate(id)}
           onAdd={(payPeriod) => handleAddItem("income", payPeriod)}
           splitEnabled={splitEnabled}
-          onToggleSplit={handleToggleSplit}
-          periodBalance1Checked={periodBalance1Checked}
-          periodBalance1Budgeted={periodBalance1Budgeted}
-          periodBalance2Checked={periodBalance2Checked}
-          periodBalance2Budgeted={periodBalance2Budgeted} />
+          onToggleSplit={handleToggleSplit} />
 
         <EntryCard
           title="Expenses"
@@ -399,11 +412,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           onDelete={(id) => deleteItem.mutate(id)}
           onAdd={(payPeriod) => handleAddItem("expense", payPeriod)}
           splitEnabled={splitEnabled}
-          onToggleSplit={handleToggleSplit}
-          periodBalance1Checked={periodBalance1Checked}
-          periodBalance1Budgeted={periodBalance1Budgeted}
-          periodBalance2Checked={periodBalance2Checked}
-          periodBalance2Budgeted={periodBalance2Budgeted} />
+          onToggleSplit={handleToggleSplit} />
 
       </div>
 
@@ -460,13 +469,9 @@ interface EntryCardProps {
   onAdd: (payPeriod?: number) => void;
   splitEnabled: boolean;
   onToggleSplit: (enabled: boolean) => void;
-  periodBalance1Checked: number;
-  periodBalance1Budgeted: number;
-  periodBalance2Checked: number;
-  periodBalance2Budgeted: number;
 }
 
-const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit, periodBalance1Checked, periodBalance1Budgeted, periodBalance2Checked, periodBalance2Budgeted }: EntryCardProps) => {
+const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit }: EntryCardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: BudgetItem) => {
@@ -658,20 +663,8 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             onDrop={(e) => handlePeriodDrop(e, 1)}
           >
             <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-semibold ${periodBalance1Checked < 0 ? "text-negative" : "text-positive"}`}>
-                  {formatPHP(periodBalance1Checked)}
-                </span>
-                <span className="text-[10px] text-muted-foreground/50">/</span>
-                <span className="text-[10px] text-muted-foreground">{formatPHP(periodBalance1Budgeted)}</span>
-              </div>
-            </div>
-            <div className="flex items-baseline justify-between mb-1">
-              <span className="text-sm font-semibold text-foreground">{formatPHP(period1Checked)}</span>
-              <span className="text-[10px] text-muted-foreground">of {formatPHP(period1All)}</span>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
+              <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(period1Checked)} <span className="text-muted-foreground/50">/</span> {formatPHP(period1All)}</span>
             </div>
             <div className="space-y-1.5">
               {period1Items.map((item, idx) =>
@@ -703,20 +696,8 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             onDrop={(e) => handlePeriodDrop(e, 2)}
           >
             <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-semibold ${periodBalance2Checked < 0 ? "text-negative" : "text-positive"}`}>
-                  {formatPHP(periodBalance2Checked)}
-                </span>
-                <span className="text-[10px] text-muted-foreground/50">/</span>
-                <span className="text-[10px] text-muted-foreground">{formatPHP(periodBalance2Budgeted)}</span>
-              </div>
-            </div>
-            <div className="flex items-baseline justify-between mb-1">
-              <span className="text-sm font-semibold text-foreground">{formatPHP(period2Checked)}</span>
-              <span className="text-[10px] text-muted-foreground">of {formatPHP(period2All)}</span>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
+              <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(period2Checked)} <span className="text-muted-foreground/50">/</span> {formatPHP(period2All)}</span>
             </div>
             <div className="space-y-1.5">
               {period2Items.map((item, idx) =>
