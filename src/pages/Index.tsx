@@ -167,9 +167,30 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   const deleteSaving = useDeleteSavingsItem();
 
   const rolloverAmount = rolloverData?.amount ?? 0;
+  const [splitEnabled, setSplitEnabled] = useState(false);
 
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
+
+  // Period-level totals for balance calculation
+  const incomePeriod1Total = useMemo(() => incomeItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [incomeItems, splitEnabled]);
+  const incomePeriod2Total = useMemo(() => splitEnabled ? incomeItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [incomeItems, splitEnabled]);
+  const expensePeriod1Total = useMemo(() => expenseItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [expenseItems, splitEnabled]);
+  const expensePeriod2Total = useMemo(() => splitEnabled ? expenseItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [expenseItems, splitEnabled]);
+
+  const periodBalance1 = incomePeriod1Total - expensePeriod1Total;
+  const periodBalance2 = incomePeriod2Total - expensePeriod2Total;
+
+  const handleToggleSplit = (enabled: boolean) => {
+    setSplitEnabled(enabled);
+    if (enabled) {
+      items.forEach(item => {
+        if (item.pay_period !== 1) {
+          upsertItem.mutate({ ...item, pay_period: 1 });
+        }
+      });
+    }
+  };
 
   const totalIncome = useMemo(
     () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0) + rolloverAmount,
