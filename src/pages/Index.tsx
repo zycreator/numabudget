@@ -618,8 +618,12 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
 
       {splitEnabled && (
         <div className="flex flex-col flex-1">
-          {/* Period 1 */}
-          <div className="flex-1 flex flex-col">
+          {/* Period 1 — entire section is a drop target */}
+          <div
+            className="flex-1 flex flex-col rounded-md transition-colors"
+            onDragOver={handlePeriodDragOver}
+            onDrop={(e) => handlePeriodDrop(e, 1)}
+          >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
@@ -637,17 +641,11 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
               <span className="text-[10px] text-muted-foreground">of {formatPHP(period1All)}</span>
             </div>
             <div className="space-y-1.5">
-              {period1Items.map((item, idx) => (
-                <div key={item.id}
-                  onDragStart={(e) => { e.dataTransfer.setData("text/plain", item.id); handleDragStart(idx, e); }}
-                >
-                  {renderRow(item, idx, dragIndex, overIndex,
-                    (i, e) => { e.dataTransfer.setData("text/plain", item.id); handleDragStart(i, e); },
-                    handleDragOver, handleDragEnd, handleDragLeave, 1)}
-                </div>
-              ))}
+              {period1Items.map((item, idx) =>
+                renderRow(item, idx, dragIndex, overIndex,
+                  handleDragStart, handleDragOver, handleDragEnd, handleDragLeave)
+              )}
             </div>
-            {renderDropZone(1)}
             <div className="mt-auto">
               {renderAddButton(1)}
             </div>
@@ -663,8 +661,12 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
           </div>
 
-          {/* Period 2 */}
-          <div className="flex-1 flex flex-col">
+          {/* Period 2 — entire section is a drop target */}
+          <div
+            className="flex-1 flex flex-col rounded-md transition-colors"
+            onDragOver={handlePeriodDragOver}
+            onDrop={(e) => handlePeriodDrop(e, 2)}
+          >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
@@ -682,15 +684,11 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
               <span className="text-[10px] text-muted-foreground">of {formatPHP(period2All)}</span>
             </div>
             <div className="space-y-1.5">
-              {period2Items.map((item, idx) => (
-                <div key={item.id}>
-                  {renderRow(item, idx, dragIndex2, overIndex2,
-                    (i, e) => { e.dataTransfer.setData("text/plain", item.id); handleDragStart2(i, e); },
-                    handleDragOver2, handleDragEnd2, handleDragLeave2, 2)}
-                </div>
-              ))}
+              {period2Items.map((item, idx) =>
+                renderRow(item, idx, dragIndex2, overIndex2,
+                  handleDragStart2, handleDragOver2, handleDragEnd2, handleDragLeave2)
+              )}
             </div>
-            {renderDropZone(2)}
             <div className="mt-auto">
               {renderAddButton(2)}
             </div>
