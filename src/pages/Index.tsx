@@ -167,7 +167,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   const deleteSaving = useDeleteSavingsItem();
 
   const rolloverAmount = rolloverData?.amount ?? 0;
-  const [splitEnabled, setSplitEnabled] = useState(false);
+  const splitEnabled = budget.split_enabled ?? false;
 
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
@@ -188,7 +188,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   const periodBalance2Budgeted = incomePeriod2All - expensePeriod2All;
 
   const handleToggleSplit = (enabled: boolean) => {
-    setSplitEnabled(enabled);
+    updateBudget.mutate({ id: budget.id, split_enabled: enabled } as any);
     if (enabled) {
       items.forEach(item => {
         if (item.pay_period !== 1) {
