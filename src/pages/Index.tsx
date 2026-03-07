@@ -167,9 +167,30 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
   const deleteSaving = useDeleteSavingsItem();
 
   const rolloverAmount = rolloverData?.amount ?? 0;
+  const [splitEnabled, setSplitEnabled] = useState(false);
 
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
+
+  // Period-level totals for balance calculation
+  const incomePeriod1Total = useMemo(() => incomeItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [incomeItems, splitEnabled]);
+  const incomePeriod2Total = useMemo(() => splitEnabled ? incomeItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [incomeItems, splitEnabled]);
+  const expensePeriod1Total = useMemo(() => expenseItems.filter(i => (i.pay_period === 1 || !splitEnabled) && i.included).reduce((s, i) => s + i.amount, 0), [expenseItems, splitEnabled]);
+  const expensePeriod2Total = useMemo(() => splitEnabled ? expenseItems.filter(i => i.pay_period === 2 && i.included).reduce((s, i) => s + i.amount, 0) : 0, [expenseItems, splitEnabled]);
+
+  const periodBalance1 = incomePeriod1Total - expensePeriod1Total;
+  const periodBalance2 = incomePeriod2Total - expensePeriod2Total;
+
+  const handleToggleSplit = (enabled: boolean) => {
+    setSplitEnabled(enabled);
+    if (enabled) {
+      items.forEach(item => {
+        if (item.pay_period !== 1) {
+          upsertItem.mutate({ ...item, pay_period: 1 });
+        }
+      });
+    }
+  };
 
   const totalIncome = useMemo(
     () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0) + rolloverAmount,
@@ -345,7 +366,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       <CategoryLimitsCard items={items} categories={categories} limits={categoryLimits} />
 
       {/* Income & Expenses */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
         <EntryCard
           title="Income"
           total={totalIncome - rolloverAmount}
@@ -354,7 +375,11 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={(payPeriod) => handleAddItem("income", payPeriod)} />
+          onAdd={(payPeriod) => handleAddItem("income", payPeriod)}
+          splitEnabled={splitEnabled}
+          onToggleSplit={handleToggleSplit}
+          periodBalance1={periodBalance1}
+          periodBalance2={periodBalance2} />
 
         <EntryCard
           title="Expenses"
@@ -364,7 +389,11 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={(payPeriod) => handleAddItem("expense", payPeriod)} />
+          onAdd={(payPeriod) => handleAddItem("expense", payPeriod)}
+          splitEnabled={splitEnabled}
+          onToggleSplit={handleToggleSplit}
+          periodBalance1={periodBalance1}
+          periodBalance2={periodBalance2} />
 
       </div>
 
@@ -419,28 +448,19 @@ interface EntryCardProps {
   onUpdate: (item: BudgetItem) => void;
   onDelete: (id: string) => void;
   onAdd: (payPeriod?: number) => void;
+  splitEnabled: boolean;
+  onToggleSplit: (enabled: boolean) => void;
+  periodBalance1: number;
+  periodBalance2: number;
 }
 
-const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd }: EntryCardProps) => {
-  const [splitEnabled, setSplitEnabled] = useState(false);
+const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit, periodBalance1, periodBalance2 }: EntryCardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: BudgetItem) => {
     if (debounceRef.current[item.id]) clearTimeout(debounceRef.current[item.id]);
     debounceRef.current[item.id] = setTimeout(() => onUpdate(item), 500);
   }, [onUpdate]);
-
-  // When toggling split ON, move all items to period 1
-  const handleToggleSplit = (enabled: boolean) => {
-    setSplitEnabled(enabled);
-    if (enabled) {
-      items.forEach(item => {
-        if (item.pay_period !== 1) {
-          onUpdate({ ...item, pay_period: 1 });
-        }
-      });
-    }
-  };
 
   const period1Items = useMemo(() => items.filter(i => i.pay_period === 1 || !splitEnabled), [items, splitEnabled]);
   const period2Items = useMemo(() => splitEnabled ? items.filter(i => i.pay_period === 2) : [], [items, splitEnabled]);
@@ -576,7 +596,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
     };
 
   return (
-    <div className="rounded-lg border border-border p-4 bg-primary-foreground">
+    <div className="rounded-lg border border-border p-4 bg-primary-foreground flex flex-col">
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
         <span className="text-sm font-semibold text-foreground">{formatPHP(total)}</span>
@@ -594,12 +614,17 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
       )}
 
       {splitEnabled && (
-        <>
+        <div className="flex flex-col flex-1">
           {/* Period 1 */}
-          <div className="mb-1">
+          <div className="flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
-              <p className="text-[10px] font-medium text-muted-foreground">₱{period1Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
+                <span className="text-[10px] font-medium text-muted-foreground">₱{period1Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <span className={`text-[10px] font-semibold ${periodBalance1 < 0 ? "text-negative" : "text-positive"}`}>
+                Balance: {formatPHP(periodBalance1)}
+              </span>
             </div>
             <div className="space-y-1.5">
               {period1Items.map((item, idx) => (
@@ -613,17 +638,31 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
               ))}
             </div>
             {renderDropZone(1)}
-            {renderAddButton(1)}
+            <div className="mt-auto">
+              {renderAddButton(1)}
+            </div>
           </div>
 
-          {/* Divider */}
-          <div className="my-3 border-t border-border/50" />
+          {/* Toggle as divider */}
+          <div className="my-3 flex items-center gap-2 py-2 border-t border-b border-border/40">
+            <Switch
+              checked={splitEnabled}
+              onCheckedChange={onToggleSplit}
+              className="scale-75 origin-left"
+            />
+            <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
+          </div>
 
           {/* Period 2 */}
-          <div>
+          <div className="flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
-              <p className="text-[10px] font-medium text-muted-foreground">₱{period2Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
+                <span className="text-[10px] font-medium text-muted-foreground">₱{period2Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <span className={`text-[10px] font-semibold ${periodBalance2 < 0 ? "text-negative" : "text-positive"}`}>
+                Balance: {formatPHP(periodBalance2)}
+              </span>
             </div>
             <div className="space-y-1.5">
               {period2Items.map((item, idx) => (
@@ -635,20 +674,24 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
               ))}
             </div>
             {renderDropZone(2)}
-            {renderAddButton(2)}
+            <div className="mt-auto">
+              {renderAddButton(2)}
+            </div>
           </div>
-        </>
+        </div>
       )}
 
-      {/* Toggle */}
-      <div className="mt-3 flex items-center gap-2 pt-2 border-t border-border/30">
-        <Switch
-          checked={splitEnabled}
-          onCheckedChange={handleToggleSplit}
-          className="scale-75 origin-left"
-        />
-        <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
-      </div>
+      {/* Toggle when not split */}
+      {!splitEnabled && (
+        <div className="mt-3 flex items-center gap-2 pt-2 border-t border-border/30">
+          <Switch
+            checked={splitEnabled}
+            onCheckedChange={onToggleSplit}
+            className="scale-75 origin-left"
+          />
+          <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
+        </div>
+      )}
     </div>
   );
 };
