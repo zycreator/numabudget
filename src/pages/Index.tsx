@@ -347,7 +347,10 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
             <p className={`text-xl sm:text-2xl font-bold tracking-tight ${(totalIncomeAll - totalExpensesAll) >= 0 ? "text-positive" : "text-negative"}`}>
               {formatPHP(totalIncomeAll - totalExpensesAll)}
             </p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">All Income − All Expenses</p>
+            <div className="mt-1 space-y-0.5 text-[10px] text-muted-foreground">
+              <p>Inc: <span className="text-positive">{formatPHP(totalIncomeChecked - rolloverAmount)}</span> / {formatPHP(totalIncomeAll - rolloverAmount)}</p>
+              <p>Exp: <span className="text-positive">{formatPHP(totalExpensesChecked)}</span> / {formatPHP(totalExpensesAll)}</p>
+            </div>
           </div>
           {/* Column 2: Period 1 Summary */}
           <div className="rounded-md bg-secondary/50 p-3">
