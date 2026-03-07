@@ -336,27 +336,12 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
 
       {/* Sticky Header + Summary Group */}
       <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 sm:py-3 bg-background border-b border-border shadow-sm">
-        {/* Top Nav */}
-        <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="h-5 w-5" />
-            <h1 className="text-xs sm:text-sm font-semibold text-foreground">Budget</h1>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button onClick={onToggleRecurring} className="rounded-md border border-border px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-              Recurring
-            </button>
-            <button onClick={onToggleSettings} className="rounded-md border border-border px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-              Settings
-            </button>
-            <button onClick={onSignOut} className="rounded-md border border-border px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-              Sign Out
-            </button>
-          </div>
-        </div>
-        {/* Budget Title Row */}
-        <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-1.5">
-          <div className="group relative inline-flex items-center gap-1.5">
+        {/* Single-line title: Budget · Name · Dates */}
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <SidebarTrigger className="h-5 w-5 shrink-0" />
+          <span className="text-xs sm:text-sm font-semibold text-foreground">Budget</span>
+          <span className="text-muted-foreground/40">·</span>
+          <div className="group inline-flex items-center gap-1 min-w-0">
             <input
               type="text"
               defaultValue={budget.name}
@@ -367,33 +352,23 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
                 if (val !== budget.name) updateBudget.mutate({ id: budget.id, name: val });
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="text-xs sm:text-sm font-medium text-foreground bg-transparent rounded-md px-1.5 py-0.5 border border-transparent hover:border-border hover:bg-secondary/30 focus:border-ring focus:bg-background focus:outline-none transition-colors w-full max-w-[200px]"
+              className="text-xs sm:text-sm font-medium text-foreground bg-transparent rounded-md px-1 py-0.5 border border-transparent hover:border-border hover:bg-secondary/30 focus:border-ring focus:bg-background focus:outline-none transition-colors max-w-[140px] sm:max-w-[200px]"
             />
-            <span className="text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors text-xs pointer-events-none">✎</span>
-            {(budget.start_date || budget.end_date) &&
-            <p className="text-[10px] sm:text-xs text-muted-foreground">
-                {budget.start_date && new Date(budget.start_date).toLocaleDateString()}
-                {budget.start_date && budget.end_date && " – "}
-                {budget.end_date && new Date(budget.end_date).toLocaleDateString()}
-              </p>
-            }
+            <span className="text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors text-[10px] pointer-events-none">✎</span>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <label className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-muted-foreground cursor-pointer">
-              <Switch
-                checked={budget.rollover_enabled}
-                onCheckedChange={(v) => updateBudget.mutate({ id: budget.id, rollover_enabled: v })} />
-              Rollover
-            </label>
-            <button onClick={exportCSV} className="rounded-md border border-border px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-              Export
-            </button>
-          </div>
+          {(budget.start_date || budget.end_date) && <>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
+              {budget.start_date && new Date(budget.start_date).toLocaleDateString()}
+              {budget.start_date && budget.end_date && " – "}
+              {budget.end_date && new Date(budget.end_date).toLocaleDateString()}
+            </span>
+          </>}
         </div>
 
         {/* Rollover banner */}
         {rolloverData &&
-        <div className="mb-2 rounded-md bg-positive/10 px-3 py-1.5 text-[10px] sm:text-xs text-positive">
+        <div className="mb-1.5 rounded-md bg-positive/10 px-3 py-1 text-[10px] sm:text-xs text-positive">
             Rollover from "{rolloverData.fromBudgetName}": {formatPHP(rolloverData.amount)}
           </div>
         }
