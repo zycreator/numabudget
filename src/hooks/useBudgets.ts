@@ -9,6 +9,7 @@ export interface Budget {
   start_date: string | null;
   end_date: string | null;
   rollover_enabled: boolean;
+  split_enabled: boolean;
   is_active: boolean;
   created_at: string;
 }
@@ -81,6 +82,7 @@ export const useDuplicateBudget = () => {
           start_date: source.start_date,
           end_date: source.end_date,
           rollover_enabled: source.rollover_enabled,
+          split_enabled: source.split_enabled,
         })
         .select()
         .single();
