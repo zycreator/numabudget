@@ -198,19 +198,30 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
     }
   };
 
-  const totalIncome = useMemo(
+  const totalIncomeChecked = useMemo(
     () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0) + rolloverAmount,
     [incomeItems, rolloverAmount]
   );
-  const totalExpenses = useMemo(
+  const totalIncomeAll = useMemo(
+    () => incomeItems.reduce((s, r) => s + r.amount, 0) + rolloverAmount,
+    [incomeItems, rolloverAmount]
+  );
+  const totalIncome = totalIncomeChecked;
+  const totalExpensesChecked = useMemo(
     () => expenseItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
     [expenseItems]
   );
+  const totalExpensesAll = useMemo(
+    () => expenseItems.reduce((s, r) => s + r.amount, 0),
+    [expenseItems]
+  );
+  const totalExpenses = totalExpensesChecked;
   const totalDebt = useMemo(() => debtItems.reduce((s, d) => s + d.amount, 0), [debtItems]);
   const totalSaved = useMemo(() => savingsItems.reduce((s, d) => s + d.saved_amount, 0), [savingsItems]);
   const totalSavingsTarget = useMemo(() => savingsItems.reduce((s, d) => s + d.target_amount, 0), [savingsItems]);
 
   const net = totalIncome - totalExpenses - totalDebt - totalSaved;
+  const netBudgeted = totalIncomeAll - totalExpensesAll - totalDebt - totalSaved;
   const pctSaved = totalIncome > 0 ? net / totalIncome * 100 : 0;
 
   const goalTarget = savingsGoal?.target_amount ?? 0;
