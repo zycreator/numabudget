@@ -563,6 +563,24 @@ const SplitBudgetGrid = ({
 
   const allItems = useMemo(() => [...incomeItems, ...expenseItems], [incomeItems, expenseItems]);
 
+  // Re-sort a period's items by date, updating sort_order and persisting
+  const resortPeriodByDate = useCallback((periodItems: BudgetItem[], changedItem?: BudgetItem) => {
+    const list = changedItem
+      ? periodItems.map(i => i.id === changedItem.id ? changedItem : i)
+      : periodItems;
+    const sorted = [...list].sort((a, b) => {
+      if (!a.item_date && !b.item_date) return 0;
+      if (!a.item_date) return 1;
+      if (!b.item_date) return -1;
+      return a.item_date.localeCompare(b.item_date);
+    });
+    sorted.forEach((item, idx) => {
+      if (item.sort_order !== idx) {
+        onUpdate({ ...item, sort_order: idx });
+      }
+    });
+  }, [onUpdate]);
+
   const incomeP1 = useMemo(() => incomeItems.filter(i => i.pay_period === 1), [incomeItems]);
   const incomeP2 = useMemo(() => incomeItems.filter(i => i.pay_period === 2), [incomeItems]);
   const expenseP1 = useMemo(() => expenseItems.filter(i => i.pay_period === 1), [expenseItems]);
@@ -597,7 +615,7 @@ const SplitBudgetGrid = ({
     e.preventDefault();
     e.stopPropagation();
   };
-  const handleContainerDrop = (e: React.DragEvent, targetPeriod: number) => {
+  const handleContainerDrop = (e: React.DragEvent, targetPeriod: number, targetType: "income" | "expense") => {
     e.preventDefault();
     e.stopPropagation();
     dragCounterRef.current = {};
@@ -605,7 +623,11 @@ const SplitBudgetGrid = ({
     const draggedId = e.dataTransfer.getData("text/plain");
     const draggedItem = allItems.find(i => i.id === draggedId);
     if (draggedItem && draggedItem.pay_period !== targetPeriod) {
-      onUpdate({ ...draggedItem, pay_period: targetPeriod });
+      const movedItem = { ...draggedItem, pay_period: targetPeriod };
+      onUpdate(movedItem);
+      // Re-sort the target period after a tick so the item lands in date order
+      const targetItems = (targetType === "income" ? incomeItems : expenseItems).filter(i => i.pay_period === targetPeriod);
+      setTimeout(() => resortPeriodByDate(targetItems, movedItem), 100);
     }
   };
   const handleGlobalDragEnd = () => {
@@ -623,6 +645,7 @@ const SplitBudgetGrid = ({
     onDragEndFn: () => void,
     onDragLeaveFn: () => void,
     showCategory: boolean,
+    periodItems: BudgetItem[],
   ) => (
     <div
       key={item.id}
@@ -657,7 +680,12 @@ const SplitBudgetGrid = ({
           <Calendar
             mode="single"
             selected={item.item_date ? new Date(item.item_date + "T00:00:00") : undefined}
-            onSelect={(date) => onUpdate({ ...item, item_date: date ? format(date, "yyyy-MM-dd") : null })}
+            onSelect={(date) => {
+              const newDate = date ? format(date, "yyyy-MM-dd") : null;
+              const updated = { ...item, item_date: newDate };
+              onUpdate(updated);
+              setTimeout(() => resortPeriodByDate(periodItems, updated), 100);
+            }}
             className={cn("p-3 pointer-events-auto")}
           />
         </PopoverContent>
@@ -710,17 +738,18 @@ const SplitBudgetGrid = ({
     targetPeriod: number,
     showCategory: boolean,
     onAdd: () => void,
+    targetType: "income" | "expense",
   ) => (
     <div
       className={`flex-1 flex flex-col rounded-md p-2 transition-colors min-h-[60px] ${dropTarget === containerKey ? "bg-accent/10 ring-2 ring-accent/30 ring-inset" : ""}`}
       onDragOver={handleContainerDragOver}
       onDragEnter={(e) => handleContainerDragEnter(e, containerKey)}
       onDragLeave={(e) => handleContainerDragLeave(e, containerKey)}
-      onDrop={(e) => handleContainerDrop(e, targetPeriod)}
+      onDrop={(e) => handleContainerDrop(e, targetPeriod, targetType)}
     >
       <div className="space-y-1.5">
         {items.map((item, idx) =>
-          renderRow(item, idx, drag.dragIndex, drag.overIndex, drag.handleDragStart, drag.handleDragOver, drag.handleDragEnd, drag.handleDragLeave, showCategory)
+          renderRow(item, idx, drag.dragIndex, drag.overIndex, drag.handleDragStart, drag.handleDragOver, drag.handleDragEnd, drag.handleDragLeave, showCategory, items)
         )}
       </div>
       <div className="mt-auto">
@@ -750,14 +779,14 @@ const SplitBudgetGrid = ({
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP1))}</span>
           </div>
-          {renderPeriodSection(incomeP1, incomeP1Drag, "income-1", 1, false, () => onAddIncome(1))}
+          {renderPeriodSection(incomeP1, incomeP1Drag, "income-1", 1, false, () => onAddIncome(1), "income")}
         </div>
         <div className="border-x border-border bg-primary-foreground px-3 pb-2">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP1))}</span>
           </div>
-          {renderPeriodSection(expenseP1, expenseP1Drag, "expense-1", 1, true, () => onAddExpense(1))}
+          {renderPeriodSection(expenseP1, expenseP1Drag, "expense-1", 1, true, () => onAddExpense(1), "expense")}
         </div>
       </div>
 
@@ -783,14 +812,14 @@ const SplitBudgetGrid = ({
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP2))}</span>
           </div>
-          {renderPeriodSection(incomeP2, incomeP2Drag, "income-2", 2, false, () => onAddIncome(2))}
+          {renderPeriodSection(incomeP2, incomeP2Drag, "income-2", 2, false, () => onAddIncome(2), "income")}
         </div>
         <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-3 pb-3">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP2))}</span>
           </div>
-          {renderPeriodSection(expenseP2, expenseP2Drag, "expense-2", 2, true, () => onAddExpense(2))}
+          {renderPeriodSection(expenseP2, expenseP2Drag, "expense-2", 2, true, () => onAddExpense(2), "expense")}
         </div>
       </div>
     </div>
