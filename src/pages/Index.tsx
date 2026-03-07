@@ -507,6 +507,22 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
     onUpdate({ ...item, pay_period: targetPeriod });
   };
 
+  // Shared drag-over handler for period containers
+  const handlePeriodDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handlePeriodDrop = (e: React.DragEvent, targetPeriod: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const draggedId = e.dataTransfer.getData("text/plain");
+    const draggedItem = items.find(i => i.id === draggedId);
+    if (draggedItem && draggedItem.pay_period !== targetPeriod) {
+      handleCrossDrop(draggedItem, targetPeriod);
+    }
+  };
+
   const renderRow = (
     item: BudgetItem,
     idx: number,
@@ -516,26 +532,22 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
     onDragOverFn: (index: number, e: React.DragEvent) => void,
     onDragEndFn: () => void,
     onDragLeaveFn: () => void,
-    crossPeriod?: number
   ) => (
     <div
       key={item.id}
       draggable
-      onDragStart={(e) => onDragStartFn(idx, e)}
-      onDragOver={(e) => onDragOverFn(idx, e)}
+      onDragStart={(e) => {
+        e.dataTransfer.setData("text/plain", item.id);
+        e.dataTransfer.effectAllowed = "move";
+        onDragStartFn(idx, e);
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDragOverFn(idx, e);
+      }}
       onDragEnd={onDragEndFn}
       onDragLeave={onDragLeaveFn}
-      onDrop={(e) => {
-        e.preventDefault();
-        if (crossPeriod !== undefined) {
-          // Check if dragged item is from the other period
-          const draggedId = e.dataTransfer.getData("text/plain");
-          const draggedItem = items.find(i => i.id === draggedId);
-          if (draggedItem && draggedItem.pay_period !== crossPeriod) {
-            handleCrossDrop(draggedItem, crossPeriod);
-          }
-        }
-      }}
       className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-50" : ""} ${oIdx === idx ? "border-t-2 border-accent" : ""}`}>
       <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
       <Checkbox
@@ -586,30 +598,6 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
     </button>
   );
 
-  const renderDropZone = (targetPeriod: number) => (
-    <div
-      className="min-h-[8px] rounded transition-colors"
-      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("bg-accent/20"); }}
-      onDragLeave={(e) => { e.currentTarget.classList.remove("bg-accent/20"); }}
-      onDrop={(e) => {
-        e.preventDefault();
-        e.currentTarget.classList.remove("bg-accent/20");
-        const draggedId = e.dataTransfer.getData("text/plain");
-        const draggedItem = items.find(i => i.id === draggedId);
-        if (draggedItem && draggedItem.pay_period !== targetPeriod) {
-          handleCrossDrop(draggedItem, targetPeriod);
-        }
-      }}
-    />
-  );
-
-  // Patch drag start to store item id in dataTransfer
-  const wrapDragStart = (originalFn: (index: number, e: React.DragEvent) => void) =>
-    (idx: number, itemId: string) => (e: React.DragEvent) => {
-      e.dataTransfer.setData("text/plain", itemId);
-      originalFn(idx, e);
-    };
-
   return (
     <div className="rounded-lg border border-border p-4 bg-primary-foreground flex flex-col">
       <div className="mb-3 flex items-baseline justify-between">
@@ -630,8 +618,12 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
 
       {splitEnabled && (
         <div className="flex flex-col flex-1">
-          {/* Period 1 */}
-          <div className="flex-1 flex flex-col">
+          {/* Period 1 — entire section is a drop target */}
+          <div
+            className="flex-1 flex flex-col rounded-md transition-colors"
+            onDragOver={handlePeriodDragOver}
+            onDrop={(e) => handlePeriodDrop(e, 1)}
+          >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
@@ -649,17 +641,11 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
               <span className="text-[10px] text-muted-foreground">of {formatPHP(period1All)}</span>
             </div>
             <div className="space-y-1.5">
-              {period1Items.map((item, idx) => (
-                <div key={item.id}
-                  onDragStart={(e) => { e.dataTransfer.setData("text/plain", item.id); handleDragStart(idx, e); }}
-                >
-                  {renderRow(item, idx, dragIndex, overIndex,
-                    (i, e) => { e.dataTransfer.setData("text/plain", item.id); handleDragStart(i, e); },
-                    handleDragOver, handleDragEnd, handleDragLeave, 1)}
-                </div>
-              ))}
+              {period1Items.map((item, idx) =>
+                renderRow(item, idx, dragIndex, overIndex,
+                  handleDragStart, handleDragOver, handleDragEnd, handleDragLeave)
+              )}
             </div>
-            {renderDropZone(1)}
             <div className="mt-auto">
               {renderAddButton(1)}
             </div>
@@ -675,8 +661,12 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
           </div>
 
-          {/* Period 2 */}
-          <div className="flex-1 flex flex-col">
+          {/* Period 2 — entire section is a drop target */}
+          <div
+            className="flex-1 flex flex-col rounded-md transition-colors"
+            onDragOver={handlePeriodDragOver}
+            onDrop={(e) => handlePeriodDrop(e, 2)}
+          >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
@@ -694,15 +684,11 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
               <span className="text-[10px] text-muted-foreground">of {formatPHP(period2All)}</span>
             </div>
             <div className="space-y-1.5">
-              {period2Items.map((item, idx) => (
-                <div key={item.id}>
-                  {renderRow(item, idx, dragIndex2, overIndex2,
-                    (i, e) => { e.dataTransfer.setData("text/plain", item.id); handleDragStart2(i, e); },
-                    handleDragOver2, handleDragEnd2, handleDragLeave2, 2)}
-                </div>
-              ))}
+              {period2Items.map((item, idx) =>
+                renderRow(item, idx, dragIndex2, overIndex2,
+                  handleDragStart2, handleDragOver2, handleDragEnd2, handleDragLeave2)
+              )}
             </div>
-            {renderDropZone(2)}
             <div className="mt-auto">
               {renderAddButton(2)}
             </div>
