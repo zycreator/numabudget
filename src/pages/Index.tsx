@@ -400,11 +400,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           onDelete={(id) => deleteItem.mutate(id)}
           onAdd={(payPeriod) => handleAddItem("income", payPeriod)}
           splitEnabled={splitEnabled}
-          onToggleSplit={handleToggleSplit}
-          periodBalance1Checked={periodBalance1Checked}
-          periodBalance1Budgeted={periodBalance1Budgeted}
-          periodBalance2Checked={periodBalance2Checked}
-          periodBalance2Budgeted={periodBalance2Budgeted} />
+          onToggleSplit={handleToggleSplit} />
 
         <EntryCard
           title="Expenses"
@@ -416,11 +412,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           onDelete={(id) => deleteItem.mutate(id)}
           onAdd={(payPeriod) => handleAddItem("expense", payPeriod)}
           splitEnabled={splitEnabled}
-          onToggleSplit={handleToggleSplit}
-          periodBalance1Checked={periodBalance1Checked}
-          periodBalance1Budgeted={periodBalance1Budgeted}
-          periodBalance2Checked={periodBalance2Checked}
-          periodBalance2Budgeted={periodBalance2Budgeted} />
+          onToggleSplit={handleToggleSplit} />
 
       </div>
 
