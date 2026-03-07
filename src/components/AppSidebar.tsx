@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Plus, Wallet, FileText, Archive, Trash2, Copy, Pencil } from "lucide-react";
+import { Plus, Wallet, FileText, Archive, Trash2, Copy, Pencil, RotateCcw, Download, Settings, LogOut, Repeat } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
   Sidebar,
@@ -27,9 +27,15 @@ interface AppSidebarProps {
   activePlanId: string | null;
   onSelectBudget: (id: string) => void;
   onSelectPlan: (id: string) => void;
+  onToggleRecurring?: () => void;
+  onToggleRollover?: () => void;
+  onExport?: () => void;
+  onToggleSettings?: () => void;
+  onSignOut?: () => void;
+  rolloverEnabled?: boolean;
 }
 
-export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSelectPlan }: AppSidebarProps) {
+export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSelectPlan, onToggleRecurring, onToggleRollover, onExport, onToggleSettings, onSignOut, rolloverEnabled }: AppSidebarProps) {
   const { data: budgets = [] } = useBudgets();
   const { data: plans = [] } = usePlans();
   const createBudget = useCreateBudget();
@@ -304,6 +310,36 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
           </SidebarGroup>
         }
       </SidebarContent>
+
+      {/* Footer Actions */}
+      <div className="border-t border-border p-2 space-y-0.5">
+        {onToggleRecurring && (
+          <button onClick={onToggleRecurring} className="flex items-center gap-2 w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+            <Repeat className="h-3.5 w-3.5" /> Recurring
+          </button>
+        )}
+        {onToggleRollover && (
+          <button onClick={onToggleRollover} className="flex items-center justify-between w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+            <span className="flex items-center gap-2"><RotateCcw className="h-3.5 w-3.5" /> Rollover</span>
+            {rolloverEnabled && <span className="text-[9px] font-medium text-positive">ON</span>}
+          </button>
+        )}
+        {onExport && (
+          <button onClick={onExport} className="flex items-center gap-2 w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+            <Download className="h-3.5 w-3.5" /> Export
+          </button>
+        )}
+        {onToggleSettings && (
+          <button onClick={onToggleSettings} className="flex items-center gap-2 w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+            <Settings className="h-3.5 w-3.5" /> Settings
+          </button>
+        )}
+        {onSignOut && (
+          <button onClick={onSignOut} className="flex items-center gap-2 w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-destructive transition-colors">
+            <LogOut className="h-3.5 w-3.5" /> Sign Out
+          </button>
+        )}
+      </div>
     </Sidebar>);
 
 }
