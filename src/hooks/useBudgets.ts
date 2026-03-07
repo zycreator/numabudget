@@ -9,6 +9,7 @@ export interface Budget {
   start_date: string | null;
   end_date: string | null;
   rollover_enabled: boolean;
+  split_enabled: boolean;
   is_active: boolean;
   created_at: string;
 }
