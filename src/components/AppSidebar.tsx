@@ -37,6 +37,7 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
   const createPlan = useCreatePlan();
   const deletePlan = useDeletePlan();
   const duplicateBudget = useDuplicateBudget();
+  const updateBudget = useUpdateBudget();
 
   const [showNewBudget, setShowNewBudget] = useState(false);
   const [showNewPlan, setShowNewPlan] = useState(false);
@@ -45,9 +46,34 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [rollover, setRollover] = useState(false);
   const [planName, setPlanName] = useState("");
+  const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const editInputRef = useRef<HTMLInputElement>(null);
 
-  const activeBudgets = budgets.filter((b) => b.is_active);
-  const archivedBudgets = budgets.filter((b) => !b.is_active);
+  useEffect(() => {
+    if (editingBudgetId && editInputRef.current) {
+      editInputRef.current.focus();
+      editInputRef.current.select();
+    }
+  }, [editingBudgetId]);
+
+  const handleStartEdit = (b: Budget, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingBudgetId(b.id);
+    setEditingName(b.name);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingBudgetId && editingName.trim()) {
+      updateBudget.mutate({ id: editingBudgetId, name: editingName.trim() });
+    }
+    setEditingBudgetId(null);
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSaveEdit();
+    if (e.key === "Escape") setEditingBudgetId(null);
+  };
 
   const handleCreateBudget = () => {
     if (!budgetName.trim()) return;
