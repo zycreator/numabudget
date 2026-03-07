@@ -773,14 +773,14 @@ const SplitBudgetGrid = ({
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP1))}</span>
           </div>
-          {renderPeriodSection(incomeP1, incomeP1Drag, "income-1", 1, false, () => onAddIncome(1))}
+          {renderPeriodSection(incomeP1, incomeP1Drag, "income-1", 1, false, () => onAddIncome(1), "income")}
         </div>
         <div className="border-x border-border bg-primary-foreground px-3 pb-2">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP1))}</span>
           </div>
-          {renderPeriodSection(expenseP1, expenseP1Drag, "expense-1", 1, true, () => onAddExpense(1))}
+          {renderPeriodSection(expenseP1, expenseP1Drag, "expense-1", 1, true, () => onAddExpense(1), "expense")}
         </div>
       </div>
 
@@ -806,14 +806,14 @@ const SplitBudgetGrid = ({
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP2))}</span>
           </div>
-          {renderPeriodSection(incomeP2, incomeP2Drag, "income-2", 2, false, () => onAddIncome(2))}
+          {renderPeriodSection(incomeP2, incomeP2Drag, "income-2", 2, false, () => onAddIncome(2), "income")}
         </div>
         <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-3 pb-3">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP2))}</span>
           </div>
-          {renderPeriodSection(expenseP2, expenseP2Drag, "expense-2", 2, true, () => onAddExpense(2))}
+          {renderPeriodSection(expenseP2, expenseP2Drag, "expense-2", 2, true, () => onAddExpense(2), "expense")}
         </div>
       </div>
     </div>
