@@ -1,0 +1,1 @@
+ALTER TABLE public.budget_items ADD COLUMN item_date date DEFAULT NULL;

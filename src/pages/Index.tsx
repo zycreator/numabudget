@@ -53,6 +53,22 @@ import { Progress } from "@/components/ui/progress";
 const formatPHP = (n: number) =>
 `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+const formatDateShort = (dateStr: string | null) => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr + "T00:00:00");
+  return `${d.getMonth() + 1}-${d.getDate()}`;
+};
+
+const toISODate = (shortStr: string): string | null => {
+  const parts = shortStr.trim().split("-");
+  if (parts.length !== 2) return null;
+  const m = parseInt(parts[0], 10);
+  const d = parseInt(parts[1], 10);
+  if (!m || !d || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const y = new Date().getFullYear();
+  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+};
+
 const Index = () => {
   const { user, signOut } = useAuth();
   const [activeBudgetId, setActiveBudgetId] = useState<string | null>(null);
@@ -242,7 +258,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       included: true,
       sort_order: list.length,
       paid: false,
-      pay_period: payPeriod
+      pay_period: payPeriod,
+      item_date: null
     });
   };
 
@@ -632,6 +649,18 @@ const SplitBudgetGrid = ({
       <Checkbox checked={item.paid} onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })} className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
       <input
         type="text"
+        placeholder="M-D"
+        defaultValue={formatDateShort(item.item_date)}
+        onBlur={(e) => {
+          const v = e.target.value.trim();
+          const iso = v ? toISODate(v) : null;
+          if (iso !== item.item_date) onUpdate({ ...item, item_date: iso });
+        }}
+        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+        className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+      />
+      <input
+        type="text"
         placeholder="Description"
         defaultValue={item.description}
         onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
@@ -901,6 +930,18 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         checked={item.paid}
         onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })}
         className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
+      <input
+        type="text"
+        placeholder="M-D"
+        defaultValue={formatDateShort(item.item_date)}
+        onBlur={(e) => {
+          const v = e.target.value.trim();
+          const iso = v ? toISODate(v) : null;
+          if (iso !== item.item_date) onUpdate({ ...item, item_date: iso });
+        }}
+        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+        className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+      />
       <input
         type="text"
         placeholder="Description"
