@@ -303,7 +303,9 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
     URL.revokeObjectURL(url);
   };
 
-  if (isLoading) {
+  // Register export function for sidebar
+  exportRef.current = exportCSV;
+
     return <div className="flex items-center justify-center p-8"><p className="text-sm text-muted-foreground">Loading...</p></div>;
   }
 
