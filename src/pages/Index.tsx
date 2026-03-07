@@ -366,7 +366,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       <CategoryLimitsCard items={items} categories={categories} limits={categoryLimits} />
 
       {/* Income & Expenses */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
         <EntryCard
           title="Income"
           total={totalIncome - rolloverAmount}
@@ -375,7 +375,11 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={(payPeriod) => handleAddItem("income", payPeriod)} />
+          onAdd={(payPeriod) => handleAddItem("income", payPeriod)}
+          splitEnabled={splitEnabled}
+          onToggleSplit={handleToggleSplit}
+          periodBalance1={periodBalance1}
+          periodBalance2={periodBalance2} />
 
         <EntryCard
           title="Expenses"
@@ -385,7 +389,11 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={(payPeriod) => handleAddItem("expense", payPeriod)} />
+          onAdd={(payPeriod) => handleAddItem("expense", payPeriod)}
+          splitEnabled={splitEnabled}
+          onToggleSplit={handleToggleSplit}
+          periodBalance1={periodBalance1}
+          periodBalance2={periodBalance2} />
 
       </div>
 
