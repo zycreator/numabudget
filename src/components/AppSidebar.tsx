@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Wallet, FileText, Archive, Trash2 } from "lucide-react";
+import { Plus, Wallet, FileText, Archive, Trash2, Copy } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
   Sidebar,
@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger } from
 "@/components/ui/sidebar";
-import { useBudgets, useCreateBudget, useDeleteBudget, type Budget } from "@/hooks/useBudgets";
+import { useBudgets, useCreateBudget, useDeleteBudget, useDuplicateBudget, type Budget } from "@/hooks/useBudgets";
 import { usePlans, useCreatePlan, useDeletePlan, type Plan } from "@/hooks/usePlans";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
   const deleteBudget = useDeleteBudget();
   const createPlan = useCreatePlan();
   const deletePlan = useDeletePlan();
+  const duplicateBudget = useDuplicateBudget();
 
   const [showNewBudget, setShowNewBudget] = useState(false);
   const [showNewPlan, setShowNewPlan] = useState(false);
@@ -101,12 +102,19 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
                       <Wallet className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate text-xs">{b.name}</span>
                     </span>
-                    <button
-                    onClick={(e) => {e.stopPropagation();if (confirm(`Delete "${b.name}"?`)) deleteBudget.mutate(b.id);}}
-                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-negative">
-
-                      <Trash2 className="h-3 w-3" />
-                    </button>
+                    <span className="flex items-center gap-1">
+                      <button
+                      onClick={(e) => {e.stopPropagation();duplicateBudget.mutate(b.id, { onSuccess: (data) => onSelectBudget(data.id) });}}
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground"
+                      title="Duplicate budget">
+                        <Copy className="h-3 w-3" />
+                      </button>
+                      <button
+                      onClick={(e) => {e.stopPropagation();if (confirm(`Delete "${b.name}"?`)) deleteBudget.mutate(b.id);}}
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
