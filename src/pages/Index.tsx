@@ -477,13 +477,9 @@ interface EntryCardProps {
   onAdd: (payPeriod?: number) => void;
   splitEnabled: boolean;
   onToggleSplit: (enabled: boolean) => void;
-  periodBalance1Checked: number;
-  periodBalance1Budgeted: number;
-  periodBalance2Checked: number;
-  periodBalance2Budgeted: number;
 }
 
-const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit, periodBalance1Checked, periodBalance1Budgeted, periodBalance2Checked, periodBalance2Budgeted }: EntryCardProps) => {
+const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd, splitEnabled, onToggleSplit }: EntryCardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: BudgetItem) => {
