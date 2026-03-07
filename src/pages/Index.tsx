@@ -355,10 +355,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
             <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
               {formatPHP(periodBalance1Checked)}
             </p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">
-              <span className="text-positive">{formatPHP(incomePeriod1Checked + expensePeriod1Checked)}</span>
-              <span className="text-muted-foreground/50"> / </span>
-              <span>{formatPHP(incomePeriod1All + expensePeriod1All)}</span>
+            <p className="mt-0.5 text-[10px] text-muted-foreground leading-relaxed">
+              Inc: <span className="text-positive">{formatPHP(incomePeriod1Checked)}</span>/{formatPHP(incomePeriod1All)} · Exp: <span className="text-positive">{formatPHP(expensePeriod1Checked)}</span>/{formatPHP(expensePeriod1All)}
             </p>
           </div>
           {/* Column 3: Period 2 Summary */}
@@ -367,10 +365,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
             <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
               {formatPHP(periodBalance2Checked)}
             </p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">
-              <span className="text-positive">{formatPHP(incomePeriod2Checked + expensePeriod2Checked)}</span>
-              <span className="text-muted-foreground/50"> / </span>
-              <span>{formatPHP(incomePeriod2All + expensePeriod2All)}</span>
+            <p className="mt-0.5 text-[10px] text-muted-foreground leading-relaxed">
+              Inc: <span className="text-positive">{formatPHP(incomePeriod2Checked)}</span>/{formatPHP(incomePeriod2All)} · Exp: <span className="text-positive">{formatPHP(expensePeriod2Checked)}</span>/{formatPHP(expensePeriod2All)}
             </p>
           </div>
         </div>
