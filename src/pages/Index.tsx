@@ -108,7 +108,7 @@ const Index = () => {
           onSelectBudget={handleSelectBudget}
           onSelectPlan={handleSelectPlan} />
 
-        <main className="flex-1 px-3 sm:px-4 py-4 sm:py-10 overflow-x-hidden overflow-y-auto bg-secondary">
+        <main className="flex-1 px-3 sm:px-4 py-4 sm:py-10 overflow-y-auto bg-secondary">
           <div className="mx-auto max-w-5xl space-y-3 sm:space-y-4">
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -375,7 +375,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       </div>
 
       {/* Sticky Summary Section */}
-      <div className="sticky top-0 z-30 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 bg-background/95 backdrop-blur-sm border-b border-transparent [&:not(:first-child)]:shadow-[0_2px_8px_-2px_hsl(var(--foreground)/0.08)]">
+      <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 bg-background border-b border-border shadow-sm">
       {splitEnabled ? (
         <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
           {/* Column 1: Overall Summary */}
