@@ -88,6 +88,7 @@ export type Database = {
           is_active: boolean
           name: string
           rollover_enabled: boolean
+          split_enabled: boolean
           start_date: string | null
           user_id: string
         }
@@ -98,6 +99,7 @@ export type Database = {
           is_active?: boolean
           name: string
           rollover_enabled?: boolean
+          split_enabled?: boolean
           start_date?: string | null
           user_id: string
         }
@@ -108,6 +110,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           rollover_enabled?: boolean
+          split_enabled?: boolean
           start_date?: string | null
           user_id?: string
         }

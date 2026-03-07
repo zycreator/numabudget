@@ -1,0 +1,1 @@
+ALTER TABLE public.budgets ADD COLUMN split_enabled boolean NOT NULL DEFAULT false;
