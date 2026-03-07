@@ -82,6 +82,7 @@ export const useDuplicateBudget = () => {
           start_date: source.start_date,
           end_date: source.end_date,
           rollover_enabled: source.rollover_enabled,
+          split_enabled: source.split_enabled,
         })
         .select()
         .single();
