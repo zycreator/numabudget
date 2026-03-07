@@ -635,11 +635,18 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
-                <span className="text-[10px] font-medium text-muted-foreground">₱{period1Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <span className={`text-[10px] font-semibold ${periodBalance1 < 0 ? "text-negative" : "text-positive"}`}>
-                Balance: {formatPHP(periodBalance1)}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-semibold ${periodBalance1Checked < 0 ? "text-negative" : "text-positive"}`}>
+                  {formatPHP(periodBalance1Checked)}
+                </span>
+                <span className="text-[10px] text-muted-foreground/50">/</span>
+                <span className="text-[10px] text-muted-foreground">{formatPHP(periodBalance1Budgeted)}</span>
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between mb-1">
+              <span className="text-sm font-semibold text-foreground">{formatPHP(period1Checked)}</span>
+              <span className="text-[10px] text-muted-foreground">of {formatPHP(period1All)}</span>
             </div>
             <div className="space-y-1.5">
               {period1Items.map((item, idx) => (
@@ -673,11 +680,18 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
-                <span className="text-[10px] font-medium text-muted-foreground">₱{period2Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <span className={`text-[10px] font-semibold ${periodBalance2 < 0 ? "text-negative" : "text-positive"}`}>
-                Balance: {formatPHP(periodBalance2)}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-semibold ${periodBalance2Checked < 0 ? "text-negative" : "text-positive"}`}>
+                  {formatPHP(periodBalance2Checked)}
+                </span>
+                <span className="text-[10px] text-muted-foreground/50">/</span>
+                <span className="text-[10px] text-muted-foreground">{formatPHP(periodBalance2Budgeted)}</span>
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between mb-1">
+              <span className="text-sm font-semibold text-foreground">{formatPHP(period2Checked)}</span>
+              <span className="text-[10px] text-muted-foreground">of {formatPHP(period2All)}</span>
             </div>
             <div className="space-y-1.5">
               {period2Items.map((item, idx) => (
