@@ -647,18 +647,21 @@ const SplitBudgetGrid = ({
       <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
       <Checkbox checked={item.included} onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })} />
       <Checkbox checked={item.paid} onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })} className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
-      <input
-        type="text"
-        placeholder="M-D"
-        defaultValue={formatDateShort(item.item_date)}
-        onBlur={(e) => {
-          const v = e.target.value.trim();
-          const iso = v ? toISODate(v) : null;
-          if (iso !== item.item_date) onUpdate({ ...item, item_date: iso });
-        }}
-        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-        className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
-      />
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
+            {item.item_date ? formatDateShort(item.item_date) : "M-D"}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={item.item_date ? new Date(item.item_date + "T00:00:00") : undefined}
+            onSelect={(date) => onUpdate({ ...item, item_date: date ? format(date, "yyyy-MM-dd") : null })}
+            className={cn("p-3 pointer-events-auto")}
+          />
+        </PopoverContent>
+      </Popover>
       <input
         type="text"
         placeholder="Description"
@@ -930,18 +933,21 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         checked={item.paid}
         onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })}
         className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
-      <input
-        type="text"
-        placeholder="M-D"
-        defaultValue={formatDateShort(item.item_date)}
-        onBlur={(e) => {
-          const v = e.target.value.trim();
-          const iso = v ? toISODate(v) : null;
-          if (iso !== item.item_date) onUpdate({ ...item, item_date: iso });
-        }}
-        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-        className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
-      />
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
+            {item.item_date ? formatDateShort(item.item_date) : "M-D"}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={item.item_date ? new Date(item.item_date + "T00:00:00") : undefined}
+            onSelect={(date) => onUpdate({ ...item, item_date: date ? format(date, "yyyy-MM-dd") : null })}
+            className={cn("p-3 pointer-events-auto")}
+          />
+        </PopoverContent>
+      </Popover>
       <input
         type="text"
         placeholder="Description"
