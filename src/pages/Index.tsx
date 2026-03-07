@@ -563,6 +563,24 @@ const SplitBudgetGrid = ({
 
   const allItems = useMemo(() => [...incomeItems, ...expenseItems], [incomeItems, expenseItems]);
 
+  // Re-sort a period's items by date, updating sort_order and persisting
+  const resortPeriodByDate = useCallback((periodItems: BudgetItem[], changedItem?: BudgetItem) => {
+    const list = changedItem
+      ? periodItems.map(i => i.id === changedItem.id ? changedItem : i)
+      : periodItems;
+    const sorted = [...list].sort((a, b) => {
+      if (!a.item_date && !b.item_date) return 0;
+      if (!a.item_date) return 1;
+      if (!b.item_date) return -1;
+      return a.item_date.localeCompare(b.item_date);
+    });
+    sorted.forEach((item, idx) => {
+      if (item.sort_order !== idx) {
+        onUpdate({ ...item, sort_order: idx });
+      }
+    });
+  }, [onUpdate]);
+
   const incomeP1 = useMemo(() => incomeItems.filter(i => i.pay_period === 1), [incomeItems]);
   const incomeP2 = useMemo(() => incomeItems.filter(i => i.pay_period === 2), [incomeItems]);
   const expenseP1 = useMemo(() => expenseItems.filter(i => i.pay_period === 1), [expenseItems]);
