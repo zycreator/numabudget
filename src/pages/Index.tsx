@@ -645,6 +645,7 @@ const SplitBudgetGrid = ({
     onDragEndFn: () => void,
     onDragLeaveFn: () => void,
     showCategory: boolean,
+    periodItems: BudgetItem[],
   ) => (
     <div
       key={item.id}
