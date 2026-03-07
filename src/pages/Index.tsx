@@ -339,18 +339,43 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           </div>
         }
 
-        <p className={`text-3xl sm:text-4xl font-bold tracking-tight ${net >= 0 ? "text-positive" : "text-negative"}`}>
-          {formatPHP(net)}
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          of {formatPHP(netBudgeted)} budgeted · {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
-        </p>
-        {splitEnabled && (
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span>Income: <span className="font-medium text-foreground">{formatPHP(totalIncomeChecked)}</span> <span className="text-muted-foreground/50">/ {formatPHP(totalIncomeAll)}</span></span>
-            <span>Expenses: <span className="font-medium text-foreground">{formatPHP(totalExpensesChecked)}</span> <span className="text-muted-foreground/50">/ {formatPHP(totalExpensesAll)}</span></span>
+      {splitEnabled ? (
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          {/* Column 1: Overall Summary */}
+          <div className="rounded-md bg-secondary/50 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Overall</p>
+            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${(totalIncomeAll - totalExpensesAll) >= 0 ? "text-positive" : "text-negative"}`}>
+              {formatPHP(totalIncomeAll - totalExpensesAll)}
+            </p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">All Income − All Expenses</p>
           </div>
-        )}
+          {/* Column 2: Period 1 Summary */}
+          <div className="rounded-md bg-secondary/50 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Period 1</p>
+            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
+              {formatPHP(periodBalance1Checked)}
+            </p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">{formatPHP(periodBalance1Budgeted)} budgeted</p>
+          </div>
+          {/* Column 3: Period 2 Summary */}
+          <div className="rounded-md bg-secondary/50 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Period 2</p>
+            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
+              {formatPHP(periodBalance2Checked)}
+            </p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">{formatPHP(periodBalance2Budgeted)} budgeted</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <p className={`text-3xl sm:text-4xl font-bold tracking-tight ${net >= 0 ? "text-positive" : "text-negative"}`}>
+            {formatPHP(net)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            of {formatPHP(netBudgeted)} budgeted · {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
+          </p>
+        </>
+      )}
         {(totalDebt > 0 || totalSaved > 0) &&
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
             {totalDebt > 0 && <span>Debt: <span className="font-medium text-foreground">{formatPHP(totalDebt)}</span></span>}
