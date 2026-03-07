@@ -138,9 +138,7 @@ const Index = () => {
               budget={activeBudget}
               showSettings={showSettings}
               showRecurring={showRecurring}
-              onToggleSettings={() => setShowSettings(!showSettings)}
-              onToggleRecurring={() => setShowRecurring(!showRecurring)}
-              onSignOut={() => signOut()} />
+              exportRef={exportRef} />
             ) : (
             <div className="pt-4">
               <div className="flex items-center gap-2 mb-8">
