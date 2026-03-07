@@ -12,7 +12,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger } from
 "@/components/ui/sidebar";
-import { useBudgets, useCreateBudget, useDeleteBudget, useDuplicateBudget, type Budget } from "@/hooks/useBudgets";
+import { useBudgets, useCreateBudget, useDeleteBudget, useDuplicateBudget, useUpdateBudget, type Budget } from "@/hooks/useBudgets";
 import { usePlans, useCreatePlan, useDeletePlan, type Plan } from "@/hooks/usePlans";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
