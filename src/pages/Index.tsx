@@ -53,6 +53,12 @@ import { Progress } from "@/components/ui/progress";
 const formatPHP = (n: number) =>
 `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+// Compact format for mobile headers: drops decimals for large numbers
+const formatPHPCompact = (n: number) => {
+  if (Math.abs(n) >= 1000) return `₱${(n / 1000).toFixed(1)}k`;
+  return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+};
+
 const formatDateShort = (dateStr: string | null) => {
   if (!dateStr) return "";
   const d = new Date(dateStr + "T00:00:00");
@@ -369,38 +375,41 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         }
 
       {splitEnabled ? (
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
           {/* Column 1: Overall Summary */}
-          <div className="rounded-md bg-secondary/50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Overall</p>
-            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${(totalIncomeAll - totalExpensesAll) >= 0 ? "text-positive" : "text-negative"}`}>
-              {formatPHP(totalIncomeAll - totalExpensesAll)}
+          <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+            <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5 sm:mb-1">Overall</p>
+            <p className={`text-sm sm:text-2xl font-bold tracking-tight ${(totalIncomeAll - totalExpensesAll) >= 0 ? "text-positive" : "text-negative"}`}>
+              <span className="sm:hidden">{formatPHPCompact(totalIncomeAll - totalExpensesAll)}</span>
+              <span className="hidden sm:inline">{formatPHP(totalIncomeAll - totalExpensesAll)}</span>
             </p>
-            <div className="mt-1 space-y-0.5 text-[10px] text-muted-foreground">
-              <p>Inc: <span className="text-positive">{formatPHP(totalIncomeChecked - rolloverAmount)}</span> / {formatPHP(totalIncomeAll - rolloverAmount)}</p>
-              <p>Exp: <span className="text-positive">{formatPHP(totalExpensesChecked)}</span> / {formatPHP(totalExpensesAll)}</p>
+            <div className="mt-0.5 sm:mt-1 space-y-0 sm:space-y-0.5 text-[8px] sm:text-[10px] text-muted-foreground">
+              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(totalIncomeChecked - rolloverAmount)}</span><span className="hidden sm:inline"> / {formatPHP(totalIncomeAll - rolloverAmount)}</span></p>
+              <p className="truncate">Exp: <span className="text-positive">{formatPHPCompact(totalExpensesChecked)}</span><span className="hidden sm:inline"> / {formatPHP(totalExpensesAll)}</span></p>
             </div>
           </div>
           {/* Column 2: Period 1 Summary */}
-          <div className="rounded-md bg-secondary/50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Period 1</p>
-            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
-              {formatPHP(periodBalance1Checked)}
+          <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+            <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5 sm:mb-1">Period 1</p>
+            <p className={`text-sm sm:text-2xl font-bold tracking-tight ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
+              <span className="sm:hidden">{formatPHPCompact(periodBalance1Checked)}</span>
+              <span className="hidden sm:inline">{formatPHP(periodBalance1Checked)}</span>
             </p>
-            <div className="mt-1 space-y-0.5 text-[10px] text-muted-foreground">
-              <p>Inc: <span className="text-positive">{formatPHP(incomePeriod1Checked)}</span> / {formatPHP(incomePeriod1All)}</p>
-              <p>Exp: <span className="text-positive">{formatPHP(expensePeriod1Checked)}</span> / {formatPHP(expensePeriod1All)}</p>
+            <div className="mt-0.5 sm:mt-1 space-y-0 sm:space-y-0.5 text-[8px] sm:text-[10px] text-muted-foreground">
+              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(incomePeriod1Checked)}</span><span className="hidden sm:inline"> / {formatPHP(incomePeriod1All)}</span></p>
+              <p className="truncate">Exp: <span className="text-positive">{formatPHPCompact(expensePeriod1Checked)}</span><span className="hidden sm:inline"> / {formatPHP(expensePeriod1All)}</span></p>
             </div>
           </div>
           {/* Column 3: Period 2 Summary */}
-          <div className="rounded-md bg-secondary/50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Period 2</p>
-            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
-              {formatPHP(periodBalance2Checked)}
+          <div className="rounded-md bg-secondary/50 p-2 sm:p-3">
+            <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-0.5 sm:mb-1">Period 2</p>
+            <p className={`text-sm sm:text-2xl font-bold tracking-tight ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
+              <span className="sm:hidden">{formatPHPCompact(periodBalance2Checked)}</span>
+              <span className="hidden sm:inline">{formatPHP(periodBalance2Checked)}</span>
             </p>
-            <div className="mt-1 space-y-0.5 text-[10px] text-muted-foreground">
-              <p>Inc: <span className="text-positive">{formatPHP(incomePeriod2Checked)}</span> / {formatPHP(incomePeriod2All)}</p>
-              <p>Exp: <span className="text-positive">{formatPHP(expensePeriod2Checked)}</span> / {formatPHP(expensePeriod2All)}</p>
+            <div className="mt-0.5 sm:mt-1 space-y-0 sm:space-y-0.5 text-[8px] sm:text-[10px] text-muted-foreground">
+              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(incomePeriod2Checked)}</span><span className="hidden sm:inline"> / {formatPHP(incomePeriod2All)}</span></p>
+              <p className="truncate">Exp: <span className="text-positive">{formatPHPCompact(expensePeriod2Checked)}</span><span className="hidden sm:inline"> / {formatPHP(expensePeriod2All)}</span></p>
             </div>
           </div>
         </div>
@@ -672,7 +681,7 @@ const SplitBudgetGrid = ({
       <Checkbox checked={item.paid} onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })} className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
       <Popover>
         <PopoverTrigger asChild>
-          <button className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
+          <button className={`w-10 h-8 sm:h-auto shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
             {item.item_date ? formatDateShort(item.item_date) : "M-D"}
           </button>
         </PopoverTrigger>
@@ -725,7 +734,7 @@ const SplitBudgetGrid = ({
   const renderAddButton = (onClick: () => void) => (
     <button
       onClick={onClick}
-      className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors"
+      className="mt-2 w-full rounded-md border border-dashed border-border py-2.5 sm:py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary"
     >
       + Add Row
     </button>
@@ -761,27 +770,27 @@ const SplitBudgetGrid = ({
   return (
     <div className="space-y-0">
       {/* Card headers row */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
         <div className="rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground flex items-baseline justify-between">
-          <h3 className="text-sm font-medium text-muted-foreground">Income</h3>
-          <span className="text-sm font-semibold text-foreground">{formatPHP(totalIncome)}</span>
+          <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Income</h3>
+          <span className="text-xs sm:text-sm font-semibold text-foreground">{formatPHP(totalIncome)}</span>
         </div>
-        <div className="rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground flex items-baseline justify-between">
-          <h3 className="text-sm font-medium text-muted-foreground">Expenses</h3>
-          <span className="text-sm font-semibold text-foreground">{formatPHP(totalExpenses)}</span>
+        <div className="rounded-t-lg sm:rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground flex items-baseline justify-between max-sm:rounded-none max-sm:border-t-0">
+          <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Expenses</h3>
+          <span className="text-xs sm:text-sm font-semibold text-foreground">{formatPHP(totalExpenses)}</span>
         </div>
       </div>
 
-      {/* Period 1 row — both sides share same grid row = same height */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="border-x border-border bg-primary-foreground px-3 pb-2">
+      {/* Period 1 row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 pb-2">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP1))}</span>
           </div>
           {renderPeriodSection(incomeP1, incomeP1Drag, "income-1", 1, false, () => onAddIncome(1), "income")}
         </div>
-        <div className="border-x border-border bg-primary-foreground px-3 pb-2">
+        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 pb-2 max-sm:border-t max-sm:border-border/30">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP1))}</span>
@@ -791,30 +800,30 @@ const SplitBudgetGrid = ({
       </div>
 
       {/* Split toggle divider */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="border-x border-border bg-primary-foreground px-3">
-          <div className="flex items-center gap-2 py-2 border-t border-b border-border/40">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3">
+          <div className="flex items-center gap-2 py-2.5 sm:py-2 border-t border-b border-border/40">
             <Switch checked={true} onCheckedChange={onToggleSplit} className="scale-75 origin-left" />
             <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
           </div>
         </div>
-        <div className="border-x border-border bg-primary-foreground px-3">
+        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 max-sm:hidden">
           <div className="py-2 border-t border-b border-border/40">
             <span className="text-[10px] text-muted-foreground/40">&nbsp;</span>
           </div>
         </div>
       </div>
 
-      {/* Period 2 row — both sides share same grid row = same height */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-3 pb-3">
+      {/* Period 2 row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+        <div className="rounded-b-lg sm:rounded-b-lg border border-t-0 border-border bg-primary-foreground px-2 sm:px-3 pb-3 max-sm:rounded-none">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP2))}</span>
           </div>
           {renderPeriodSection(incomeP2, incomeP2Drag, "income-2", 2, false, () => onAddIncome(2), "income")}
         </div>
-        <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-3 pb-3">
+        <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-2 sm:px-3 pb-3">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP2))}</span>
