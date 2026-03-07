@@ -242,7 +242,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       included: true,
       sort_order: list.length,
       paid: false,
-      pay_period: payPeriod
+      pay_period: payPeriod,
+      item_date: null
     });
   };
 
