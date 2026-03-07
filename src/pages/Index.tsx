@@ -375,7 +375,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       </div>
 
       {/* Sticky Summary Section */}
-      <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 -mt-3 sm:-mt-4 px-3 sm:px-4 py-2 bg-background backdrop-blur-md border-b border-border shadow-sm">
+      <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 bg-background border-b border-border shadow-sm">
       {splitEnabled ? (
         <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
           {/* Column 1: Overall Summary */}
