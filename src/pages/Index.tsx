@@ -308,18 +308,20 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       {/* Budget Header */}
       <div className="rounded-lg border border-border p-4 sm:p-5 bg-primary-foreground">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <div className="group">
+          <div className="group relative inline-flex items-center gap-1.5">
             <input
               type="text"
               defaultValue={budget.name}
               key={budget.id}
               onBlur={(e) => {
                 const val = e.target.value.trim();
-                if (val && val !== budget.name) updateBudget.mutate({ id: budget.id, name: val });
+                if (!val) { e.target.value = budget.name; return; }
+                if (val !== budget.name) updateBudget.mutate({ id: budget.id, name: val });
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="text-sm font-medium text-foreground bg-transparent border-b border-transparent hover:border-border focus:border-ring focus:outline-none transition-colors w-full max-w-[200px] py-0.5"
+              className="text-sm font-medium text-foreground bg-transparent rounded-md px-1.5 py-0.5 border border-transparent hover:border-border hover:bg-secondary/30 focus:border-ring focus:bg-background focus:outline-none transition-colors w-full max-w-[200px]"
             />
+            <span className="text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors text-xs pointer-events-none">✎</span>
             {(budget.start_date || budget.end_date) &&
             <p className="text-xs text-muted-foreground">
                 {budget.start_date && new Date(budget.start_date).toLocaleDateString()}
