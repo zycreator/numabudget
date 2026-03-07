@@ -308,8 +308,18 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       {/* Budget Header */}
       <div className="rounded-lg border border-border p-4 sm:p-5 bg-primary-foreground">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <div>
-            <h2 className="text-sm font-medium text-foreground">{budget.name}</h2>
+          <div className="group">
+            <input
+              type="text"
+              defaultValue={budget.name}
+              key={budget.id}
+              onBlur={(e) => {
+                const val = e.target.value.trim();
+                if (val && val !== budget.name) updateBudget.mutate({ id: budget.id, name: val });
+              }}
+              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+              className="text-sm font-medium text-foreground bg-transparent border-b border-transparent hover:border-border focus:border-ring focus:outline-none transition-colors w-full max-w-[200px] py-0.5"
+            />
             {(budget.start_date || budget.end_date) &&
             <p className="text-xs text-muted-foreground">
                 {budget.start_date && new Date(budget.start_date).toLocaleDateString()}
@@ -347,7 +357,10 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
             <p className={`text-xl sm:text-2xl font-bold tracking-tight ${(totalIncomeAll - totalExpensesAll) >= 0 ? "text-positive" : "text-negative"}`}>
               {formatPHP(totalIncomeAll - totalExpensesAll)}
             </p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">All Income − All Expenses</p>
+            <div className="mt-1 space-y-0.5 text-[10px] text-muted-foreground">
+              <p>Inc: <span className="text-positive">{formatPHP(totalIncomeChecked - rolloverAmount)}</span> / {formatPHP(totalIncomeAll - rolloverAmount)}</p>
+              <p>Exp: <span className="text-positive">{formatPHP(totalExpensesChecked)}</span> / {formatPHP(totalExpensesAll)}</p>
+            </div>
           </div>
           {/* Column 2: Period 1 Summary */}
           <div className="rounded-md bg-secondary/50 p-3">
