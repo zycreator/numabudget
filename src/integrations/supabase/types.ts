@@ -23,6 +23,7 @@ export type Database = {
           description: string
           id: string
           included: boolean
+          item_date: string | null
           month: number
           paid: boolean
           pay_period: number | null
@@ -39,6 +40,7 @@ export type Database = {
           description?: string
           id?: string
           included?: boolean
+          item_date?: string | null
           month: number
           paid?: boolean
           pay_period?: number | null
@@ -55,6 +57,7 @@ export type Database = {
           description?: string
           id?: string
           included?: boolean
+          item_date?: string | null
           month?: number
           paid?: boolean
           pay_period?: number | null
