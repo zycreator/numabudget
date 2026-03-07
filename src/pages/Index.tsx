@@ -832,8 +832,10 @@ const SplitBudgetGrid = ({
       </div>
     </div>
   );
-};
+  };
 
+  // Register export function for sidebar access
+  exportRef.current = exportCSV;
 
 interface EntryCardProps {
   title: string;
