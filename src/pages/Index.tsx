@@ -445,6 +445,9 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
   const period1Items = useMemo(() => items.filter(i => i.pay_period === 1 || !splitEnabled), [items, splitEnabled]);
   const period2Items = useMemo(() => splitEnabled ? items.filter(i => i.pay_period === 2) : [], [items, splitEnabled]);
 
+  const period1Total = useMemo(() => period1Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period1Items]);
+  const period2Total = useMemo(() => period2Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period2Items]);
+
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items: splitEnabled ? period1Items : items,
     onReorder: (reordered) => reordered.forEach((item) => onUpdate(item)),
