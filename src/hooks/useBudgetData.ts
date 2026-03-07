@@ -14,6 +14,7 @@ export interface BudgetItem {
   included: boolean;
   sort_order: number;
   paid: boolean;
+  pay_period: number;
 }
 
 export interface Category {
@@ -77,7 +78,7 @@ export const useBudgetItems = (budgetId: string | null) => {
         .eq("budget_id", budgetId!)
         .order("sort_order");
       if (error) throw error;
-      return data as BudgetItem[];
+      return (data as unknown as BudgetItem[]).map(item => ({ ...item, pay_period: item.pay_period ?? 1 }));
     },
     enabled: !!user && !!budgetId,
   });
@@ -148,6 +149,7 @@ export const useUpsertBudgetItem = () => {
           included: item.included,
           sort_order: item.sort_order,
           paid: item.paid,
+          pay_period: item.pay_period,
         }).eq("id", item.id);
         if (error) throw error;
       } else {

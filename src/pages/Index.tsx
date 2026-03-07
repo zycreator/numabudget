@@ -191,7 +191,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
 
 
 
-  const handleAddItem = (type: "income" | "expense") => {
+  const handleAddItem = (type: "income" | "expense", payPeriod: number = 1) => {
     const list = type === "income" ? incomeItems : expenseItems;
     upsertItem.mutate({
       description: "",
@@ -203,7 +203,8 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
       year: 0,
       included: true,
       sort_order: list.length,
-      paid: false
+      paid: false,
+      pay_period: payPeriod
     });
   };
 
@@ -353,7 +354,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={() => handleAddItem("income")} />
+          onAdd={(payPeriod) => handleAddItem("income", payPeriod)} />
 
         <EntryCard
           title="Expenses"
@@ -363,7 +364,7 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
           queryKey={["budget_items", user?.id, budget.id]}
           onUpdate={(item) => upsertItem.mutate(item)}
           onDelete={(id) => deleteItem.mutate(id)}
-          onAdd={() => handleAddItem("expense")} />
+          onAdd={(payPeriod) => handleAddItem("expense", payPeriod)} />
 
       </div>
 
@@ -417,10 +418,11 @@ interface EntryCardProps {
   queryKey: unknown[];
   onUpdate: (item: BudgetItem) => void;
   onDelete: (id: string) => void;
-  onAdd: () => void;
+  onAdd: (payPeriod?: number) => void;
 }
 
 const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDelete, onAdd }: EntryCardProps) => {
+  const [splitEnabled, setSplitEnabled] = useState(false);
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: BudgetItem) => {
@@ -428,11 +430,147 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
     debounceRef.current[item.id] = setTimeout(() => onUpdate(item), 500);
   }, [onUpdate]);
 
+  // When toggling split ON, move all items to period 1
+  const handleToggleSplit = (enabled: boolean) => {
+    setSplitEnabled(enabled);
+    if (enabled) {
+      items.forEach(item => {
+        if (item.pay_period !== 1) {
+          onUpdate({ ...item, pay_period: 1 });
+        }
+      });
+    }
+  };
+
+  const period1Items = useMemo(() => items.filter(i => i.pay_period === 1 || !splitEnabled), [items, splitEnabled]);
+  const period2Items = useMemo(() => splitEnabled ? items.filter(i => i.pay_period === 2) : [], [items, splitEnabled]);
+
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
-    items,
+    items: splitEnabled ? period1Items : items,
     onReorder: (reordered) => reordered.forEach((item) => onUpdate(item)),
     queryKey
   });
+
+  const {
+    dragIndex: dragIndex2,
+    overIndex: overIndex2,
+    handleDragStart: handleDragStart2,
+    handleDragOver: handleDragOver2,
+    handleDragEnd: handleDragEnd2,
+    handleDragLeave: handleDragLeave2
+  } = useDragReorder({
+    items: period2Items,
+    onReorder: (reordered) => reordered.forEach((item) => onUpdate(item)),
+    queryKey
+  });
+
+  // Cross-period drop handler
+  const handleCrossDrop = (item: BudgetItem, targetPeriod: number) => {
+    onUpdate({ ...item, pay_period: targetPeriod });
+  };
+
+  const renderRow = (
+    item: BudgetItem,
+    idx: number,
+    dIdx: number | null,
+    oIdx: number | null,
+    onDragStartFn: (index: number, e: React.DragEvent) => void,
+    onDragOverFn: (index: number, e: React.DragEvent) => void,
+    onDragEndFn: () => void,
+    onDragLeaveFn: () => void,
+    crossPeriod?: number
+  ) => (
+    <div
+      key={item.id}
+      draggable
+      onDragStart={(e) => onDragStartFn(idx, e)}
+      onDragOver={(e) => onDragOverFn(idx, e)}
+      onDragEnd={onDragEndFn}
+      onDragLeave={onDragLeaveFn}
+      onDrop={(e) => {
+        e.preventDefault();
+        if (crossPeriod !== undefined) {
+          // Check if dragged item is from the other period
+          const draggedId = e.dataTransfer.getData("text/plain");
+          const draggedItem = items.find(i => i.id === draggedId);
+          if (draggedItem && draggedItem.pay_period !== crossPeriod) {
+            handleCrossDrop(draggedItem, crossPeriod);
+          }
+        }
+      }}
+      className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-50" : ""} ${oIdx === idx ? "border-t-2 border-accent" : ""}`}>
+      <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
+      <Checkbox
+        checked={item.included}
+        onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })} />
+      <Checkbox
+        checked={item.paid}
+        onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })}
+        className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
+      <input
+        type="text"
+        placeholder="Description"
+        defaultValue={item.description}
+        onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
+        className={`flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`} />
+      {title === "Expenses" &&
+        <select
+          defaultValue={item.category_id ?? ""}
+          onChange={(e) => onUpdate({ ...item, category_id: e.target.value || null })}
+          className={`w-16 sm:w-20 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
+          <option value="">—</option>
+          {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      }
+      <div className="relative w-20 sm:w-24 shrink-0">
+        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
+        <input
+          type="number"
+          placeholder="0.00"
+          defaultValue={item.amount || ""}
+          onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
+          className={`w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+          step="0.01" />
+      </div>
+      <button
+        onClick={() => onDelete(item.id)}
+        className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">
+        ✕
+      </button>
+    </div>
+  );
+
+  const renderAddButton = (payPeriod?: number) => (
+    <button
+      onClick={() => onAdd(payPeriod)}
+      className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors">
+      + Add Row
+    </button>
+  );
+
+  const renderDropZone = (targetPeriod: number) => (
+    <div
+      className="min-h-[8px] rounded transition-colors"
+      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("bg-accent/20"); }}
+      onDragLeave={(e) => { e.currentTarget.classList.remove("bg-accent/20"); }}
+      onDrop={(e) => {
+        e.preventDefault();
+        e.currentTarget.classList.remove("bg-accent/20");
+        const draggedId = e.dataTransfer.getData("text/plain");
+        const draggedItem = items.find(i => i.id === draggedId);
+        if (draggedItem && draggedItem.pay_period !== targetPeriod) {
+          handleCrossDrop(draggedItem, targetPeriod);
+        }
+      }}
+    />
+  );
+
+  // Patch drag start to store item id in dataTransfer
+  const wrapDragStart = (originalFn: (index: number, e: React.DragEvent) => void) =>
+    (idx: number, itemId: string) => (e: React.DragEvent) => {
+      e.dataTransfer.setData("text/plain", itemId);
+      originalFn(idx, e);
+    };
 
   return (
     <div className="rounded-lg border border-border p-4 bg-primary-foreground">
@@ -440,73 +578,70 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
         <span className="text-sm font-semibold text-foreground">{formatPHP(total)}</span>
       </div>
-      <div className="space-y-1.5">
-        {items.map((item, idx) =>
-        <div
-          key={item.id}
-          draggable
-          onDragStart={(e) => handleDragStart(idx, e)}
-          onDragOver={(e) => handleDragOver(idx, e)}
-          onDragEnd={handleDragEnd}
-          onDragLeave={handleDragLeave}
-          className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
-            <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
-            <Checkbox
-            checked={item.included}
-            onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })} />
-          
-            <Checkbox
-            checked={item.paid}
-            onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })}
-            className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
 
-            <input
-            type="text"
-            placeholder="Description"
-            defaultValue={item.description}
-            onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-            className={`flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`} />
-
-            {title === "Expenses" &&
-          <select
-            defaultValue={item.category_id ?? ""}
-            onChange={(e) => onUpdate({ ...item, category_id: e.target.value || null })}
-            className={`w-16 sm:w-20 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
-
-                <option value="">—</option>
-                {categories.map((c) =>
-            <option key={c.id} value={c.id}>{c.name}</option>
+      {!splitEnabled && (
+        <>
+          <div className="space-y-1.5">
+            {items.map((item, idx) =>
+              renderRow(item, idx, dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave)
             )}
-              </select>
-          }
-            <div className="relative w-20 sm:w-24 shrink-0">
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
-              <input
-              type="number"
-              placeholder="0.00"
-              defaultValue={item.amount || ""}
-              onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
-              className={`w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
-              step="0.01" />
-
-            </div>
-            <button
-            onClick={() => onDelete(item.id)}
-            className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">
-
-              ✕
-            </button>
           </div>
-        )}
+          {renderAddButton()}
+        </>
+      )}
+
+      {splitEnabled && (
+        <>
+          {/* Period 1 */}
+          <div className="mb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1.5">Period 1</p>
+            <div className="space-y-1.5">
+              {period1Items.map((item, idx) => (
+                <div key={item.id}
+                  onDragStart={(e) => { e.dataTransfer.setData("text/plain", item.id); handleDragStart(idx, e); }}
+                >
+                  {renderRow(item, idx, dragIndex, overIndex,
+                    (i, e) => { e.dataTransfer.setData("text/plain", item.id); handleDragStart(i, e); },
+                    handleDragOver, handleDragEnd, handleDragLeave, 1)}
+                </div>
+              ))}
+            </div>
+            {renderDropZone(1)}
+            {renderAddButton(1)}
+          </div>
+
+          {/* Divider */}
+          <div className="my-3 border-t border-border/50" />
+
+          {/* Period 2 */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1.5">Period 2</p>
+            <div className="space-y-1.5">
+              {period2Items.map((item, idx) => (
+                <div key={item.id}>
+                  {renderRow(item, idx, dragIndex2, overIndex2,
+                    (i, e) => { e.dataTransfer.setData("text/plain", item.id); handleDragStart2(i, e); },
+                    handleDragOver2, handleDragEnd2, handleDragLeave2, 2)}
+                </div>
+              ))}
+            </div>
+            {renderDropZone(2)}
+            {renderAddButton(2)}
+          </div>
+        </>
+      )}
+
+      {/* Toggle */}
+      <div className="mt-3 flex items-center gap-2 pt-2 border-t border-border/30">
+        <Switch
+          checked={splitEnabled}
+          onCheckedChange={handleToggleSplit}
+          className="scale-75 origin-left"
+        />
+        <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
       </div>
-      <button
-        onClick={onAdd}
-        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors">
-
-        + Add Row
-      </button>
-    </div>);
-
+    </div>
+  );
 };
 
 // ─── Settings Panel ──────────────────────────────────────────
