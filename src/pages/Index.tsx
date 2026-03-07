@@ -355,7 +355,11 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
             <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
               {formatPHP(periodBalance1Checked)}
             </p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">{formatPHP(periodBalance1Budgeted)} budgeted</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">
+              <span className="text-positive">{formatPHP(incomePeriod1Checked + expensePeriod1Checked)}</span>
+              <span className="text-muted-foreground/50"> / </span>
+              <span>{formatPHP(incomePeriod1All + expensePeriod1All)}</span>
+            </p>
           </div>
           {/* Column 3: Period 2 Summary */}
           <div className="rounded-md bg-secondary/50 p-3">
@@ -363,7 +367,11 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
             <p className={`text-xl sm:text-2xl font-bold tracking-tight ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
               {formatPHP(periodBalance2Checked)}
             </p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">{formatPHP(periodBalance2Budgeted)} budgeted</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">
+              <span className="text-positive">{formatPHP(incomePeriod2Checked + expensePeriod2Checked)}</span>
+              <span className="text-muted-foreground/50"> / </span>
+              <span>{formatPHP(incomePeriod2All + expensePeriod2All)}</span>
+            </p>
           </div>
         </div>
       ) : (
