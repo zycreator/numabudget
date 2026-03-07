@@ -53,6 +53,12 @@ import { Progress } from "@/components/ui/progress";
 const formatPHP = (n: number) =>
 `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+// Compact format for mobile headers: drops decimals for large numbers
+const formatPHPCompact = (n: number) => {
+  if (Math.abs(n) >= 1000) return `₱${(n / 1000).toFixed(1)}k`;
+  return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+};
+
 const formatDateShort = (dateStr: string | null) => {
   if (!dateStr) return "";
   const d = new Date(dateStr + "T00:00:00");
