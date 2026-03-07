@@ -649,6 +649,18 @@ const SplitBudgetGrid = ({
       <Checkbox checked={item.paid} onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })} className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
       <input
         type="text"
+        placeholder="M-D"
+        defaultValue={formatDateShort(item.item_date)}
+        onBlur={(e) => {
+          const v = e.target.value.trim();
+          const iso = v ? toISODate(v) : null;
+          if (iso !== item.item_date) onUpdate({ ...item, item_date: iso });
+        }}
+        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+        className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+      />
+      <input
+        type="text"
         placeholder="Description"
         defaultValue={item.description}
         onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
@@ -918,6 +930,18 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         checked={item.paid}
         onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })}
         className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
+      <input
+        type="text"
+        placeholder="M-D"
+        defaultValue={formatDateShort(item.item_date)}
+        onBlur={(e) => {
+          const v = e.target.value.trim();
+          const iso = v ? toISODate(v) : null;
+          if (iso !== item.item_date) onUpdate({ ...item, item_date: iso });
+        }}
+        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+        className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+      />
       <input
         type="text"
         placeholder="Description"
