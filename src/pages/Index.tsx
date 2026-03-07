@@ -445,6 +445,9 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
   const period1Items = useMemo(() => items.filter(i => i.pay_period === 1 || !splitEnabled), [items, splitEnabled]);
   const period2Items = useMemo(() => splitEnabled ? items.filter(i => i.pay_period === 2) : [], [items, splitEnabled]);
 
+  const period1Total = useMemo(() => period1Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period1Items]);
+  const period2Total = useMemo(() => period2Items.filter(i => i.included).reduce((s, i) => s + i.amount, 0), [period2Items]);
+
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items: splitEnabled ? period1Items : items,
     onReorder: (reordered) => reordered.forEach((item) => onUpdate(item)),
@@ -594,7 +597,10 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         <>
           {/* Period 1 */}
           <div className="mb-1">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1.5">Period 1</p>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
+              <p className="text-[10px] font-medium text-muted-foreground">₱{period1Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
             <div className="space-y-1.5">
               {period1Items.map((item, idx) => (
                 <div key={item.id}
@@ -615,7 +621,10 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
 
           {/* Period 2 */}
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1.5">Period 2</p>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
+              <p className="text-[10px] font-medium text-muted-foreground">₱{period2Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
             <div className="space-y-1.5">
               {period2Items.map((item, idx) => (
                 <div key={item.id}>
