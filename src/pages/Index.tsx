@@ -680,7 +680,12 @@ const SplitBudgetGrid = ({
           <Calendar
             mode="single"
             selected={item.item_date ? new Date(item.item_date + "T00:00:00") : undefined}
-            onSelect={(date) => onUpdate({ ...item, item_date: date ? format(date, "yyyy-MM-dd") : null })}
+            onSelect={(date) => {
+              const newDate = date ? format(date, "yyyy-MM-dd") : null;
+              const updated = { ...item, item_date: newDate };
+              onUpdate(updated);
+              setTimeout(() => resortPeriodByDate(periodItems, updated), 100);
+            }}
             className={cn("p-3 pointer-events-auto")}
           />
         </PopoverContent>
