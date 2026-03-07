@@ -73,7 +73,7 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
   const activeBudgets = budgets.filter((b) => b.is_active);
   const archivedBudgets = budgets.filter((b) => !b.is_active);
 
-
+  const handleEditKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSaveEdit();
     if (e.key === "Escape") setEditingBudgetId(null);
   };
