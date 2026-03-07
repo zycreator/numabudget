@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Wallet, FileText, Archive, Trash2, Copy } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Plus, Wallet, FileText, Archive, Trash2, Copy, Pencil } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
   Sidebar,
