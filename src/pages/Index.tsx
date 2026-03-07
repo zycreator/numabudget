@@ -596,7 +596,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
     };
 
   return (
-    <div className="rounded-lg border border-border p-4 bg-primary-foreground">
+    <div className="rounded-lg border border-border p-4 bg-primary-foreground flex flex-col">
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
         <span className="text-sm font-semibold text-foreground">{formatPHP(total)}</span>
@@ -614,12 +614,17 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
       )}
 
       {splitEnabled && (
-        <>
+        <div className="flex flex-col flex-1">
           {/* Period 1 */}
-          <div className="mb-1">
+          <div className="flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
-              <p className="text-[10px] font-medium text-muted-foreground">₱{period1Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
+                <span className="text-[10px] font-medium text-muted-foreground">₱{period1Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <span className={`text-[10px] font-semibold ${periodBalance1 < 0 ? "text-negative" : "text-positive"}`}>
+                Balance: {formatPHP(periodBalance1)}
+              </span>
             </div>
             <div className="space-y-1.5">
               {period1Items.map((item, idx) => (
@@ -633,17 +638,31 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
               ))}
             </div>
             {renderDropZone(1)}
-            {renderAddButton(1)}
+            <div className="mt-auto">
+              {renderAddButton(1)}
+            </div>
           </div>
 
-          {/* Divider */}
-          <div className="my-3 border-t border-border/50" />
+          {/* Toggle as divider */}
+          <div className="my-3 flex items-center gap-2 py-2 border-t border-b border-border/40">
+            <Switch
+              checked={splitEnabled}
+              onCheckedChange={onToggleSplit}
+              className="scale-75 origin-left"
+            />
+            <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
+          </div>
 
           {/* Period 2 */}
-          <div>
+          <div className="flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
-              <p className="text-[10px] font-medium text-muted-foreground">₱{period2Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
+                <span className="text-[10px] font-medium text-muted-foreground">₱{period2Total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <span className={`text-[10px] font-semibold ${periodBalance2 < 0 ? "text-negative" : "text-positive"}`}>
+                Balance: {formatPHP(periodBalance2)}
+              </span>
             </div>
             <div className="space-y-1.5">
               {period2Items.map((item, idx) => (
@@ -655,20 +674,24 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
               ))}
             </div>
             {renderDropZone(2)}
-            {renderAddButton(2)}
+            <div className="mt-auto">
+              {renderAddButton(2)}
+            </div>
           </div>
-        </>
+        </div>
       )}
 
-      {/* Toggle */}
-      <div className="mt-3 flex items-center gap-2 pt-2 border-t border-border/30">
-        <Switch
-          checked={splitEnabled}
-          onCheckedChange={handleToggleSplit}
-          className="scale-75 origin-left"
-        />
-        <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
-      </div>
+      {/* Toggle when not split */}
+      {!splitEnabled && (
+        <div className="mt-3 flex items-center gap-2 pt-2 border-t border-border/30">
+          <Switch
+            checked={splitEnabled}
+            onCheckedChange={onToggleSplit}
+            className="scale-75 origin-left"
+          />
+          <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
+        </div>
+      )}
     </div>
   );
 };
