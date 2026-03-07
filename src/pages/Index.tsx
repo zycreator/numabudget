@@ -328,9 +328,10 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
 
       }
 
-      {/* Budget Header */}
-      <div className="rounded-lg border border-border p-4 sm:p-5 bg-primary-foreground">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+      {/* Sticky Header + Summary Group */}
+      <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 sm:py-3 bg-background border-b border-border shadow-sm">
+        {/* Budget Title Row */}
+        <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-2">
           <div className="group relative inline-flex items-center gap-1.5">
             <input
               type="text"
@@ -342,25 +343,25 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
                 if (val !== budget.name) updateBudget.mutate({ id: budget.id, name: val });
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="text-sm font-medium text-foreground bg-transparent rounded-md px-1.5 py-0.5 border border-transparent hover:border-border hover:bg-secondary/30 focus:border-ring focus:bg-background focus:outline-none transition-colors w-full max-w-[200px]"
+              className="text-xs sm:text-sm font-medium text-foreground bg-transparent rounded-md px-1.5 py-0.5 border border-transparent hover:border-border hover:bg-secondary/30 focus:border-ring focus:bg-background focus:outline-none transition-colors w-full max-w-[200px]"
             />
             <span className="text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors text-xs pointer-events-none">✎</span>
             {(budget.start_date || budget.end_date) &&
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
                 {budget.start_date && new Date(budget.start_date).toLocaleDateString()}
                 {budget.start_date && budget.end_date && " – "}
                 {budget.end_date && new Date(budget.end_date).toLocaleDateString()}
               </p>
             }
           </div>
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <label className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-muted-foreground cursor-pointer">
               <Switch
                 checked={budget.rollover_enabled}
                 onCheckedChange={(v) => updateBudget.mutate({ id: budget.id, rollover_enabled: v })} />
               Rollover
             </label>
-            <button onClick={exportCSV} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+            <button onClick={exportCSV} className="rounded-md border border-border px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
               Export
             </button>
           </div>
@@ -368,14 +369,12 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
 
         {/* Rollover banner */}
         {rolloverData &&
-        <div className="mt-3 rounded-md bg-positive/10 px-3 py-2 text-xs text-positive">
+        <div className="mb-2 rounded-md bg-positive/10 px-3 py-1.5 text-[10px] sm:text-xs text-positive">
             Rollover from "{rolloverData.fromBudgetName}": {formatPHP(rolloverData.amount)}
           </div>
         }
-      </div>
 
-      {/* Sticky Summary Section */}
-      <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 bg-background border-b border-border shadow-sm">
+        {/* Summary Cards */}
       {splitEnabled ? (
         <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
           {/* Column 1: Overall Summary */}
