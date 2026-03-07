@@ -86,7 +86,7 @@ const Index = () => {
           onSelectBudget={handleSelectBudget}
           onSelectPlan={handleSelectPlan} />
 
-        <main className="flex-1 px-3 sm:px-4 py-4 sm:py-10 overflow-x-hidden overflow-y-auto bg-background">
+        <main className="flex-1 px-3 sm:px-4 py-4 sm:py-10 overflow-x-hidden overflow-y-auto bg-secondary">
           <div className="mx-auto max-w-5xl space-y-3 sm:space-y-4">
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -306,12 +306,12 @@ const BudgetView = ({ budget, showSettings, showRecurring }: BudgetViewProps) =>
         <p className="mt-1 text-xs text-muted-foreground">
           {pctSaved >= 0 ? "+" : ""}{pctSaved.toFixed(1)}% saved
         </p>
-        {(totalDebt > 0 || totalSaved > 0) && (
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        {(totalDebt > 0 || totalSaved > 0) &&
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
             {totalDebt > 0 && <span>Debt: <span className="font-medium text-foreground">{formatPHP(totalDebt)}</span></span>}
             {totalSaved > 0 && <span>Savings: <span className="font-medium text-foreground">{formatPHP(totalSaved)}</span></span>}
           </div>
-        )}
+        }
 
         {goalTarget > 0 &&
         <div className="mt-3">
@@ -431,7 +431,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items,
     onReorder: (reordered) => reordered.forEach((item) => onUpdate(item)),
-    queryKey,
+    queryKey
   });
 
   return (
@@ -453,8 +453,8 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
             <Checkbox
             checked={item.included}
-            onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })}
-            />
+            onCheckedChange={(checked) => onUpdate({ ...item, included: !!checked })} />
+          
             <Checkbox
             checked={item.paid}
             onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })}
@@ -688,7 +688,7 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items,
     onReorder: (reordered) => reordered.forEach((item) => onUpsert(item)),
-    queryKey,
+    queryKey
   });
 
   return (
@@ -785,7 +785,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
   const { dragIndex, overIndex, handleDragStart, handleDragOver, handleDragEnd, handleDragLeave } = useDragReorder({
     items,
     onReorder: (reordered) => reordered.forEach((item) => onUpsert(item)),
-    queryKey,
+    queryKey
   });
 
   return (
