@@ -108,28 +108,30 @@ const Index = () => {
           onSelectBudget={handleSelectBudget}
           onSelectPlan={handleSelectPlan} />
 
-        <main className="flex-1 min-h-0 h-screen overflow-y-auto px-3 sm:px-4 pt-4 sm:pt-6 bg-secondary">
-          <div className="mx-auto max-w-5xl space-y-3 sm:space-y-4">
-            {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <SidebarTrigger className="h-6 w-6" />
-                <h1 className="text-lg font-semibold text-foreground">Budget</h1>
-              </div>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {!activePlanId &&
-                <>
-                    <button onClick={() => setShowRecurring(!showRecurring)} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-                      Recurring
-                    </button>
-                    <button onClick={() => setShowSettings(!showSettings)} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-                      Settings
-                    </button>
-                  </>
-                }
-                <button onClick={() => signOut()} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-                  Sign Out
-                </button>
+        <main className="flex-1 min-h-0 h-screen overflow-y-auto bg-secondary">
+          <div className="mx-auto max-w-5xl px-3 sm:px-4 space-y-3 sm:space-y-4">
+            {/* Top Nav - sticky, handled per view below */}
+            <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 bg-background border-b border-border shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <SidebarTrigger className="h-6 w-6" />
+                  <h1 className="text-sm sm:text-lg font-semibold text-foreground">Budget</h1>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {!activePlanId &&
+                  <>
+                      <button onClick={() => setShowRecurring(!showRecurring)} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                        Recurring
+                      </button>
+                      <button onClick={() => setShowSettings(!showSettings)} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                        Settings
+                      </button>
+                    </>
+                  }
+                  <button onClick={() => signOut()} className="rounded-md border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
+                    Sign Out
+                  </button>
+                </div>
               </div>
             </div>
 
