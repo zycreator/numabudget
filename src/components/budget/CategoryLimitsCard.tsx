@@ -44,9 +44,9 @@ const CategoryLimitsCard = ({ items, categories, limits }: Props) => {
                 {formatPHP(d.spent)} / {formatPHP(d.limit)}
               </span>
             </div>
-            <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+            <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${
+                className={`h-full rounded-full transition-all duration-500 ease-out ${
                   d.pct >= 90 ? "bg-negative" : d.pct >= 75 ? "bg-primary" : "bg-accent"
                 }`}
                 style={{ width: `${d.pct}%` }}
