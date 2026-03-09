@@ -33,7 +33,7 @@ const CategoryLimitsCard = ({ items, categories, limits }: Props) => {
   if (data.length === 0) return null;
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-xl border border-border bg-card/60 backdrop-blur-xl p-4 shadow-lg shadow-black/10">
       <h3 className="text-sm font-medium text-muted-foreground mb-3">Budget Limits</h3>
       <div className="space-y-3">
         {data.map((d) => (
