@@ -567,7 +567,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
 };
 
 // ─── Entry Card ──────────────────────────────────────────────
-
+interface EntryCardProps {
   title: string;
   total: number;
   items: BudgetItem[];
