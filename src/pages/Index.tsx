@@ -731,18 +731,18 @@ const SplitBudgetGrid = ({
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       )}
-      <div className="relative w-20 sm:w-24 shrink-0">
-        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
+      <div className="relative w-[72px] sm:w-24 shrink-0">
+        <span className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-[10px] sm:text-xs text-muted-foreground/50">₱</span>
         <input
           type="number"
           placeholder="0.00"
           defaultValue={item.amount || ""}
           onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
-          className={`w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+          className={`w-full rounded-md border border-border bg-background py-2 sm:py-1.5 pl-4 sm:pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
           step="0.01"
         />
       </div>
-      <button onClick={() => onDelete(item.id)} className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">✕</button>
+      <button onClick={() => onDelete(item.id)} className="shrink-0 p-1 text-muted-foreground/40 hover:text-negative text-xs">✕</button>
     </div>
   );
 
