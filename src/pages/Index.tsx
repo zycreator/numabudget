@@ -526,21 +526,19 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
 
       </div>
 
-      <div className="flex gap-2">
-        <button
-          onClick={() => {if (confirm("Clear all items for this budget?")) clearItems.mutate(budget.id);}}
-          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-
-          Clear All
-        </button>
+      <div className="flex gap-2 pt-2 border-t border-border/30">
         {recurringItems.length > 0 &&
         <button
           onClick={handleApplyRecurring}
-          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-secondary hover:text-secondary-foreground">
-
+          className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/20">
             Apply Recurring Items
           </button>
         }
+        <button
+          onClick={() => {if (confirm("Clear all items for this budget?")) clearItems.mutate(budget.id);}}
+          className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-2 text-xs font-medium text-destructive/70 transition-colors hover:bg-destructive/10 hover:text-destructive ml-auto">
+          Clear All
+        </button>
       </div>
     </div>);
 
