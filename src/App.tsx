@@ -33,7 +33,7 @@ const SubscribeRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (authLoading || subLoading) return null;
   if (!user) return <Navigate to="/auth" replace />;
-  if (isActive) return <Navigate to="/" replace />;
+  if (hasAccess) return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 
