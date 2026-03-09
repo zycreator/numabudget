@@ -48,7 +48,6 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
   const [budgetName, setBudgetName] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
-  const [rollover, setRollover] = useState(false);
   const [planName, setPlanName] = useState("");
   const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
