@@ -1300,7 +1300,7 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
   });
 
   return (
-    <div className="rounded-lg border border-border p-4 bg-primary-foreground">
+    <div className="rounded-xl border border-border p-4 bg-card/60 backdrop-blur-xl shadow-lg shadow-black/10">
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">Debt</h3>
         <span className="text-sm font-semibold text-negative">{formatPHP(totalDebt)}</span>
