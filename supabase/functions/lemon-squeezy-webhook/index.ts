@@ -63,7 +63,6 @@ Deno.serve(async (req) => {
 
     console.log("Lemon Squeezy event:", eventName);
 
-    // Handle successful payment events
     if (eventName === "order_created") {
       const customerEmail = event.data?.attributes?.user_email;
 
@@ -82,7 +81,6 @@ Deno.serve(async (req) => {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
       );
 
-      // Find user by email
       const { data: users, error: userError } =
         await supabaseAdmin.auth.admin.listUsers();
 
@@ -106,7 +104,6 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Update profile to grant lifetime access
       const { error: updateError } = await supabaseAdmin
         .from("profiles")
         .update({ has_lifetime_access: true })
