@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 
-const LEMON_SQUEEZY_CHECKOUT_URL = "https://YOUR_LEMONSQUEEZY_CHECKOUT_URL_HERE";
+const LEMON_SQUEEZY_CHECKOUT_URL = "https://numa.lemonsqueezy.com/checkout/buy/6dcc6e88-5ab7-4c75-a463-ea026f54c3dc";
 
 const Subscribe = () => {
   const { signOut } = useAuth();
