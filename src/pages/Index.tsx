@@ -441,7 +441,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
                 {formatPHP(Math.max(0, net))} / {formatPHP(goalTarget)}
               </span>
             </div>
-            <div className="h-2 rounded-full bg-secondary overflow-hidden">
+            <div className="h-3 rounded-full bg-secondary overflow-hidden">
               <div
               className={`h-full rounded-full transition-all ${goalPct >= 100 ? "bg-positive" : "bg-accent"}`}
               style={{ width: `${Math.max(0, goalPct)}%` }} />
