@@ -199,7 +199,6 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   const { data: savingsGoal } = useSavingsGoal(budget.id);
   const { data: recurringItems = [] } = useRecurringItems();
   const { data: categoryLimits = [] } = useCategoryLimits(budget.id);
-  const { data: rolloverData } = useRolloverAmount(budget.id);
   const { data: debtItems = [] } = useDebtItems(budget.id);
   const { data: savingsItems = [] } = useSavingsItems(budget.id);
   const updateBudget = useUpdateBudget();
