@@ -137,11 +137,9 @@ const Index = () => {
           onSelectBudget={handleSelectBudget}
           onSelectPlan={handleSelectPlan}
           onToggleRecurring={activeBudget ? () => setShowRecurring(v => !v) : undefined}
-          onToggleRollover={activeBudget ? () => updateBudgetIndex.mutate({ id: activeBudget.id, rollover_enabled: !activeBudget.rollover_enabled }) : undefined}
           onExport={activeBudget ? () => exportRef.current?.() : undefined}
           onToggleSettings={activeBudget ? () => setShowSettings(v => !v) : undefined}
           onSignOut={() => signOut()}
-          rolloverEnabled={activeBudget?.rollover_enabled ?? false}
         />
 
         <main className="flex-1 min-h-0 h-screen overflow-y-auto bg-secondary">
