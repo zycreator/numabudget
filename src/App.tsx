@@ -7,7 +7,9 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useAccessControl } from "@/hooks/useAccessControl";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Subscribe from "./pages/Subscribe";
+import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +52,8 @@ const AppRoutes = () => (
       <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
       <Route path="/subscribe" element={<SubscribeRoute><Subscribe /></SubscribeRoute>} />
       <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/welcome" element={<Welcome />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>
