@@ -59,25 +59,25 @@ const PlannerView = ({ plan }: PlannerViewProps) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-foreground">📝 {plan.name}</h1>
-          <p className="text-xs text-muted-foreground">Plan / Scratch Pad</p>
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-base sm:text-lg font-semibold text-foreground truncate">📝 {plan.name}</h1>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">Plan / Scratch Pad</p>
         </div>
-        <Button onClick={handleConvert} variant="default" size="sm" disabled={convertToBudget.isPending}>
+        <Button onClick={handleConvert} variant="default" size="sm" disabled={convertToBudget.isPending} className="shrink-0 text-xs">
           Convert to Budget
         </Button>
       </div>
 
       {/* Summary */}
-      <div className="rounded-lg border border-border bg-card p-4">
-        <h2 className="text-sm font-medium text-muted-foreground mb-2">Plan Summary</h2>
-        <p className={`text-3xl font-bold tracking-tight ${net >= 0 ? "text-positive" : "text-negative"}`}>
+      <div className="rounded-xl border border-border bg-card/60 backdrop-blur-xl shadow-lg shadow-black/10 p-3 sm:p-4">
+        <h2 className="text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Plan Summary</h2>
+        <p className={`text-2xl sm:text-3xl font-bold tracking-tight ${net >= 0 ? "text-positive" : "text-negative"}`}>
           {formatPHP(net)}
         </p>
-        <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+        <div className="flex gap-3 sm:gap-4 mt-1 text-[10px] sm:text-xs text-muted-foreground">
           <span>Income: {formatPHP(totalIncome)}</span>
           <span>Expenses: {formatPHP(totalExpenses)}</span>
         </div>
