@@ -1478,8 +1478,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
       </div>
       <button
         onClick={onAdd}
-        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors">
-
+        className="mt-2 w-full rounded-md border border-dashed border-border py-3 sm:py-2 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary">
         + Add Savings Goal
       </button>
     </div>);
