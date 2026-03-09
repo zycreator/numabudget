@@ -452,7 +452,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
 
       {/* Budget Breakdown Chart */}
       {(expenseItems.length > 0 || totalDebt > 0 || totalSaved > 0) &&
-      <div className="rounded-lg border border-border p-4 bg-primary-foreground">
+      <div className="rounded-xl border border-border p-4 bg-card/60 backdrop-blur-xl shadow-lg shadow-black/10">
           <h3 className="text-sm font-medium text-muted-foreground mb-2">Budget Breakdown</h3>
           <ExpensePieChart items={items} categories={categories} totalDebt={totalDebt} totalSaved={totalSaved} />
           <ExpenseLegend items={items} categories={categories} totalDebt={totalDebt} totalSaved={totalSaved} />
