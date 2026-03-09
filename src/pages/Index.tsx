@@ -403,7 +403,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
               <span className="hidden sm:inline">{formatPHP(totalIncomeAll - totalExpensesAll)}</span>
             </p>
             <div className="mt-0.5 sm:mt-1 space-y-0 sm:space-y-0.5 text-[8px] sm:text-[10px] text-muted-foreground">
-              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(totalIncomeChecked - rolloverAmount)}</span><span className="hidden sm:inline"> / {formatPHP(totalIncomeAll - rolloverAmount)}</span></p>
+              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(totalIncomeChecked)}</span><span className="hidden sm:inline"> / {formatPHP(totalIncomeAll)}</span></p>
               <p className="truncate">Exp: <span className="text-positive">{formatPHPCompact(totalExpensesChecked)}</span><span className="hidden sm:inline"> / {formatPHP(totalExpensesAll)}</span></p>
             </div>
           </div>
