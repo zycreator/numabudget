@@ -749,7 +749,7 @@ const SplitBudgetGrid = ({
   const renderAddButton = (onClick: () => void) => (
     <button
       onClick={onClick}
-      className="mt-2 w-full rounded-md border border-dashed border-border py-2.5 sm:py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary"
+      className="mt-2 w-full rounded-md border border-dashed border-border py-3 sm:py-2 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary"
     >
       + Add Row
     </button>
