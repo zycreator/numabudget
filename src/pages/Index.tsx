@@ -471,8 +471,8 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
       {/* Expense breakdown charts */}
       {expenseItems.length > 0 && categories.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ExpensePieChart expenses={expenseItems} categories={categories} />
-          <ExpenseLegend expenses={expenseItems} categories={categories} />
+          <ExpensePieChart items={expenseItems} categories={categories} />
+          <ExpenseLegend items={expenseItems} categories={categories} />
         </div>
       )}
 
