@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgot, setIsForgot] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,6 +18,20 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (isForgot) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Check your email", description: "We sent you a password reset link." });
+        setIsForgot(false);
+      }
+      setLoading(false);
+      return;
+    }
 
     if (isLogin) {
       const { error } = await signIn(email, password);
@@ -41,7 +57,7 @@ const Auth = () => {
         <div className="text-center space-y-3">
           <img src={logo} alt="Numa" className="h-16 mx-auto" />
           <p className="text-sm text-muted-foreground">
-            {isLogin ? "Sign in to your account" : "Create a new account"}
+            {isForgot ? "Reset your password" : isLogin ? "Sign in to your account" : "Create a new account"}
           </p>
         </div>
 
@@ -57,35 +73,59 @@ const Auth = () => {
               placeholder="you@example.com"
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
-              placeholder="••••••••"
-              minLength={6}
-            />
-          </div>
+          {!isForgot && (
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Password</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring"
+                placeholder="••••••••"
+                minLength={6}
+              />
+            </div>
+          )}
           <button
             type="submit"
             disabled={loading}
             className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            {loading ? "..." : isLogin ? "Sign In" : "Sign Up"}
+            {loading ? "..." : isForgot ? "Send Reset Link" : isLogin ? "Sign In" : "Sign Up"}
           </button>
         </form>
 
+        {isLogin && !isForgot && (
+          <p className="text-center text-xs text-muted-foreground">
+            <button
+              onClick={() => setIsForgot(true)}
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Forgot password?
+            </button>
+          </p>
+        )}
+
         <p className="text-center text-xs text-muted-foreground">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="font-medium text-primary underline-offset-2 hover:underline"
-          >
-            {isLogin ? "Sign up" : "Sign in"}
-          </button>
+          {isForgot ? (
+            <button
+              onClick={() => setIsForgot(false)}
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Back to sign in
+            </button>
+          ) : (
+            <>
+              {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+              <button
+                onClick={() => setIsLogin(!isLogin)}
+                className="font-medium text-primary underline-offset-2 hover:underline"
+              >
+                {isLogin ? "Sign up" : "Sign in"}
+              </button>
+            </>
+          )}
         </p>
       </div>
     </div>
