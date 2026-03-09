@@ -494,7 +494,6 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
           onUpsert={(item) => upsertDebt.mutate(item)}
           onDelete={(id) => deleteDebt.mutate(id)}
           onAdd={() => upsertDebt.mutate({
-            user_id: user!.id,
             budget_id: budget.id,
             description: "",
             amount: 0,
