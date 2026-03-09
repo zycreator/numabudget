@@ -6,8 +6,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const IS_TEST_MODE = Deno.env.get("WEBHOOK_TEST_MODE") === "true";
-
 async function verifySignature(
   payload: string,
   signature: string,
@@ -34,34 +32,30 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const secret = Deno.env.get("LEMONSQUEEZY_WEBHOOK_SECRET");
+    if (!secret) {
+      return new Response(
+        JSON.stringify({ error: "Webhook secret not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const body = await req.text();
+    const signature = req.headers.get("x-signature");
 
-    // Verify signature (skip in test mode)
-    const testHeader = req.headers.get("x-test-mode");
-    if (testHeader !== "true") {
-      const secret = Deno.env.get("LEMONSQUEEZY_WEBHOOK_SECRET");
-      if (!secret) {
-        return new Response(
-          JSON.stringify({ error: "Webhook secret not configured" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+    if (!signature) {
+      return new Response(
+        JSON.stringify({ error: "Missing signature" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-      const signature = req.headers.get("x-signature");
-      if (!signature) {
-        return new Response(
-          JSON.stringify({ error: "Missing signature" }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      const isValid = await verifySignature(body, signature, secret);
-      if (!isValid) {
-        return new Response(
-          JSON.stringify({ error: "Invalid signature" }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+    const isValid = await verifySignature(body, signature, secret);
+    if (!isValid) {
+      return new Response(
+        JSON.stringify({ error: "Invalid signature" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const event = JSON.parse(body);
