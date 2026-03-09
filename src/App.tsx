@@ -23,7 +23,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   if (!user) return <Navigate to="/auth" replace />;
-  if (!isActive) return <Navigate to="/subscribe" replace />;
+  if (!hasAccess) return <Navigate to="/subscribe" replace />;
   return <>{children}</>;
 };
 
