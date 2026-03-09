@@ -1334,24 +1334,16 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
               className="w-full rounded-md border border-border bg-background py-2 sm:py-1.5 pl-4 sm:pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               step="0.01" />
             </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className={cn(
+            <DatePopover
+              value={item.due_date}
+              onSelect={(date) => onUpsert({ ...item, due_date: date ? format(date, "yyyy-MM-dd") : null })}
+              triggerClassName={cn(
                 "shrink-0 rounded-md border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-ring",
                 item.due_date ? "text-foreground" : "text-muted-foreground/50"
-              )}>
-                  {item.due_date ? format(new Date(item.due_date), "MMM d") : "Due"}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                mode="single"
-                selected={item.due_date ? new Date(item.due_date) : undefined}
-                onSelect={(date) => onUpsert({ ...item, due_date: date ? format(date, "yyyy-MM-dd") : null })}
-                className={cn("p-3 pointer-events-auto")} />
-
-              </PopoverContent>
-            </Popover>
+              )}
+              formatFn={(d) => format(new Date(d), "MMM d")}
+              placeholder="Due"
+            />
             <button
             onClick={() => onDelete(item.id)}
             className="shrink-0 p-1 text-muted-foreground/40 hover:text-negative text-xs">
