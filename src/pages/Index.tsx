@@ -771,10 +771,10 @@ const SplitBudgetGrid = ({
     <div className="space-y-0">
       {/* Card headers row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-        <div className="rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground">
+        <div className="rounded-t-xl border border-b-0 border-border p-3 bg-card/60 backdrop-blur-xl">
           <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Income</h3>
         </div>
-        <div className="rounded-t-lg sm:rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground max-sm:rounded-none max-sm:border-t-0">
+        <div className="rounded-t-xl sm:rounded-t-xl border border-b-0 border-border p-3 bg-card/60 backdrop-blur-xl max-sm:rounded-none max-sm:border-t-0">
           <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Expenses</h3>
         </div>
       </div>
