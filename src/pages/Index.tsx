@@ -799,7 +799,7 @@ const SplitBudgetGrid = ({
 
       {/* Split toggle divider */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3">
+        <div className="border-x border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3">
           <div className="flex items-center gap-2 py-2.5 sm:py-2 border-t border-b border-border/40">
             <Switch checked={true} onCheckedChange={onToggleSplit} className="scale-75 origin-left" />
             <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
