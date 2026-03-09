@@ -312,7 +312,6 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
     const list = type === "income" ? incomeItems : expenseItems;
     const maxSort = list.length > 0 ? Math.max(...list.map(i => i.sort_order)) : 0;
     upsertItem.mutate({
-      user_id: user!.id,
       budget_id: budget.id,
       type,
       description: "",
