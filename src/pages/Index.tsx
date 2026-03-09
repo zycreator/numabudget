@@ -49,6 +49,36 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 
+const DatePopover = ({ value, onSelect, triggerClassName, formatFn, placeholder }: {
+  value: string | null | undefined;
+  onSelect: (date: Date | undefined) => void;
+  triggerClassName: string;
+  formatFn: (dateStr: string) => string;
+  placeholder: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className={triggerClassName}>
+          {value ? formatFn(value) : placeholder}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={value ? new Date(value + (value.length === 10 ? "T00:00:00" : "")) : undefined}
+          onSelect={(date) => {
+            onSelect(date);
+            setOpen(false);
+          }}
+          className={cn("p-3 pointer-events-auto")}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 
 const formatPHP = (n: number) =>
 `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
