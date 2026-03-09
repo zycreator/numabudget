@@ -143,7 +143,7 @@ const Index = () => {
         />
 
         <main className="flex-1 min-h-0 h-screen overflow-y-auto bg-secondary">
-          <div className="mx-auto max-w-5xl px-3 sm:px-4 space-y-3 sm:space-y-4">
+          <div className="mx-auto max-w-5xl px-2 sm:px-4 md:px-6 space-y-3 sm:space-y-4">
 
             {activePlanId && activePlan ? (
             <>
