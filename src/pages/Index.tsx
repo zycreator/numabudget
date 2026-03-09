@@ -1271,20 +1271,22 @@ const RecurringPanel = ({ items, categories, onUpsert, onDelete, onApply }: Recu
           </div>
         )}
       </div>
-      <div className="flex gap-2">
-        <select value={type} onChange={(e) => setType(e.target.value as "income" | "expense")} className="rounded-md border border-border bg-background px-1.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <select value={type} onChange={(e) => setType(e.target.value as "income" | "expense")} className="rounded-md border border-border bg-background px-1.5 py-2 sm:py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
           <option value="income">Income</option>
           <option value="expense">Expense</option>
         </select>
-        <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Description" className="flex-1 min-w-0 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring" />
-        {type === "expense" &&
-        <select value={catId} onChange={(e) => setCatId(e.target.value)} className="w-20 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
-            <option value="">—</option>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        }
-        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₱" className="w-20 rounded-md border border-border bg-background px-2 py-1.5 text-xs text-right text-foreground focus:outline-none focus:ring-1 focus:ring-ring" step="0.01" />
-        <button onClick={handleAdd} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">Add</button>
+        <div className="flex gap-2 flex-1">
+          <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Description" className="flex-1 min-w-0 rounded-md border border-border bg-background px-2.5 py-2 sm:py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring" />
+          {type === "expense" &&
+          <select value={catId} onChange={(e) => setCatId(e.target.value)} className="w-20 rounded-md border border-border bg-background px-1 py-2 sm:py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+              <option value="">—</option>
+              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          }
+          <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₱" className="w-20 rounded-md border border-border bg-background px-2 py-2 sm:py-1.5 text-xs text-right text-foreground focus:outline-none focus:ring-1 focus:ring-ring" step="0.01" />
+          <button onClick={handleAdd} className="rounded-md bg-primary px-3 py-2 sm:py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">Add</button>
+        </div>
       </div>
     </div>);
 
