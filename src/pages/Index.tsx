@@ -543,12 +543,11 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
         <RecurringPanel
           items={recurringItems}
           categories={categories}
-          onUpsert={(item) => upsertRecurring.mutate({ ...item, user_id: user!.id })}
+          onUpsert={(item) => upsertRecurring.mutate(item)}
           onDelete={(id) => deleteRecurring.mutate(id)}
           onApply={() => applyRecurring.mutate({
             budgetId: budget.id,
-            month: new Date().getMonth() + 1,
-            year: new Date().getFullYear(),
+            items: recurringItems.filter(r => r.is_active),
           })}
         />
       )}
