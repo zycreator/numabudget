@@ -497,6 +497,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
             budget_id: budget.id,
             description: "",
             amount: 0,
+            due_date: null,
             sort_order: debtItems.length,
           })}
         />
