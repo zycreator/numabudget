@@ -71,27 +71,6 @@ const PlannerView = ({ plan }: PlannerViewProps) => {
         </Button>
       </div>
 
-      {/* Rollover Include */}
-      <div className="rounded-lg border border-border bg-card p-4">
-        <label className="text-xs text-muted-foreground">Include rollover from budget:</label>
-        <Select value={rolloverBudgetId ?? "none"} onValueChange={(v) => setRolloverBudgetId(v === "none" ? null : v)}>
-          <SelectTrigger className="mt-1 text-xs">
-            <SelectValue placeholder="None" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {budgets.map((b) => (
-              <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {rolloverData && (
-          <p className="mt-2 text-xs text-positive">
-            Rollover from "{rolloverData.fromBudgetName}": {formatPHP(rolloverData.amount)}
-          </p>
-        )}
-      </div>
-
       {/* Summary */}
       <div className="rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-medium text-muted-foreground mb-2">Plan Summary</h2>
