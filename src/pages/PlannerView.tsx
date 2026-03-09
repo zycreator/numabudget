@@ -3,9 +3,7 @@ import { useDragReorder } from "@/hooks/useDragReorder";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { usePlanItems, useUpsertPlanItem, useDeletePlanItem, useConvertPlanToBudget, type Plan, type PlanItem } from "@/hooks/usePlans";
-import { useCategories, useRolloverAmount, type Category } from "@/hooks/useBudgetData";
-import { useBudgets } from "@/hooks/useBudgets";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCategories, type Category } from "@/hooks/useBudgetData";
 import { toast } from "sonner";
 
 const formatPHP = (n: number) =>
@@ -18,22 +16,16 @@ interface PlannerViewProps {
 const PlannerView = ({ plan }: PlannerViewProps) => {
   const { data: items = [], isLoading } = usePlanItems(plan.id);
   const { data: categories = [] } = useCategories();
-  const { data: budgets = [] } = useBudgets();
   const upsertItem = useUpsertPlanItem();
   const deleteItem = useDeletePlanItem();
   const convertToBudget = useConvertPlanToBudget();
 
-  const [rolloverBudgetId, setRolloverBudgetId] = useState<string | null>(plan.include_rollover_from);
-  const { data: rolloverData } = useRolloverAmount(rolloverBudgetId);
-
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
 
-  const rolloverAmount = rolloverData?.amount ?? 0;
-
   const totalIncome = useMemo(
-    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0) + rolloverAmount,
-    [incomeItems, rolloverAmount]
+    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
+    [incomeItems]
   );
   const totalExpenses = useMemo(
     () => expenseItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
