@@ -216,10 +216,6 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
                     </Popover>
                   </div>
                 </div>
-                <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
-                  <Checkbox checked={rollover} onCheckedChange={(v) => setRollover(!!v)} />
-                  Carry over remaining balance to next budget
-                </label>
                 <Button onClick={handleCreateBudget} className="w-full" disabled={!budgetName.trim()}>
                   Create Budget
                 </Button>
