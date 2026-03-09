@@ -28,14 +28,12 @@ interface AppSidebarProps {
   onSelectBudget: (id: string) => void;
   onSelectPlan: (id: string) => void;
   onToggleRecurring?: () => void;
-  onToggleRollover?: () => void;
   onExport?: () => void;
   onToggleSettings?: () => void;
   onSignOut?: () => void;
-  rolloverEnabled?: boolean;
 }
 
-export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSelectPlan, onToggleRecurring, onToggleRollover, onExport, onToggleSettings, onSignOut, rolloverEnabled }: AppSidebarProps) {
+export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSelectPlan, onToggleRecurring, onExport, onToggleSettings, onSignOut }: AppSidebarProps) {
   const { data: budgets = [] } = useBudgets();
   const { data: plans = [] } = usePlans();
   const createBudget = useCreateBudget();
