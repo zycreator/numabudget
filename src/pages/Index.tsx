@@ -524,7 +524,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
           categoryLimits={categoryLimits.map(cl => ({ category_id: cl.category_id, limit_amount: cl.limit_amount }))}
           budgetId={budget.id}
           savingsGoal={goalTarget}
-          onUpsertCategory={(c) => upsertCategory.mutate({ ...c, user_id: user!.id })}
+          onUpsertCategory={(c) => upsertCategory.mutate(c)}
           onDeleteCategory={(id) => deleteCategory.mutate(id)}
           onSetGoal={(amt) => upsertGoal.mutate({
             user_id: user!.id,
