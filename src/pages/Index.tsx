@@ -361,13 +361,13 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
       }
 
       {/* Sticky Header + Summary Group */}
-      <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 sm:py-3 bg-background border-b border-border shadow-sm">
+      <div className="sticky top-0 z-50 -mx-2 sm:-mx-4 md:-mx-6 px-2 sm:px-4 md:px-6 py-2 sm:py-3 bg-background border-b border-border shadow-sm">
         {/* Single-line title: Budget · Name · Dates */}
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <SidebarTrigger className="h-5 w-5 shrink-0" />
-          <span className="text-xs sm:text-sm font-semibold text-foreground">Budget</span>
-          <span className="text-muted-foreground/40">·</span>
-          <div className="group inline-flex items-center gap-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-1.5 overflow-hidden">
+          <SidebarTrigger className="h-6 w-6 sm:h-5 sm:w-5 shrink-0" />
+          <span className="text-xs sm:text-sm font-semibold text-foreground shrink-0">Budget</span>
+          <span className="text-muted-foreground/40 shrink-0">·</span>
+          <div className="group inline-flex items-center gap-1 min-w-0 flex-1">
             <input
               type="text"
               defaultValue={budget.name}
@@ -378,18 +378,17 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
                 if (val !== budget.name) updateBudget.mutate({ id: budget.id, name: val });
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="text-xs sm:text-sm font-medium text-foreground bg-transparent rounded-md px-1 py-0.5 border border-transparent hover:border-border hover:bg-secondary/30 focus:border-ring focus:bg-background focus:outline-none transition-colors max-w-[140px] sm:max-w-[200px]"
+              className="text-xs sm:text-sm font-medium text-foreground bg-transparent rounded-md px-1 py-1 sm:py-0.5 border border-transparent hover:border-border hover:bg-secondary/30 focus:border-ring focus:bg-background focus:outline-none transition-colors w-full max-w-[120px] sm:max-w-[200px]"
             />
-            <span className="text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors text-[10px] pointer-events-none">✎</span>
+            <span className="text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors text-[10px] pointer-events-none hidden sm:inline">✎</span>
           </div>
-          {(budget.start_date || budget.end_date) && <>
-            <span className="text-muted-foreground/40">·</span>
-            <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
+          {(budget.start_date || budget.end_date) &&
+            <span className="text-[9px] sm:text-xs text-muted-foreground whitespace-nowrap shrink-0 hidden sm:inline">
               {budget.start_date && new Date(budget.start_date).toLocaleDateString()}
               {budget.start_date && budget.end_date && " – "}
               {budget.end_date && new Date(budget.end_date).toLocaleDateString()}
             </span>
-          </>}
+          }
         </div>
 
         {/* Summary Cards */}
