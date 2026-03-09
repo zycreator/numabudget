@@ -87,14 +87,12 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
       name: budgetName.trim(),
       start_date: startDate ? format(startDate, "yyyy-MM-dd") : null,
       end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
-      rollover_enabled: rollover
     }, {
       onSuccess: (data) => {
         onSelectBudget(data.id);
         setBudgetName("");
         setStartDate(undefined);
         setEndDate(undefined);
-        setRollover(false);
         setShowNewBudget(false);
       }
     });
