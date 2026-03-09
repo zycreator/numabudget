@@ -1,0 +1,1 @@
+UPDATE profiles SET has_lifetime_access = true WHERE id = '42c25f91-56dd-4706-a39c-e92e62a89013';
