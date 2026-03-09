@@ -379,7 +379,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   return (
     <div className="pt-4 space-y-4 px-2 sm:px-4 md:px-6">
       {/* Sticky header */}
-      <div className="sticky top-0 z-20 -mx-2 sm:-mx-4 md:-mx-6 px-2 sm:px-4 md:px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border/30">
+      <div className="sticky top-0 z-20 -mx-2 sm:-mx-4 md:-mx-6 px-2 sm:px-4 md:px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border/30 space-y-2">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="h-5 w-5" />
           <h1 className="text-sm font-semibold text-foreground truncate">{budget.name}</h1>
@@ -389,45 +389,45 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
             </span>
           )}
         </div>
-      </div>
 
-      {/* Summary row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
-          <p className="text-[10px] text-muted-foreground mb-1">Income</p>
-          <p className="text-sm font-bold text-foreground">{formatPHP(totalIncome)}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
-          <p className="text-[10px] text-muted-foreground mb-1">Expenses</p>
-          <p className="text-sm font-bold text-foreground">{formatPHP(totalExpenses)}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
-          <p className="text-[10px] text-muted-foreground mb-1">Remaining</p>
-          <p className={`text-sm font-bold ${net >= 0 ? "text-positive" : "text-negative"}`}>{formatPHP(net)}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
-          <p className="text-[10px] text-muted-foreground mb-1">Savings Rate</p>
-          <p className="text-sm font-bold text-foreground">{pctSaved.toFixed(1)}%</p>
-        </div>
-      </div>
-
-      {/* Period balances when split */}
-      {splitEnabled && (
-        <div className="grid grid-cols-2 gap-2">
+        {/* Summary row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
-            <p className="text-[10px] text-muted-foreground mb-1">Period 1 Balance</p>
-            <p className={`text-sm font-bold ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
-              {formatPHP(periodBalance1Checked)} <span className="text-muted-foreground/50 font-normal text-[10px]">/ {formatPHP(periodBalance1Budgeted)}</span>
-            </p>
+            <p className="text-[10px] text-muted-foreground mb-1">Income</p>
+            <p className="text-sm font-bold text-foreground">{formatPHP(totalIncome)}</p>
           </div>
           <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
-            <p className="text-[10px] text-muted-foreground mb-1">Period 2 Balance</p>
-            <p className={`text-sm font-bold ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
-              {formatPHP(periodBalance2Checked)} <span className="text-muted-foreground/50 font-normal text-[10px]">/ {formatPHP(periodBalance2Budgeted)}</span>
-            </p>
+            <p className="text-[10px] text-muted-foreground mb-1">Expenses</p>
+            <p className="text-sm font-bold text-foreground">{formatPHP(totalExpenses)}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+            <p className="text-[10px] text-muted-foreground mb-1">Remaining</p>
+            <p className={`text-sm font-bold ${net >= 0 ? "text-positive" : "text-negative"}`}>{formatPHP(net)}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+            <p className="text-[10px] text-muted-foreground mb-1">Savings Rate</p>
+            <p className="text-sm font-bold text-foreground">{pctSaved.toFixed(1)}%</p>
           </div>
         </div>
-      )}
+
+        {/* Period balances when split */}
+        {splitEnabled && (
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+              <p className="text-[10px] text-muted-foreground mb-1">Period 1 Balance</p>
+              <p className={`text-sm font-bold ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
+                {formatPHP(periodBalance1Checked)} <span className="text-muted-foreground/50 font-normal text-[10px]">/ {formatPHP(periodBalance1Budgeted)}</span>
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+              <p className="text-[10px] text-muted-foreground mb-1">Period 2 Balance</p>
+              <p className={`text-sm font-bold ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
+                {formatPHP(periodBalance2Checked)} <span className="text-muted-foreground/50 font-normal text-[10px]">/ {formatPHP(periodBalance2Budgeted)}</span>
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Savings goal progress */}
       {goalTarget > 0 && (
