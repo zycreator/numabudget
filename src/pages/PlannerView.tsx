@@ -87,7 +87,7 @@ const PlannerView = ({ plan }: PlannerViewProps) => {
       <div className="grid gap-4 sm:grid-cols-2">
         <PlanEntryCard
           title="Income"
-          total={totalIncome - rolloverAmount}
+          total={totalIncome}
           items={incomeItems}
           categories={categories}
           queryKey={["plan_items", plan.id]}
