@@ -1437,7 +1437,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
                   placeholder="Saving for..."
                   defaultValue={item.description}
                   onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-                  className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
+                  className="flex-1 min-w-[60px] rounded-md border border-border bg-background px-2 py-2 sm:py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
 
                 <div className="relative w-20 shrink-0">
                   <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
