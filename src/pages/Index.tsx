@@ -441,9 +441,9 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
                 {formatPHP(Math.max(0, net))} / {formatPHP(goalTarget)}
               </span>
             </div>
-            <div className="h-2 rounded-full bg-secondary overflow-hidden">
+            <div className="h-3 rounded-full bg-secondary overflow-hidden">
               <div
-              className={`h-full rounded-full transition-all ${goalPct >= 100 ? "bg-positive" : "bg-accent"}`}
+              className={`h-full rounded-full transition-all duration-500 ease-out ${goalPct >= 100 ? "bg-positive" : "bg-accent"}`}
               style={{ width: `${Math.max(0, goalPct)}%` }} />
             </div>
           </div>
@@ -452,7 +452,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
 
       {/* Budget Breakdown Chart */}
       {(expenseItems.length > 0 || totalDebt > 0 || totalSaved > 0) &&
-      <div className="rounded-lg border border-border p-4 bg-primary-foreground">
+      <div className="rounded-xl border border-border p-4 bg-card/60 backdrop-blur-xl shadow-lg shadow-black/10">
           <h3 className="text-sm font-medium text-muted-foreground mb-2">Budget Breakdown</h3>
           <ExpensePieChart items={items} categories={categories} totalDebt={totalDebt} totalSaved={totalSaved} />
           <ExpenseLegend items={items} categories={categories} totalDebt={totalDebt} totalSaved={totalSaved} />
@@ -526,21 +526,19 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
 
       </div>
 
-      <div className="flex gap-2">
-        <button
-          onClick={() => {if (confirm("Clear all items for this budget?")) clearItems.mutate(budget.id);}}
-          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">
-
-          Clear All
-        </button>
+      <div className="flex gap-2 pt-2 border-t border-border/30">
         {recurringItems.length > 0 &&
         <button
           onClick={handleApplyRecurring}
-          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-secondary hover:text-secondary-foreground">
-
+          className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/20">
             Apply Recurring Items
           </button>
         }
+        <button
+          onClick={() => {if (confirm("Clear all items for this budget?")) clearItems.mutate(budget.id);}}
+          className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-2 text-xs font-medium text-destructive/70 transition-colors hover:bg-destructive/10 hover:text-destructive ml-auto">
+          Clear All
+        </button>
       </div>
     </div>);
 
@@ -773,24 +771,24 @@ const SplitBudgetGrid = ({
     <div className="space-y-0">
       {/* Card headers row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-        <div className="rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground">
+        <div className="rounded-t-xl border border-b-0 border-border p-3 bg-card/60 backdrop-blur-xl">
           <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Income</h3>
         </div>
-        <div className="rounded-t-lg sm:rounded-t-lg border border-b-0 border-border p-3 bg-primary-foreground max-sm:rounded-none max-sm:border-t-0">
+        <div className="rounded-t-xl sm:rounded-t-xl border border-b-0 border-border p-3 bg-card/60 backdrop-blur-xl max-sm:rounded-none max-sm:border-t-0">
           <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">Expenses</h3>
         </div>
       </div>
 
       {/* Period 1 row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 pb-2">
+        <div className="border-x border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3 pb-2">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP1))}</span>
           </div>
           {renderPeriodSection(incomeP1, incomeP1Drag, "income-1", 1, false, () => onAddIncome(1), "income")}
         </div>
-        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 pb-2 max-sm:border-t max-sm:border-border/30">
+        <div className="border-x border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3 pb-2 max-sm:border-t max-sm:border-border/30">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP1))}</span>
@@ -801,13 +799,13 @@ const SplitBudgetGrid = ({
 
       {/* Split toggle divider */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3">
+        <div className="border-x border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3">
           <div className="flex items-center gap-2 py-2.5 sm:py-2 border-t border-b border-border/40">
             <Switch checked={true} onCheckedChange={onToggleSplit} className="scale-75 origin-left" />
             <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
           </div>
         </div>
-        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 max-sm:hidden">
+        <div className="border-x border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3 max-sm:hidden">
           <div className="py-2 border-t border-b border-border/40">
             <span className="text-[10px] text-muted-foreground/40">&nbsp;</span>
           </div>
@@ -816,14 +814,14 @@ const SplitBudgetGrid = ({
 
       {/* Period 2 row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-        <div className="rounded-b-lg sm:rounded-b-lg border border-t-0 border-border bg-primary-foreground px-2 sm:px-3 pb-3 max-sm:rounded-none">
+        <div className="rounded-b-xl sm:rounded-b-xl border border-t-0 border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3 pb-3 max-sm:rounded-none">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP2))}</span>
           </div>
           {renderPeriodSection(incomeP2, incomeP2Drag, "income-2", 2, false, () => onAddIncome(2), "income")}
         </div>
-        <div className="rounded-b-lg border border-t-0 border-border bg-primary-foreground px-2 sm:px-3 pb-3">
+        <div className="rounded-b-xl border border-t-0 border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3 pb-3">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 2</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP2))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP2))}</span>
@@ -1028,7 +1026,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
   );
 
   return (
-    <div className="rounded-lg border border-border p-4 bg-primary-foreground flex flex-col">
+    <div className="rounded-xl border border-border p-4 bg-card/60 backdrop-blur-xl shadow-lg shadow-black/10 flex flex-col">
       <div className="mb-3">
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
       </div>
@@ -1302,7 +1300,7 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
   });
 
   return (
-    <div className="rounded-lg border border-border p-4 bg-primary-foreground">
+    <div className="rounded-xl border border-border p-4 bg-card/60 backdrop-blur-xl shadow-lg shadow-black/10">
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">Debt</h3>
         <span className="text-sm font-semibold text-negative">{formatPHP(totalDebt)}</span>
@@ -1399,7 +1397,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
   });
 
   return (
-    <div className="rounded-lg border border-border p-4 bg-primary-foreground">
+    <div className="rounded-xl border border-border p-4 bg-card/60 backdrop-blur-xl shadow-lg shadow-black/10">
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">Savings</h3>
         <span className="text-sm font-semibold text-positive">
