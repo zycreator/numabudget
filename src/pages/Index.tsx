@@ -250,12 +250,12 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   };
 
   const totalIncomeChecked = useMemo(
-    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0) + rolloverAmount,
-    [incomeItems, rolloverAmount]
+    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
+    [incomeItems]
   );
   const totalIncomeAll = useMemo(
-    () => incomeItems.reduce((s, r) => s + r.amount, 0) + rolloverAmount,
-    [incomeItems, rolloverAmount]
+    () => incomeItems.reduce((s, r) => s + r.amount, 0),
+    [incomeItems]
   );
   const totalIncome = totalIncomeChecked;
   const totalExpensesChecked = useMemo(
