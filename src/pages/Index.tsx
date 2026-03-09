@@ -1331,7 +1331,7 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
           onDragOver={(e) => handleDragOver(idx, e)}
           onDragEnd={handleDragEnd}
           onDragLeave={handleDragLeave}
-          className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-opacity ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
+          className={`flex flex-wrap items-center gap-1 sm:gap-1.5 md:gap-2 py-1 transition-opacity ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
             <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
             <input
             type="text"
