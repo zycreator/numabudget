@@ -479,10 +479,9 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
       {/* Category limits */}
       {categories.length > 0 && (
         <CategoryLimitsCard
+          items={expenseItems}
           categories={categories}
-          categoryLimits={categoryLimits}
-          expenses={expenseItems}
-          budgetId={budget.id}
+          limits={categoryLimits}
         />
       )}
 
