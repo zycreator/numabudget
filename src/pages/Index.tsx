@@ -788,7 +788,7 @@ const SplitBudgetGrid = ({
           </div>
           {renderPeriodSection(incomeP1, incomeP1Drag, "income-1", 1, false, () => onAddIncome(1), "income")}
         </div>
-        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 pb-2 max-sm:border-t max-sm:border-border/30">
+        <div className="border-x border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3 pb-2 max-sm:border-t max-sm:border-border/30">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(expenseP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(expenseP1))}</span>
