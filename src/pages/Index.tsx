@@ -971,7 +971,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         handleGlobalDragEnd();
       }}
       onDragLeave={onDragLeaveFn}
-      className={`relative flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-30 scale-95" : ""}`}>
+      className={`relative flex flex-wrap items-center gap-1 sm:gap-1.5 md:gap-2 py-1 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-30 scale-95" : ""}`}>
       {/* Drop indicator line */}
       {oIdx === idx && (
         <div className="absolute -top-[2px] left-0 right-0 h-[3px] rounded-full bg-accent z-10" />
