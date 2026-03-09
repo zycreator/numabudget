@@ -781,7 +781,7 @@ const SplitBudgetGrid = ({
 
       {/* Period 1 row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 pb-2">
+        <div className="border-x border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3 pb-2">
           <div className="flex items-center justify-between mb-1.5 pt-2">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">Period 1</p>
             <span className="text-[10px] font-medium text-muted-foreground">{formatPHP(sumChecked(incomeP1))} <span className="text-muted-foreground/50">/</span> {formatPHP(sumAll(incomeP1))}</span>
