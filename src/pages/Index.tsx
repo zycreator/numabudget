@@ -719,7 +719,7 @@ const SplitBudgetGrid = ({
         placeholder="Description"
         defaultValue={item.description}
         onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-        className={`flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+        className={`flex-1 min-w-[60px] rounded-md border border-border bg-background px-2 py-2 sm:py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
       />
       {showCategory && (
         <select
