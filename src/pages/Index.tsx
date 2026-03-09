@@ -986,8 +986,8 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
       <Popover>
         <PopoverTrigger asChild>
-          <button className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
-            {item.item_date ? formatDateShort(item.item_date) : "M-D"}
+          <button className={`w-10 h-9 sm:h-auto shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
+            {item.item_date ? formatDateShort(item.item_date) : "📅"}
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
