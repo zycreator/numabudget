@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Plus, Wallet, FileText, Archive, Trash2, Copy, Pencil, RotateCcw, Download, Settings, LogOut, Repeat } from "lucide-react";
+import { Plus, Wallet, FileText, Archive, Trash2, Copy, Pencil, Download, Settings, LogOut, Repeat } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
   Sidebar,
