@@ -531,11 +531,8 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
             target_amount: amt,
           })}
           onSetLimit={(catId, amt) => upsertLimit.mutate({
-            user_id: user!.id,
             budget_id: budget.id,
             category_id: catId,
-            month: new Date().getMonth() + 1,
-            year: new Date().getFullYear(),
             limit_amount: amt,
           })}
         />
