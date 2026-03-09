@@ -32,13 +32,11 @@ import {
   type DebtItem,
   type SavingsItem } from
 "@/hooks/useDebtSavingsData";
-import { useBudgets, useUpdateBudget, type Budget } from "@/hooks/useBudgets";
+import { useBudgets, useUpdateBudget, useCreateBudget, type Budget } from "@/hooks/useBudgets";
 import ExpensePieChart from "@/components/budget/ExpensePieChart";
 import ExpenseLegend from "@/components/budget/ExpenseLegend";
 
 import CategoryLimitsCard from "@/components/budget/CategoryLimitsCard";
-import PlannerView from "@/pages/PlannerView";
-import { usePlans, type Plan } from "@/hooks/usePlans";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +46,7 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
+import { Wallet, Plus } from "lucide-react";
 
 const DatePopover = ({ value, onSelect, triggerClassName, formatFn, placeholder }: {
   value: string | null | undefined;
@@ -83,40 +82,23 @@ const DatePopover = ({ value, onSelect, triggerClassName, formatFn, placeholder 
 const formatPHP = (n: number) =>
 `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-// Compact format for mobile headers: drops decimals for large numbers
-const formatPHPCompact = (n: number) => {
-  if (Math.abs(n) >= 1000) return `₱${(n / 1000).toFixed(1)}k`;
-  return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-};
-
 const formatDateShort = (dateStr: string | null) => {
   if (!dateStr) return "";
   const d = new Date(dateStr + "T00:00:00");
   return `${d.getMonth() + 1}-${d.getDate()}`;
 };
 
-const toISODate = (shortStr: string): string | null => {
-  const parts = shortStr.trim().split("-");
-  if (parts.length !== 2) return null;
-  const m = parseInt(parts[0], 10);
-  const d = parseInt(parts[1], 10);
-  if (!m || !d || m < 1 || m > 12 || d < 1 || d > 31) return null;
-  const y = new Date().getFullYear();
-  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-};
-
 const Index = () => {
   const { user, signOut } = useAuth();
   const [activeBudgetId, setActiveBudgetId] = useState<string | null>(null);
-  const [activePlanId, setActivePlanId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showRecurring, setShowRecurring] = useState(false);
   const exportRef = useRef<(() => void) | null>(null);
   const [prefLoaded, setPrefLoaded] = useState(false);
 
   const { data: budgets = [] } = useBudgets();
-  const { data: plans = [] } = usePlans();
   const updateBudgetIndex = useUpdateBudget();
+  const createBudget = useCreateBudget();
 
   // Load last opened budget from user_preferences
   useEffect(() => {
@@ -146,26 +128,27 @@ const Index = () => {
   // Auto-select first budget if none selected (only after pref loaded)
   const effectiveBudgetId = activeBudgetId ?? (prefLoaded && budgets.length > 0 ? budgets[0].id : null);
   const activeBudget = budgets.find((b) => b.id === effectiveBudgetId) ?? null;
-  const activePlan = plans.find((p) => p.id === activePlanId) ?? null;
 
   const handleSelectBudget = (id: string) => {
     setActiveBudgetId(id);
-    setActivePlanId(null);
     saveLastBudget(id);
   };
-  const handleSelectPlan = (id: string) => {
-    setActivePlanId(id);
-    setActiveBudgetId(null);
+
+  const handleCreateFirstBudget = () => {
+    createBudget.mutate({ name: "My First Budget" }, {
+      onSuccess: (data) => {
+        setActiveBudgetId(data.id);
+        saveLastBudget(data.id);
+      }
+    });
   };
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar
-          activeBudgetId={activePlanId ? null : effectiveBudgetId}
-          activePlanId={activePlanId}
+          activeBudgetId={effectiveBudgetId}
           onSelectBudget={handleSelectBudget}
-          onSelectPlan={handleSelectPlan}
           onToggleRecurring={activeBudget ? () => setShowRecurring(v => !v) : undefined}
           onExport={activeBudget ? () => exportRef.current?.() : undefined}
           onToggleSettings={activeBudget ? () => setShowSettings(v => !v) : undefined}
@@ -175,20 +158,7 @@ const Index = () => {
         <main className="flex-1 min-h-0 h-screen overflow-y-auto bg-secondary">
           <div className="mx-auto max-w-5xl px-2 sm:px-4 md:px-6 space-y-3 sm:space-y-4">
 
-            {activePlanId && activePlan ? (
-            <>
-              <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 bg-background border-b border-border shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <SidebarTrigger className="h-5 w-5" />
-                    <h1 className="text-xs sm:text-sm font-semibold text-foreground">Plan</h1>
-                  </div>
-                  <button onClick={() => signOut()} className="rounded-md border border-border px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground">Sign Out</button>
-                </div>
-              </div>
-              <PlannerView plan={activePlan} />
-            </>
-            ) : effectiveBudgetId && activeBudget ? (
+            {effectiveBudgetId && activeBudget ? (
             <BudgetView
               budget={activeBudget}
               showSettings={showSettings}
@@ -200,8 +170,25 @@ const Index = () => {
                 <SidebarTrigger className="h-5 w-5" />
                 <h1 className="text-sm font-semibold text-foreground">Budget</h1>
               </div>
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <p className="text-sm text-muted-foreground">No budgets yet. Create one from the sidebar!</p>
+              {/* Onboarding empty state */}
+              <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Wallet className="h-8 w-8 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-lg font-semibold text-foreground">Welcome to Numa!</h2>
+                  <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    Create your first budget to start tracking your income and expenses. It's simple and takes less than a minute.
+                  </p>
+                </div>
+                <button
+                  onClick={handleCreateFirstBudget}
+                  disabled={createBudget.isPending}
+                  className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 shadow-md disabled:opacity-50"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create My First Budget
+                </button>
               </div>
             </div>
             )}
@@ -299,10 +286,8 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   const totalExpenses = totalExpensesChecked;
   const totalDebt = useMemo(() => debtItems.reduce((s, d) => s + d.amount, 0), [debtItems]);
   const totalSaved = useMemo(() => savingsItems.reduce((s, d) => s + d.saved_amount, 0), [savingsItems]);
-  const totalSavingsTarget = useMemo(() => savingsItems.reduce((s, d) => s + d.target_amount, 0), [savingsItems]);
 
   const net = totalIncome - totalExpenses - totalDebt - totalSaved;
-  const netBudgeted = totalIncomeAll - totalExpensesAll - totalDebt - totalSaved;
   const pctSaved = totalIncome > 0 ? net / totalIncome * 100 : 0;
 
   const goalTarget = savingsGoal?.target_amount ?? 0;
@@ -401,7 +386,12 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
             <p className="text-sm font-bold text-foreground">{formatPHP(totalExpenses)}</p>
           </div>
           <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
-            <p className="text-[10px] text-muted-foreground mb-1">Remaining</p>
+            <p className="text-[10px] text-muted-foreground mb-1">
+              Remaining
+              {(totalDebt > 0 || totalSaved > 0) && (
+                <span className="block text-[9px] text-muted-foreground/60">after debt & savings</span>
+              )}
+            </p>
             <p className={`text-sm font-bold ${net >= 0 ? "text-positive" : "text-negative"}`}>{formatPHP(net)}</p>
           </div>
           <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
@@ -504,7 +494,6 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
         <SavingsBoard
           items={savingsItems}
           totalSaved={totalSaved}
-          totalTarget={totalSavingsTarget}
           queryKey={["savings_items", budget.id]}
           onUpsert={(item) => upsertSaving.mutate(item)}
           onDelete={(id) => deleteSaving.mutate(id)}
@@ -759,7 +748,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
 
       {splitEnabled && (
         <div className="flex flex-col flex-1">
-          {/* Period 1 — entire section is a drop target */}
+          {/* Period 1 */}
           <div
             className={`flex-1 flex flex-col rounded-md p-2 -m-2 transition-colors ${dropTargetPeriod === 1 ? "bg-accent/10 ring-2 ring-accent/30 ring-inset" : ""}`}
             onDragOver={handlePeriodDragOver}
@@ -792,7 +781,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
             <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
           </div>
 
-          {/* Period 2 — entire section is a drop target */}
+          {/* Period 2 */}
           <div
             className={`flex-1 flex flex-col rounded-md p-2 -m-2 transition-colors ${dropTargetPeriod === 2 ? "bg-accent/10 ring-2 ring-accent/30 ring-inset" : ""}`}
             onDragOver={handlePeriodDragOver}
@@ -1022,6 +1011,7 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
         <h3 className="text-sm font-medium text-muted-foreground">Debt</h3>
         <span className="text-sm font-semibold text-negative">{formatPHP(totalDebt)}</span>
       </div>
+      <p className="text-[10px] text-muted-foreground/60 -mt-2 mb-3">Subtracted from Remaining balance</p>
       <div className="space-y-1.5">
         {items.map((item, idx) =>
         <div
@@ -1081,14 +1071,13 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
 interface SavingsBoardProps {
   items: SavingsItem[];
   totalSaved: number;
-  totalTarget: number;
   queryKey: unknown[];
   onUpsert: (item: Omit<SavingsItem, "id"> & {id?: string;}) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
 }
 
-const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDelete, onAdd }: SavingsBoardProps) => {
+const SavingsBoard = ({ items, totalSaved, queryKey, onUpsert, onDelete, onAdd }: SavingsBoardProps) => {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const debouncedUpdate = useCallback((item: SavingsItem) => {
@@ -1106,14 +1095,11 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
     <div className="rounded-xl border border-border p-4 bg-card/60 backdrop-blur-xl shadow-lg shadow-black/10">
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">Savings</h3>
-        <span className="text-sm font-semibold text-positive">
-          {formatPHP(totalSaved)}{totalTarget > 0 ? ` / ${formatPHP(totalTarget)}` : ""}
-        </span>
+        <span className="text-sm font-semibold text-positive">{formatPHP(totalSaved)}</span>
       </div>
+      <p className="text-[10px] text-muted-foreground/60 -mt-2 mb-3">Subtracted from Remaining balance</p>
       <div className="space-y-2.5">
-        {items.map((item, idx) => {
-          const pct = item.target_amount > 0 ? Math.min(item.saved_amount / item.target_amount * 100, 100) : 0;
-          return (
+        {items.map((item, idx) => (
             <div
               key={item.id}
               draggable
@@ -1121,7 +1107,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
               onDragOver={(e) => handleDragOver(idx, e)}
               onDragEnd={handleDragEnd}
               onDragLeave={handleDragLeave}
-              className={`space-y-1 transition-opacity ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
+              className={`transition-opacity ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
               <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 md:gap-2 py-1">
                 <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
                 <input
@@ -1131,24 +1117,13 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
                   onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
                   className="flex-1 min-w-[60px] rounded-md border border-border bg-background px-2 py-2 sm:py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
 
-                <div className="relative w-[68px] sm:w-20 shrink-0">
-                  <span className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
+                <div className="relative w-[72px] sm:w-24 shrink-0">
+                  <span className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-[10px] sm:text-xs text-muted-foreground/50">₱</span>
                   <input
                     type="number"
-                    placeholder="Saved"
+                    placeholder="Amount"
                     defaultValue={item.saved_amount || ""}
                     onChange={(e) => debouncedUpdate({ ...item, saved_amount: parseFloat(e.target.value) || 0 })}
-                    className="w-full rounded-md border border-border bg-background py-2 sm:py-1.5 pl-4 sm:pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                    step="0.01" />
-                </div>
-                <span className="text-[10px] text-muted-foreground/50">/</span>
-                <div className="relative w-[68px] sm:w-20 shrink-0">
-                  <span className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
-                  <input
-                    type="number"
-                    placeholder="Target"
-                    defaultValue={item.target_amount || ""}
-                    onChange={(e) => debouncedUpdate({ ...item, target_amount: parseFloat(e.target.value) || 0 })}
                     className="w-full rounded-md border border-border bg-background py-2 sm:py-1.5 pl-4 sm:pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     step="0.01" />
                 </div>
@@ -1158,20 +1133,13 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
                   ✕
                 </button>
               </div>
-              {item.target_amount > 0 &&
-              <div className="flex items-center gap-2 pl-5">
-                  <Progress value={pct} className="h-1.5 flex-1" />
-                  <span className="text-[10px] text-muted-foreground">{pct.toFixed(0)}%</span>
-                </div>
-              }
-            </div>);
-
-        })}
+            </div>
+        ))}
       </div>
       <button
         onClick={onAdd}
         className="mt-2 w-full rounded-md border border-dashed border-border py-3 sm:py-2 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary">
-        + Add Savings Goal
+        + Add Savings
       </button>
     </div>);
 

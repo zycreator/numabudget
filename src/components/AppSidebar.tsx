@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Plus, Wallet, FileText, Archive, Trash2, Copy, Pencil, Download, Settings, LogOut, Repeat } from "lucide-react";
+import { Plus, Wallet, Archive, Trash2, Copy, Pencil, Download, Settings, LogOut, Repeat } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
   Sidebar,
@@ -13,42 +13,33 @@ import {
   SidebarTrigger } from
 "@/components/ui/sidebar";
 import { useBudgets, useCreateBudget, useDeleteBudget, useDuplicateBudget, useUpdateBudget, type Budget } from "@/hooks/useBudgets";
-import { usePlans, useCreatePlan, useDeletePlan, type Plan } from "@/hooks/usePlans";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 
 interface AppSidebarProps {
   activeBudgetId: string | null;
-  activePlanId: string | null;
   onSelectBudget: (id: string) => void;
-  onSelectPlan: (id: string) => void;
   onToggleRecurring?: () => void;
   onExport?: () => void;
   onToggleSettings?: () => void;
   onSignOut?: () => void;
 }
 
-export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSelectPlan, onToggleRecurring, onExport, onToggleSettings, onSignOut }: AppSidebarProps) {
+export function AppSidebar({ activeBudgetId, onSelectBudget, onToggleRecurring, onExport, onToggleSettings, onSignOut }: AppSidebarProps) {
   const { data: budgets = [] } = useBudgets();
-  const { data: plans = [] } = usePlans();
   const createBudget = useCreateBudget();
   const deleteBudget = useDeleteBudget();
-  const createPlan = useCreatePlan();
-  const deletePlan = useDeletePlan();
   const duplicateBudget = useDuplicateBudget();
   const updateBudget = useUpdateBudget();
 
   const [showNewBudget, setShowNewBudget] = useState(false);
-  const [showNewPlan, setShowNewPlan] = useState(false);
   const [budgetName, setBudgetName] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
-  const [planName, setPlanName] = useState("");
   const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -94,17 +85,6 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
         setStartDate(undefined);
         setEndDate(undefined);
         setShowNewBudget(false);
-      }
-    });
-  };
-
-  const handleCreatePlan = () => {
-    if (!planName.trim()) return;
-    createPlan.mutate({ name: planName.trim() }, {
-      onSuccess: (data) => {
-        onSelectPlan(data.id);
-        setPlanName("");
-        setShowNewPlan(false);
       }
     });
   };
@@ -224,59 +204,6 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
           </Dialog>
         </div>
 
-        {/* Plans */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs text-muted-foreground">Plans</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {plans.map((p) =>
-              <SidebarMenuItem key={p.id}>
-                  <SidebarMenuButton
-                  onClick={() => onSelectPlan(p.id)}
-                  className={`justify-between group ${activePlanId === p.id ? "bg-secondary text-foreground font-medium" : ""}`}>
-
-                    <span className="flex items-center gap-2 truncate">
-                      <FileText className="h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate text-xs">{p.name}</span>
-                    </span>
-                    <button
-                    onClick={(e) => {e.stopPropagation();if (confirm(`Delete plan "${p.name}"?`)) deletePlan.mutate(p.id);}}
-                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-negative">
-
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* New Plan Dialog */}
-        <div className="px-3 pb-2">
-          <Dialog open={showNewPlan} onOpenChange={setShowNewPlan}>
-            <DialogTrigger asChild>
-              <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full py-1">
-                <Plus className="h-3.5 w-3.5" /> New Plan
-              </button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create Plan</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-muted-foreground">Name</label>
-                  <Input value={planName} onChange={(e) => setPlanName(e.target.value)} placeholder="e.g. What-if Scenario" className="mt-1" />
-                </div>
-                <Button onClick={handleCreatePlan} className="w-full" disabled={!planName.trim()}>
-                  Create Plan
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
         {/* Archived */}
         {archivedBudgets.length > 0 &&
         <SidebarGroup>
@@ -290,7 +217,6 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
                     <SidebarMenuButton
                   onClick={() => onSelectBudget(b.id)}
                   className={`${activeBudgetId === b.id ? "bg-secondary text-foreground font-medium" : "text-muted-foreground"}`}>
-
                       <Wallet className="h-3.5 w-3.5 shrink-0 mr-2" />
                       <span className="truncate text-xs">{b.name}</span>
                     </SidebarMenuButton>
@@ -326,5 +252,4 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
         )}
       </div>
     </Sidebar>);
-
 }
