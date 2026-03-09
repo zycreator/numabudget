@@ -1450,16 +1450,15 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
                     step="0.01" />
                 </div>
                 <span className="text-[10px] text-muted-foreground/50">/</span>
-                <div className="relative w-20 shrink-0">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
+                <div className="relative w-[68px] sm:w-20 shrink-0">
+                  <span className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
                   <input
                     type="number"
                     placeholder="Target"
                     defaultValue={item.target_amount || ""}
                     onChange={(e) => debouncedUpdate({ ...item, target_amount: parseFloat(e.target.value) || 0 })}
-                    className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="w-full rounded-md border border-border bg-background py-2 sm:py-1.5 pl-4 sm:pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     step="0.01" />
-
                 </div>
                 <button
                   onClick={() => onDelete(item.id)}
