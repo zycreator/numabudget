@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { useMemo, useState } from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector } from "recharts";
 import type { BudgetItem, Category } from "@/hooks/useBudgetData";
 
 const DEBT_COLOR = "#C97B6B";
@@ -15,6 +15,8 @@ interface Props {
 const FALLBACK_COLOR = "hsl(30, 10%, 75%)";
 
 const ExpensePieChart = ({ items, categories, totalDebt = 0, totalSaved = 0 }: Props) => {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
   const data = useMemo(() => {
     const expenses = items.filter((i) => i.type === "expense" && i.included && i.amount > 0);
     const catMap = new Map(categories.map((c) => [c.id, c]));
@@ -36,35 +38,46 @@ const ExpensePieChart = ({ items, categories, totalDebt = 0, totalSaved = 0 }: P
 
   if (data.length === 0) {
     return (
-      <div className="flex h-40 items-center justify-center text-xs text-muted-foreground">
+      <div className="flex h-[240px] items-center justify-center text-xs text-muted-foreground">
         No expense data yet
       </div>
     );
   }
 
   return (
-    <ResponsiveContainer width="100%" height={180}>
+    <ResponsiveContainer width="100%" height={240}>
       <PieChart>
         <Pie
           data={data}
           cx="50%"
           cy="50%"
-          innerRadius={40}
-          outerRadius={70}
+          innerRadius={55}
+          outerRadius={95}
           paddingAngle={2}
           dataKey="value"
+          onMouseEnter={(_, index) => setActiveIndex(index)}
+          onMouseLeave={() => setActiveIndex(null)}
+          animationDuration={500}
         >
           {data.map((entry, i) => (
-            <Cell key={i} fill={entry.color} stroke="none" />
+            <Cell
+              key={i}
+              fill={entry.color}
+              stroke="none"
+              opacity={activeIndex === null || activeIndex === i ? 1 : 0.35}
+              style={{ transition: "opacity 300ms ease" }}
+            />
           ))}
         </Pie>
         <Tooltip
           formatter={(value: number) => `₱${value.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`}
           contentStyle={{
-            backgroundColor: "hsl(var(--card))",
-            border: "1px solid hsl(var(--border))",
-            borderRadius: "6px",
+            backgroundColor: "hsl(220 18% 11% / 0.9)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid hsl(220 14% 22% / 0.5)",
+            borderRadius: "10px",
             fontSize: "12px",
+            color: "hsl(0 0% 96%)",
           }}
         />
       </PieChart>
