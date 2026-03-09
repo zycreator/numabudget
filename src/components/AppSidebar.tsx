@@ -309,12 +309,6 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
             <Repeat className="h-3.5 w-3.5" /> Recurring
           </button>
         )}
-        {onToggleRollover && (
-          <button onClick={onToggleRollover} className="flex items-center justify-between w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
-            <span className="flex items-center gap-2"><RotateCcw className="h-3.5 w-3.5" /> Rollover</span>
-            {rolloverEnabled && <span className="text-[9px] font-medium text-positive">ON</span>}
-          </button>
-        )}
         {onExport && (
           <button onClick={onExport} className="flex items-center gap-2 w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
             <Download className="h-3.5 w-3.5" /> Export

@@ -497,7 +497,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
         <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
           <EntryCard
             title="Income"
-            total={totalIncome - rolloverAmount}
+            total={totalIncome}
             items={incomeItems}
             categories={categories}
             queryKey={["budget_items", user?.id, budget.id]}
