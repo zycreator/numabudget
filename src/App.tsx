@@ -14,7 +14,7 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
-  const { isActive, loading: subLoading } = useSubscription();
+  const { hasAccess, loading: subLoading } = useAccessControl();
 
   if (authLoading || subLoading)
     return (
