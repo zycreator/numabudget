@@ -1026,7 +1026,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
   );
 
   return (
-    <div className="rounded-lg border border-border p-4 bg-primary-foreground flex flex-col">
+    <div className="rounded-xl border border-border p-4 bg-card/60 backdrop-blur-xl shadow-lg shadow-black/10 flex flex-col">
       <div className="mb-3">
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
       </div>
