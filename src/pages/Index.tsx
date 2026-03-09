@@ -42,6 +42,7 @@ import PlannerView from "@/pages/PlannerView";
 import { usePlans, type Plan } from "@/hooks/usePlans";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
