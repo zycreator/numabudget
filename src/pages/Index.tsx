@@ -805,7 +805,7 @@ const SplitBudgetGrid = ({
             <span className="text-[10px] text-muted-foreground">Split into Pay Periods</span>
           </div>
         </div>
-        <div className="border-x border-border bg-primary-foreground px-2 sm:px-3 max-sm:hidden">
+        <div className="border-x border-border bg-card/60 backdrop-blur-xl px-2 sm:px-3 max-sm:hidden">
           <div className="py-2 border-t border-b border-border/40">
             <span className="text-[10px] text-muted-foreground/40">&nbsp;</span>
           </div>
