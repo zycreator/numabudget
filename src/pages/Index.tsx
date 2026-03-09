@@ -218,7 +218,6 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   const upsertSaving = useUpsertSavingsItem();
   const deleteSaving = useDeleteSavingsItem();
 
-  const rolloverAmount = rolloverData?.amount ?? 0;
   const splitEnabled = budget.split_enabled ?? false;
 
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
