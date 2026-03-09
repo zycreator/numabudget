@@ -308,8 +308,266 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   const goalTarget = savingsGoal?.target_amount ?? 0;
   const goalPct = goalTarget > 0 ? Math.min(net / goalTarget * 100, 100) : 0;
 
+  const handleAddItem = (type: "income" | "expense", payPeriod: number = 1) => {
+    const list = type === "income" ? incomeItems : expenseItems;
+    const maxSort = list.length > 0 ? Math.max(...list.map(i => i.sort_order)) : 0;
+    upsertItem.mutate({
+      user_id: user!.id,
+      budget_id: budget.id,
+      type,
+      description: "",
+      amount: 0,
+      month: new Date().getMonth() + 1,
+      year: new Date().getFullYear(),
+      included: true,
+      paid: false,
+      sort_order: maxSort + 1,
+      pay_period: payPeriod,
+      item_date: null,
+      category_id: null,
+    });
+  };
 
-interface EntryCardProps {
+  const handleDeleteItem = (id: string) => {
+    deleteItem.mutate(id);
+  };
+
+  const resortPeriodByDate = (periodItems: BudgetItem[], updatedItem: BudgetItem) => {
+    const sorted = [...periodItems.map(i => i.id === updatedItem.id ? updatedItem : i)]
+      .sort((a, b) => {
+        if (!a.item_date && !b.item_date) return a.sort_order - b.sort_order;
+        if (!a.item_date) return 1;
+        if (!b.item_date) return -1;
+        return a.item_date.localeCompare(b.item_date);
+      });
+    sorted.forEach((item, idx) => {
+      if (item.sort_order !== idx) {
+        upsertItem.mutate({ ...item, sort_order: idx });
+      }
+    });
+  };
+
+  // Export CSV
+  useEffect(() => {
+    exportRef.current = () => {
+      const rows = [["Type", "Description", "Amount", "Category", "Included", "Paid", "Date", "Period"]];
+      items.forEach(item => {
+        const cat = categories.find(c => c.id === item.category_id);
+        rows.push([
+          item.type,
+          item.description,
+          String(item.amount),
+          cat?.name ?? "",
+          item.included ? "Yes" : "No",
+          item.paid ? "Yes" : "No",
+          item.item_date ?? "",
+          String(item.pay_period ?? 1),
+        ]);
+      });
+      const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${budget.name || "budget"}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+  }, [items, categories, budget.name, exportRef]);
+
+  if (isLoading) return <p className="text-xs text-muted-foreground p-4">Loading…</p>;
+
+  return (
+    <div className="pt-4 space-y-4 px-2 sm:px-4 md:px-6">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-20 -mx-2 sm:-mx-4 md:-mx-6 px-2 sm:px-4 md:px-6 py-3 bg-background/80 backdrop-blur-md border-b border-border/30">
+        <div className="flex items-center gap-2">
+          <SidebarTrigger className="h-5 w-5" />
+          <h1 className="text-sm font-semibold text-foreground truncate">{budget.name}</h1>
+          {budget.start_date && budget.end_date && (
+            <span className="hidden sm:inline text-[10px] text-muted-foreground ml-auto">
+              {format(new Date(budget.start_date), "MMM d")} – {format(new Date(budget.end_date), "MMM d, yyyy")}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Summary row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+          <p className="text-[10px] text-muted-foreground mb-1">Income</p>
+          <p className="text-sm font-bold text-foreground">{formatPHP(totalIncome)}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+          <p className="text-[10px] text-muted-foreground mb-1">Expenses</p>
+          <p className="text-sm font-bold text-foreground">{formatPHP(totalExpenses)}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+          <p className="text-[10px] text-muted-foreground mb-1">Remaining</p>
+          <p className={`text-sm font-bold ${net >= 0 ? "text-positive" : "text-negative"}`}>{formatPHP(net)}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+          <p className="text-[10px] text-muted-foreground mb-1">Savings Rate</p>
+          <p className="text-sm font-bold text-foreground">{pctSaved.toFixed(1)}%</p>
+        </div>
+      </div>
+
+      {/* Period balances when split */}
+      {splitEnabled && (
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+            <p className="text-[10px] text-muted-foreground mb-1">Period 1 Balance</p>
+            <p className={`text-sm font-bold ${periodBalance1Checked >= 0 ? "text-positive" : "text-negative"}`}>
+              {formatPHP(periodBalance1Checked)} <span className="text-muted-foreground/50 font-normal text-[10px]">/ {formatPHP(periodBalance1Budgeted)}</span>
+            </p>
+          </div>
+          <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+            <p className="text-[10px] text-muted-foreground mb-1">Period 2 Balance</p>
+            <p className={`text-sm font-bold ${periodBalance2Checked >= 0 ? "text-positive" : "text-negative"}`}>
+              {formatPHP(periodBalance2Checked)} <span className="text-muted-foreground/50 font-normal text-[10px]">/ {formatPHP(periodBalance2Budgeted)}</span>
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Savings goal progress */}
+      {goalTarget > 0 && (
+        <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] text-muted-foreground">Savings Goal Progress</p>
+            <p className="text-[10px] text-muted-foreground">{formatPHP(net)} / {formatPHP(goalTarget)}</p>
+          </div>
+          <Progress value={goalPct} className="h-2" />
+        </div>
+      )}
+
+      {/* Income & Expense cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <EntryCard
+          title="Income"
+          total={totalIncome}
+          items={incomeItems}
+          categories={categories}
+          queryKey={["budget_items", budget.id]}
+          onUpdate={(item) => upsertItem.mutate(item)}
+          onDelete={handleDeleteItem}
+          onAdd={(pp) => handleAddItem("income", pp)}
+          splitEnabled={splitEnabled}
+          onToggleSplit={handleToggleSplit}
+        />
+        <EntryCard
+          title="Expenses"
+          total={totalExpenses}
+          items={expenseItems}
+          categories={categories}
+          queryKey={["budget_items", budget.id]}
+          onUpdate={(item) => upsertItem.mutate(item)}
+          onDelete={handleDeleteItem}
+          onAdd={(pp) => handleAddItem("expense", pp)}
+          splitEnabled={splitEnabled}
+          onToggleSplit={handleToggleSplit}
+        />
+      </div>
+
+      {/* Expense breakdown charts */}
+      {expenseItems.length > 0 && categories.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ExpensePieChart expenses={expenseItems} categories={categories} />
+          <ExpenseLegend expenses={expenseItems} categories={categories} />
+        </div>
+      )}
+
+      {/* Category limits */}
+      {categories.length > 0 && (
+        <CategoryLimitsCard
+          categories={categories}
+          categoryLimits={categoryLimits}
+          expenses={expenseItems}
+          budgetId={budget.id}
+        />
+      )}
+
+      {/* Debt & Savings boards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <DebtBoard
+          items={debtItems}
+          totalDebt={totalDebt}
+          queryKey={["debt_items", budget.id]}
+          onUpsert={(item) => upsertDebt.mutate(item)}
+          onDelete={(id) => deleteDebt.mutate(id)}
+          onAdd={() => upsertDebt.mutate({
+            user_id: user!.id,
+            budget_id: budget.id,
+            description: "",
+            amount: 0,
+            sort_order: debtItems.length,
+          })}
+        />
+        <SavingsBoard
+          items={savingsItems}
+          totalSaved={totalSaved}
+          totalTarget={totalSavingsTarget}
+          queryKey={["savings_items", budget.id]}
+          onUpsert={(item) => upsertSaving.mutate(item)}
+          onDelete={(id) => deleteSaving.mutate(id)}
+          onAdd={() => upsertSaving.mutate({
+            user_id: user!.id,
+            budget_id: budget.id,
+            description: "",
+            saved_amount: 0,
+            target_amount: 0,
+            sort_order: savingsItems.length,
+          })}
+        />
+      </div>
+
+      {/* Settings panel */}
+      {showSettings && (
+        <SettingsPanel
+          categories={categories}
+          categoryLimits={categoryLimits.map(cl => ({ category_id: cl.category_id, limit_amount: cl.limit_amount }))}
+          budgetId={budget.id}
+          savingsGoal={goalTarget}
+          onUpsertCategory={(c) => upsertCategory.mutate({ ...c, user_id: user!.id })}
+          onDeleteCategory={(id) => deleteCategory.mutate(id)}
+          onSetGoal={(amt) => upsertGoal.mutate({
+            user_id: user!.id,
+            budget_id: budget.id,
+            month: new Date().getMonth() + 1,
+            year: new Date().getFullYear(),
+            target_amount: amt,
+          })}
+          onSetLimit={(catId, amt) => upsertLimit.mutate({
+            user_id: user!.id,
+            budget_id: budget.id,
+            category_id: catId,
+            month: new Date().getMonth() + 1,
+            year: new Date().getFullYear(),
+            limit_amount: amt,
+          })}
+        />
+      )}
+
+      {/* Recurring panel */}
+      {showRecurring && (
+        <RecurringPanel
+          items={recurringItems}
+          categories={categories}
+          onUpsert={(item) => upsertRecurring.mutate({ ...item, user_id: user!.id })}
+          onDelete={(id) => deleteRecurring.mutate(id)}
+          onApply={() => applyRecurring.mutate({
+            budgetId: budget.id,
+            month: new Date().getMonth() + 1,
+            year: new Date().getFullYear(),
+          })}
+        />
+      )}
+    </div>
+  );
+};
+
+// ─── Entry Card ──────────────────────────────────────────────
+
   title: string;
   total: number;
   items: BudgetItem[];
