@@ -1462,8 +1462,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
                 </div>
                 <button
                   onClick={() => onDelete(item.id)}
-                  className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">
-
+                  className="shrink-0 p-1 text-muted-foreground/40 hover:text-negative text-xs">
                   ✕
                 </button>
               </div>
