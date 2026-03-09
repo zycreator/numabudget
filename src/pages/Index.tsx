@@ -392,13 +392,6 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
           </>}
         </div>
 
-        {/* Rollover banner */}
-        {rolloverData &&
-        <div className="mb-1.5 rounded-md bg-positive/10 px-3 py-1 text-[10px] sm:text-xs text-positive">
-            Rollover from "{rolloverData.fromBudgetName}": {formatPHP(rolloverData.amount)}
-          </div>
-        }
-
         {/* Summary Cards */}
       {splitEnabled ? (
         <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
