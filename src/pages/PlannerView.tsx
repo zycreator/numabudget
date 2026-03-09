@@ -3,9 +3,7 @@ import { useDragReorder } from "@/hooks/useDragReorder";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { usePlanItems, useUpsertPlanItem, useDeletePlanItem, useConvertPlanToBudget, type Plan, type PlanItem } from "@/hooks/usePlans";
-import { useCategories, useRolloverAmount, type Category } from "@/hooks/useBudgetData";
-import { useBudgets } from "@/hooks/useBudgets";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCategories, type Category } from "@/hooks/useBudgetData";
 import { toast } from "sonner";
 
 const formatPHP = (n: number) =>
@@ -18,22 +16,16 @@ interface PlannerViewProps {
 const PlannerView = ({ plan }: PlannerViewProps) => {
   const { data: items = [], isLoading } = usePlanItems(plan.id);
   const { data: categories = [] } = useCategories();
-  const { data: budgets = [] } = useBudgets();
   const upsertItem = useUpsertPlanItem();
   const deleteItem = useDeletePlanItem();
   const convertToBudget = useConvertPlanToBudget();
 
-  const [rolloverBudgetId, setRolloverBudgetId] = useState<string | null>(plan.include_rollover_from);
-  const { data: rolloverData } = useRolloverAmount(rolloverBudgetId);
-
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
 
-  const rolloverAmount = rolloverData?.amount ?? 0;
-
   const totalIncome = useMemo(
-    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0) + rolloverAmount,
-    [incomeItems, rolloverAmount]
+    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
+    [incomeItems]
   );
   const totalExpenses = useMemo(
     () => expenseItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
@@ -79,27 +71,6 @@ const PlannerView = ({ plan }: PlannerViewProps) => {
         </Button>
       </div>
 
-      {/* Rollover Include */}
-      <div className="rounded-lg border border-border bg-card p-4">
-        <label className="text-xs text-muted-foreground">Include rollover from budget:</label>
-        <Select value={rolloverBudgetId ?? "none"} onValueChange={(v) => setRolloverBudgetId(v === "none" ? null : v)}>
-          <SelectTrigger className="mt-1 text-xs">
-            <SelectValue placeholder="None" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {budgets.map((b) => (
-              <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {rolloverData && (
-          <p className="mt-2 text-xs text-positive">
-            Rollover from "{rolloverData.fromBudgetName}": {formatPHP(rolloverData.amount)}
-          </p>
-        )}
-      </div>
-
       {/* Summary */}
       <div className="rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-medium text-muted-foreground mb-2">Plan Summary</h2>
@@ -116,7 +87,7 @@ const PlannerView = ({ plan }: PlannerViewProps) => {
       <div className="grid gap-4 sm:grid-cols-2">
         <PlanEntryCard
           title="Income"
-          total={totalIncome - rolloverAmount}
+          total={totalIncome}
           items={incomeItems}
           categories={categories}
           queryKey={["plan_items", plan.id]}

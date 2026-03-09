@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Plus, Wallet, FileText, Archive, Trash2, Copy, Pencil, RotateCcw, Download, Settings, LogOut, Repeat } from "lucide-react";
+import { Plus, Wallet, FileText, Archive, Trash2, Copy, Pencil, Download, Settings, LogOut, Repeat } from "lucide-react";
 import logo from "@/assets/logo.png";
 import {
   Sidebar,
@@ -28,14 +28,12 @@ interface AppSidebarProps {
   onSelectBudget: (id: string) => void;
   onSelectPlan: (id: string) => void;
   onToggleRecurring?: () => void;
-  onToggleRollover?: () => void;
   onExport?: () => void;
   onToggleSettings?: () => void;
   onSignOut?: () => void;
-  rolloverEnabled?: boolean;
 }
 
-export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSelectPlan, onToggleRecurring, onToggleRollover, onExport, onToggleSettings, onSignOut, rolloverEnabled }: AppSidebarProps) {
+export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSelectPlan, onToggleRecurring, onExport, onToggleSettings, onSignOut }: AppSidebarProps) {
   const { data: budgets = [] } = useBudgets();
   const { data: plans = [] } = usePlans();
   const createBudget = useCreateBudget();
@@ -50,7 +48,6 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
   const [budgetName, setBudgetName] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
-  const [rollover, setRollover] = useState(false);
   const [planName, setPlanName] = useState("");
   const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -90,14 +87,12 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
       name: budgetName.trim(),
       start_date: startDate ? format(startDate, "yyyy-MM-dd") : null,
       end_date: endDate ? format(endDate, "yyyy-MM-dd") : null,
-      rollover_enabled: rollover
     }, {
       onSuccess: (data) => {
         onSelectBudget(data.id);
         setBudgetName("");
         setStartDate(undefined);
         setEndDate(undefined);
-        setRollover(false);
         setShowNewBudget(false);
       }
     });
@@ -221,10 +216,6 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
                     </Popover>
                   </div>
                 </div>
-                <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
-                  <Checkbox checked={rollover} onCheckedChange={(v) => setRollover(!!v)} />
-                  Carry over remaining balance to next budget
-                </label>
                 <Button onClick={handleCreateBudget} className="w-full" disabled={!budgetName.trim()}>
                   Create Budget
                 </Button>
@@ -316,12 +307,6 @@ export function AppSidebar({ activeBudgetId, activePlanId, onSelectBudget, onSel
         {onToggleRecurring && (
           <button onClick={onToggleRecurring} className="flex items-center gap-2 w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
             <Repeat className="h-3.5 w-3.5" /> Recurring
-          </button>
-        )}
-        {onToggleRollover && (
-          <button onClick={onToggleRollover} className="flex items-center justify-between w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
-            <span className="flex items-center gap-2"><RotateCcw className="h-3.5 w-3.5" /> Rollover</span>
-            {rolloverEnabled && <span className="text-[9px] font-medium text-positive">ON</span>}
           </button>
         )}
         {onExport && (

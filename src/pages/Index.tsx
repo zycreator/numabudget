@@ -18,7 +18,6 @@ import {
   useUpsertCategoryLimit,
   useClearBudgetItems,
   useApplyRecurring,
-  useRolloverAmount,
   type BudgetItem,
   type Category,
   type RecurringItem } from
@@ -138,11 +137,9 @@ const Index = () => {
           onSelectBudget={handleSelectBudget}
           onSelectPlan={handleSelectPlan}
           onToggleRecurring={activeBudget ? () => setShowRecurring(v => !v) : undefined}
-          onToggleRollover={activeBudget ? () => updateBudgetIndex.mutate({ id: activeBudget.id, rollover_enabled: !activeBudget.rollover_enabled }) : undefined}
           onExport={activeBudget ? () => exportRef.current?.() : undefined}
           onToggleSettings={activeBudget ? () => setShowSettings(v => !v) : undefined}
           onSignOut={() => signOut()}
-          rolloverEnabled={activeBudget?.rollover_enabled ?? false}
         />
 
         <main className="flex-1 min-h-0 h-screen overflow-y-auto bg-secondary">
@@ -202,7 +199,6 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   const { data: savingsGoal } = useSavingsGoal(budget.id);
   const { data: recurringItems = [] } = useRecurringItems();
   const { data: categoryLimits = [] } = useCategoryLimits(budget.id);
-  const { data: rolloverData } = useRolloverAmount(budget.id);
   const { data: debtItems = [] } = useDebtItems(budget.id);
   const { data: savingsItems = [] } = useSavingsItems(budget.id);
   const updateBudget = useUpdateBudget();
@@ -222,7 +218,6 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   const upsertSaving = useUpsertSavingsItem();
   const deleteSaving = useDeleteSavingsItem();
 
-  const rolloverAmount = rolloverData?.amount ?? 0;
   const splitEnabled = budget.split_enabled ?? false;
 
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
@@ -255,12 +250,12 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   };
 
   const totalIncomeChecked = useMemo(
-    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0) + rolloverAmount,
-    [incomeItems, rolloverAmount]
+    () => incomeItems.reduce((s, r) => s + (r.included ? r.amount : 0), 0),
+    [incomeItems]
   );
   const totalIncomeAll = useMemo(
-    () => incomeItems.reduce((s, r) => s + r.amount, 0) + rolloverAmount,
-    [incomeItems, rolloverAmount]
+    () => incomeItems.reduce((s, r) => s + r.amount, 0),
+    [incomeItems]
   );
   const totalIncome = totalIncomeChecked;
   const totalExpensesChecked = useMemo(
@@ -397,13 +392,6 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
           </>}
         </div>
 
-        {/* Rollover banner */}
-        {rolloverData &&
-        <div className="mb-1.5 rounded-md bg-positive/10 px-3 py-1 text-[10px] sm:text-xs text-positive">
-            Rollover from "{rolloverData.fromBudgetName}": {formatPHP(rolloverData.amount)}
-          </div>
-        }
-
         {/* Summary Cards */}
       {splitEnabled ? (
         <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
@@ -415,7 +403,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
               <span className="hidden sm:inline">{formatPHP(totalIncomeAll - totalExpensesAll)}</span>
             </p>
             <div className="mt-0.5 sm:mt-1 space-y-0 sm:space-y-0.5 text-[8px] sm:text-[10px] text-muted-foreground">
-              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(totalIncomeChecked - rolloverAmount)}</span><span className="hidden sm:inline"> / {formatPHP(totalIncomeAll - rolloverAmount)}</span></p>
+              <p className="truncate">Inc: <span className="text-positive">{formatPHPCompact(totalIncomeChecked)}</span><span className="hidden sm:inline"> / {formatPHP(totalIncomeAll)}</span></p>
               <p className="truncate">Exp: <span className="text-positive">{formatPHPCompact(totalExpensesChecked)}</span><span className="hidden sm:inline"> / {formatPHP(totalExpensesAll)}</span></p>
             </div>
           </div>
@@ -502,14 +490,14 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
           onAddIncome={(pp) => handleAddItem("income", pp)}
           onAddExpense={(pp) => handleAddItem("expense", pp)}
           onToggleSplit={handleToggleSplit}
-          totalIncome={totalIncome - rolloverAmount}
+          totalIncome={totalIncome}
           totalExpenses={totalExpenses}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
           <EntryCard
             title="Income"
-            total={totalIncome - rolloverAmount}
+            total={totalIncome}
             items={incomeItems}
             categories={categories}
             queryKey={["budget_items", user?.id, budget.id]}
