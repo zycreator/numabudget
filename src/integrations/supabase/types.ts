@@ -327,21 +327,18 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          has_lifetime_access: boolean
           id: string
-          stripe_customer_id: string | null
-          subscription_status: string
         }
         Insert: {
           created_at?: string
+          has_lifetime_access?: boolean
           id: string
-          stripe_customer_id?: string | null
-          subscription_status?: string
         }
         Update: {
           created_at?: string
+          has_lifetime_access?: boolean
           id?: string
-          stripe_customer_id?: string | null
-          subscription_status?: string
         }
         Relationships: []
       }

@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useAccessControl } from "@/hooks/useAccessControl";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Subscribe from "./pages/Subscribe";
@@ -14,7 +14,7 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
-  const { isActive, loading: subLoading } = useSubscription();
+  const { hasAccess, loading: subLoading } = useAccessControl();
 
   if (authLoading || subLoading)
     return (
@@ -23,17 +23,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   if (!user) return <Navigate to="/auth" replace />;
-  if (!isActive) return <Navigate to="/subscribe" replace />;
+  if (!hasAccess) return <Navigate to="/subscribe" replace />;
   return <>{children}</>;
 };
 
 const SubscribeRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
-  const { isActive, loading: subLoading } = useSubscription();
+  const { hasAccess, loading: subLoading } = useAccessControl();
 
   if (authLoading || subLoading) return null;
   if (!user) return <Navigate to="/auth" replace />;
-  if (isActive) return <Navigate to="/" replace />;
+  if (hasAccess) return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 

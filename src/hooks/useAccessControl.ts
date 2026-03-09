@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export const useSubscription = () => {
+export const useAccessControl = () => {
   const { user } = useAuth();
-  const [status, setStatus] = useState<string | null>(null);
+  const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
-      setStatus(null);
+      setHasAccess(false);
       setLoading(false);
       return;
     }
@@ -17,16 +17,16 @@ export const useSubscription = () => {
     const fetch = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("subscription_status")
+        .select("has_lifetime_access")
         .eq("id", user.id)
         .maybeSingle();
 
-      setStatus(data?.subscription_status ?? "none");
+      setHasAccess(data?.has_lifetime_access ?? false);
       setLoading(false);
     };
 
     fetch();
   }, [user]);
 
-  return { status, isActive: status === "active", loading };
+  return { hasAccess, loading };
 };
