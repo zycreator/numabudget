@@ -527,10 +527,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
           onUpsertCategory={(c) => upsertCategory.mutate(c)}
           onDeleteCategory={(id) => deleteCategory.mutate(id)}
           onSetGoal={(amt) => upsertGoal.mutate({
-            user_id: user!.id,
             budget_id: budget.id,
-            month: new Date().getMonth() + 1,
-            year: new Date().getFullYear(),
             target_amount: amt,
           })}
           onSetLimit={(catId, amt) => upsertLimit.mutate({
