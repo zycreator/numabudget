@@ -143,7 +143,7 @@ const Index = () => {
         />
 
         <main className="flex-1 min-h-0 h-screen overflow-y-auto bg-secondary">
-          <div className="mx-auto max-w-5xl px-3 sm:px-4 space-y-3 sm:space-y-4">
+          <div className="mx-auto max-w-5xl px-2 sm:px-4 md:px-6 space-y-3 sm:space-y-4">
 
             {activePlanId && activePlan ? (
             <>
@@ -361,13 +361,13 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
       }
 
       {/* Sticky Header + Summary Group */}
-      <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 px-3 sm:px-4 py-2 sm:py-3 bg-background border-b border-border shadow-sm">
+      <div className="sticky top-0 z-50 -mx-2 sm:-mx-4 md:-mx-6 px-2 sm:px-4 md:px-6 py-2 sm:py-3 bg-background border-b border-border shadow-sm">
         {/* Single-line title: Budget · Name · Dates */}
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <SidebarTrigger className="h-5 w-5 shrink-0" />
-          <span className="text-xs sm:text-sm font-semibold text-foreground">Budget</span>
-          <span className="text-muted-foreground/40">·</span>
-          <div className="group inline-flex items-center gap-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-1.5 overflow-hidden">
+          <SidebarTrigger className="h-6 w-6 sm:h-5 sm:w-5 shrink-0" />
+          <span className="text-xs sm:text-sm font-semibold text-foreground shrink-0">Budget</span>
+          <span className="text-muted-foreground/40 shrink-0">·</span>
+          <div className="group inline-flex items-center gap-1 min-w-0 flex-1">
             <input
               type="text"
               defaultValue={budget.name}
@@ -378,18 +378,17 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
                 if (val !== budget.name) updateBudget.mutate({ id: budget.id, name: val });
               }}
               onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-              className="text-xs sm:text-sm font-medium text-foreground bg-transparent rounded-md px-1 py-0.5 border border-transparent hover:border-border hover:bg-secondary/30 focus:border-ring focus:bg-background focus:outline-none transition-colors max-w-[140px] sm:max-w-[200px]"
+              className="text-xs sm:text-sm font-medium text-foreground bg-transparent rounded-md px-1 py-1 sm:py-0.5 border border-transparent hover:border-border hover:bg-secondary/30 focus:border-ring focus:bg-background focus:outline-none transition-colors w-full max-w-[120px] sm:max-w-[200px]"
             />
-            <span className="text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors text-[10px] pointer-events-none">✎</span>
+            <span className="text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors text-[10px] pointer-events-none hidden sm:inline">✎</span>
           </div>
-          {(budget.start_date || budget.end_date) && <>
-            <span className="text-muted-foreground/40">·</span>
-            <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
+          {(budget.start_date || budget.end_date) &&
+            <span className="text-[9px] sm:text-xs text-muted-foreground whitespace-nowrap shrink-0 hidden sm:inline">
               {budget.start_date && new Date(budget.start_date).toLocaleDateString()}
               {budget.start_date && budget.end_date && " – "}
               {budget.end_date && new Date(budget.end_date).toLocaleDateString()}
             </span>
-          </>}
+          }
         </div>
 
         {/* Summary Cards */}
@@ -687,7 +686,7 @@ const SplitBudgetGrid = ({
       }}
       onDragEnd={() => { onDragEndFn(); handleGlobalDragEnd(); }}
       onDragLeave={onDragLeaveFn}
-      className={`relative flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-30 scale-95" : ""}`}
+      className={`relative flex flex-wrap items-center gap-1 sm:gap-1.5 md:gap-2 py-1 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-30 scale-95" : ""}`}
     >
       {oIdx === idx && (
         <div className="absolute -top-[2px] left-0 right-0 h-[3px] rounded-full bg-accent z-10" />
@@ -697,8 +696,8 @@ const SplitBudgetGrid = ({
       <Checkbox checked={item.paid} onCheckedChange={(checked) => onUpdate({ ...item, paid: !!checked })} className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
       <Popover>
         <PopoverTrigger asChild>
-          <button className={`w-10 h-8 sm:h-auto shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
-            {item.item_date ? formatDateShort(item.item_date) : "M-D"}
+          <button className={`w-10 h-9 sm:h-auto shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
+            {item.item_date ? formatDateShort(item.item_date) : "📅"}
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -720,7 +719,7 @@ const SplitBudgetGrid = ({
         placeholder="Description"
         defaultValue={item.description}
         onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-        className={`flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+        className={`flex-1 min-w-[60px] rounded-md border border-border bg-background px-2 py-2 sm:py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
       />
       {showCategory && (
         <select
@@ -732,25 +731,25 @@ const SplitBudgetGrid = ({
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       )}
-      <div className="relative w-20 sm:w-24 shrink-0">
-        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
+      <div className="relative w-[72px] sm:w-24 shrink-0">
+        <span className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-[10px] sm:text-xs text-muted-foreground/50">₱</span>
         <input
           type="number"
           placeholder="0.00"
           defaultValue={item.amount || ""}
           onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
-          className={`w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
+          className={`w-full rounded-md border border-border bg-background py-2 sm:py-1.5 pl-4 sm:pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}
           step="0.01"
         />
       </div>
-      <button onClick={() => onDelete(item.id)} className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">✕</button>
+      <button onClick={() => onDelete(item.id)} className="shrink-0 p-1 text-muted-foreground/40 hover:text-negative text-xs">✕</button>
     </div>
   );
 
   const renderAddButton = (onClick: () => void) => (
     <button
       onClick={onClick}
-      className="mt-2 w-full rounded-md border border-dashed border-border py-2.5 sm:py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary"
+      className="mt-2 w-full rounded-md border border-dashed border-border py-3 sm:py-2 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary"
     >
       + Add Row
     </button>
@@ -972,7 +971,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         handleGlobalDragEnd();
       }}
       onDragLeave={onDragLeaveFn}
-      className={`relative flex flex-wrap items-center gap-1.5 sm:gap-2 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-30 scale-95" : ""}`}>
+      className={`relative flex flex-wrap items-center gap-1 sm:gap-1.5 md:gap-2 py-1 transition-all ${!item.included ? "opacity-40" : ""} ${item.paid ? "bg-muted/50 rounded-md px-1 py-0.5" : ""} ${dIdx === idx ? "opacity-30 scale-95" : ""}`}>
       {/* Drop indicator line */}
       {oIdx === idx && (
         <div className="absolute -top-[2px] left-0 right-0 h-[3px] rounded-full bg-accent z-10" />
@@ -987,8 +986,8 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         className="border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground" />
       <Popover>
         <PopoverTrigger asChild>
-          <button className={`w-10 shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
-            {item.item_date ? formatDateShort(item.item_date) : "M-D"}
+          <button className={`w-10 h-9 sm:h-auto shrink-0 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-center focus:outline-none focus:ring-1 focus:ring-ring ${item.item_date ? "text-foreground" : "text-muted-foreground/40"} ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`}>
+            {item.item_date ? formatDateShort(item.item_date) : "📅"}
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -1005,7 +1004,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
         placeholder="Description"
         defaultValue={item.description}
         onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-        className={`flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`} />
+        className={`flex-1 min-w-[60px] rounded-md border border-border bg-background px-2 py-2 sm:py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring ${item.paid ? "text-muted-foreground bg-muted/30" : ""}`} />
       {title === "Expenses" &&
         <select
           defaultValue={item.category_id ?? ""}
@@ -1036,7 +1035,7 @@ const EntryCard = ({ title, total, items, categories, queryKey, onUpdate, onDele
   const renderAddButton = (payPeriod?: number) => (
     <button
       onClick={() => onAdd(payPeriod)}
-      className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors">
+      className="mt-2 w-full rounded-md border border-dashed border-border py-3 sm:py-2 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary">
       + Add Row
     </button>
   );
@@ -1272,20 +1271,22 @@ const RecurringPanel = ({ items, categories, onUpsert, onDelete, onApply }: Recu
           </div>
         )}
       </div>
-      <div className="flex gap-2">
-        <select value={type} onChange={(e) => setType(e.target.value as "income" | "expense")} className="rounded-md border border-border bg-background px-1.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <select value={type} onChange={(e) => setType(e.target.value as "income" | "expense")} className="rounded-md border border-border bg-background px-1.5 py-2 sm:py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
           <option value="income">Income</option>
           <option value="expense">Expense</option>
         </select>
-        <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Description" className="flex-1 min-w-0 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring" />
-        {type === "expense" &&
-        <select value={catId} onChange={(e) => setCatId(e.target.value)} className="w-20 rounded-md border border-border bg-background px-1 py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
-            <option value="">—</option>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        }
-        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₱" className="w-20 rounded-md border border-border bg-background px-2 py-1.5 text-xs text-right text-foreground focus:outline-none focus:ring-1 focus:ring-ring" step="0.01" />
-        <button onClick={handleAdd} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">Add</button>
+        <div className="flex gap-2 flex-1">
+          <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Description" className="flex-1 min-w-0 rounded-md border border-border bg-background px-2.5 py-2 sm:py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring" />
+          {type === "expense" &&
+          <select value={catId} onChange={(e) => setCatId(e.target.value)} className="w-20 rounded-md border border-border bg-background px-1 py-2 sm:py-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-ring">
+              <option value="">—</option>
+              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          }
+          <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₱" className="w-20 rounded-md border border-border bg-background px-2 py-2 sm:py-1.5 text-xs text-right text-foreground focus:outline-none focus:ring-1 focus:ring-ring" step="0.01" />
+          <button onClick={handleAdd} className="rounded-md bg-primary px-3 py-2 sm:py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">Add</button>
+        </div>
       </div>
     </div>);
 
@@ -1330,25 +1331,24 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
           onDragOver={(e) => handleDragOver(idx, e)}
           onDragEnd={handleDragEnd}
           onDragLeave={handleDragLeave}
-          className={`flex flex-wrap items-center gap-1.5 sm:gap-2 transition-opacity ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
+          className={`flex flex-wrap items-center gap-1 sm:gap-1.5 md:gap-2 py-1 transition-opacity ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
             <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
             <input
             type="text"
             placeholder="Who you owe"
             defaultValue={item.description}
             onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-            className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
+            className="flex-1 min-w-[60px] rounded-md border border-border bg-background px-2 py-2 sm:py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
 
-            <div className="relative w-20 sm:w-24 shrink-0">
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">₱</span>
+            <div className="relative w-[72px] sm:w-24 shrink-0">
+              <span className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-[10px] sm:text-xs text-muted-foreground/50">₱</span>
               <input
               type="number"
               placeholder="0.00"
               defaultValue={item.amount || ""}
               onChange={(e) => debouncedUpdate({ ...item, amount: parseFloat(e.target.value) || 0 })}
-              className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              className="w-full rounded-md border border-border bg-background py-2 sm:py-1.5 pl-4 sm:pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               step="0.01" />
-
             </div>
             <Popover>
               <PopoverTrigger asChild>
@@ -1370,8 +1370,7 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
             </Popover>
             <button
             onClick={() => onDelete(item.id)}
-            className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">
-
+            className="shrink-0 p-1 text-muted-foreground/40 hover:text-negative text-xs">
               ✕
             </button>
           </div>
@@ -1379,8 +1378,7 @@ const DebtBoard = ({ items, totalDebt, queryKey, onUpsert, onDelete, onAdd }: De
       </div>
       <button
         onClick={onAdd}
-        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors">
-
+        className="mt-2 w-full rounded-md border border-dashed border-border py-3 sm:py-2 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary">
         + Add Debt
       </button>
     </div>);
@@ -1432,42 +1430,39 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
               onDragEnd={handleDragEnd}
               onDragLeave={handleDragLeave}
               className={`space-y-1 transition-opacity ${dragIndex === idx ? "opacity-50" : ""} ${overIndex === idx ? "border-t-2 border-accent" : ""}`}>
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 md:gap-2 py-1">
                 <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground text-xs select-none">⠿</span>
                 <input
                   type="text"
                   placeholder="Saving for..."
                   defaultValue={item.description}
                   onChange={(e) => debouncedUpdate({ ...item, description: e.target.value })}
-                  className="flex-1 min-w-[80px] rounded-md border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
+                  className="flex-1 min-w-[60px] rounded-md border border-border bg-background px-2 py-2 sm:py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-ring" />
 
-                <div className="relative w-20 shrink-0">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
+                <div className="relative w-[68px] sm:w-20 shrink-0">
+                  <span className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
                   <input
                     type="number"
                     placeholder="Saved"
                     defaultValue={item.saved_amount || ""}
                     onChange={(e) => debouncedUpdate({ ...item, saved_amount: parseFloat(e.target.value) || 0 })}
-                    className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="w-full rounded-md border border-border bg-background py-2 sm:py-1.5 pl-4 sm:pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     step="0.01" />
-
                 </div>
                 <span className="text-[10px] text-muted-foreground/50">/</span>
-                <div className="relative w-20 shrink-0">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
+                <div className="relative w-[68px] sm:w-20 shrink-0">
+                  <span className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/50">₱</span>
                   <input
                     type="number"
                     placeholder="Target"
                     defaultValue={item.target_amount || ""}
                     onChange={(e) => debouncedUpdate({ ...item, target_amount: parseFloat(e.target.value) || 0 })}
-                    className="w-full rounded-md border border-border bg-background py-1.5 pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="w-full rounded-md border border-border bg-background py-2 sm:py-1.5 pl-4 sm:pl-5 pr-1 text-right text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     step="0.01" />
-
                 </div>
                 <button
                   onClick={() => onDelete(item.id)}
-                  className="shrink-0 text-muted-foreground/40 hover:text-negative text-xs">
-
+                  className="shrink-0 p-1 text-muted-foreground/40 hover:text-negative text-xs">
                   ✕
                 </button>
               </div>
@@ -1483,8 +1478,7 @@ const SavingsBoard = ({ items, totalSaved, totalTarget, queryKey, onUpsert, onDe
       </div>
       <button
         onClick={onAdd}
-        className="mt-2 w-full rounded-md border border-dashed border-border py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors">
-
+        className="mt-2 w-full rounded-md border border-dashed border-border py-3 sm:py-2 text-xs text-muted-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors active:bg-secondary">
         + Add Savings Goal
       </button>
     </div>);
