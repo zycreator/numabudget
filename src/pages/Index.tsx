@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useDragReorder } from "@/hooks/useDragReorder";
 import { useAuth } from "@/hooks/useAuth";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -42,6 +42,7 @@ import PlannerView from "@/pages/PlannerView";
 import { usePlans, type Plan } from "@/hooks/usePlans";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { supabase } from "@/integrations/supabase/client";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -82,19 +83,46 @@ const Index = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showRecurring, setShowRecurring] = useState(false);
   const exportRef = useRef<(() => void) | null>(null);
+  const [prefLoaded, setPrefLoaded] = useState(false);
 
   const { data: budgets = [] } = useBudgets();
   const { data: plans = [] } = usePlans();
   const updateBudgetIndex = useUpdateBudget();
 
-  // Auto-select first budget if none selected
-  const effectiveBudgetId = activeBudgetId ?? (budgets.length > 0 ? budgets[0].id : null);
+  // Load last opened budget from user_preferences
+  useEffect(() => {
+    if (!user || prefLoaded) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from("user_preferences")
+        .select("last_budget_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data?.last_budget_id) {
+        setActiveBudgetId(data.last_budget_id);
+      }
+      setPrefLoaded(true);
+    };
+    load();
+  }, [user, prefLoaded]);
+
+  // Save last opened budget to user_preferences
+  const saveLastBudget = useCallback(async (budgetId: string) => {
+    if (!user) return;
+    await supabase
+      .from("user_preferences")
+      .upsert({ user_id: user.id, last_budget_id: budgetId, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+  }, [user]);
+
+  // Auto-select first budget if none selected (only after pref loaded)
+  const effectiveBudgetId = activeBudgetId ?? (prefLoaded && budgets.length > 0 ? budgets[0].id : null);
   const activeBudget = budgets.find((b) => b.id === effectiveBudgetId) ?? null;
   const activePlan = plans.find((p) => p.id === activePlanId) ?? null;
 
   const handleSelectBudget = (id: string) => {
     setActiveBudgetId(id);
     setActivePlanId(null);
+    saveLastBudget(id);
   };
   const handleSelectPlan = (id: string) => {
     setActivePlanId(id);
