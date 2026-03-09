@@ -490,7 +490,7 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
           onAddIncome={(pp) => handleAddItem("income", pp)}
           onAddExpense={(pp) => handleAddItem("expense", pp)}
           onToggleSplit={handleToggleSplit}
-          totalIncome={totalIncome - rolloverAmount}
+          totalIncome={totalIncome}
           totalExpenses={totalExpenses}
         />
       ) : (
