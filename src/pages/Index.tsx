@@ -210,6 +210,7 @@ interface BudgetViewProps {
 }
 
 const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetViewProps) => {
+  const recurringRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { data: items = [], isLoading } = useBudgetItems(budget.id);
   const { data: categories = [] } = useCategories();
@@ -236,6 +237,13 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
   const deleteSaving = useDeleteSavingsItem();
 
   const splitEnabled = budget.split_enabled ?? false;
+
+  // Scroll to recurring panel when opened
+  useEffect(() => {
+    if (showRecurring && recurringRef.current) {
+      setTimeout(() => recurringRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    }
+  }, [showRecurring]);
 
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
@@ -530,16 +538,18 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
 
       {/* Recurring panel */}
       {showRecurring && (
-        <RecurringPanel
-          items={recurringItems}
-          categories={categories}
-          onUpsert={(item) => upsertRecurring.mutate(item)}
-          onDelete={(id) => deleteRecurring.mutate(id)}
-          onApply={() => applyRecurring.mutate({
-            budgetId: budget.id,
-            items: recurringItems.filter(r => r.is_active),
-          })}
-        />
+        <div ref={recurringRef}>
+          <RecurringPanel
+            items={recurringItems}
+            categories={categories}
+            onUpsert={(item) => upsertRecurring.mutate(item)}
+            onDelete={(id) => deleteRecurring.mutate(id)}
+            onApply={() => applyRecurring.mutate({
+              budgetId: budget.id,
+              items: recurringItems.filter(r => r.is_active),
+            })}
+          />
+        </div>
       )}
     </div>
   );
