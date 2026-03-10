@@ -149,9 +149,9 @@ const Index = () => {
         <AppSidebar
           activeBudgetId={effectiveBudgetId}
           onSelectBudget={handleSelectBudget}
-          onToggleRecurring={activeBudget ? () => setShowRecurring(v => !v) : undefined}
+          onToggleRecurring={() => setShowRecurring(v => !v)}
           onExport={activeBudget ? () => exportRef.current?.() : undefined}
-          onToggleSettings={activeBudget ? () => setShowSettings(v => !v) : undefined}
+          onToggleSettings={() => setShowSettings(v => !v)}
           onSignOut={() => signOut()}
         />
 
