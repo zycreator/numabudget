@@ -238,6 +238,13 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
 
   const splitEnabled = budget.split_enabled ?? false;
 
+  // Scroll to recurring panel when opened
+  useEffect(() => {
+    if (showRecurring && recurringRef.current) {
+      setTimeout(() => recurringRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    }
+  }, [showRecurring]);
+
   const incomeItems = useMemo(() => items.filter((i) => i.type === "income"), [items]);
   const expenseItems = useMemo(() => items.filter((i) => i.type === "expense"), [items]);
 
