@@ -531,16 +531,18 @@ const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetVi
 
       {/* Recurring panel */}
       {showRecurring && (
-        <RecurringPanel
-          items={recurringItems}
-          categories={categories}
-          onUpsert={(item) => upsertRecurring.mutate(item)}
-          onDelete={(id) => deleteRecurring.mutate(id)}
-          onApply={() => applyRecurring.mutate({
-            budgetId: budget.id,
-            items: recurringItems.filter(r => r.is_active),
-          })}
-        />
+        <div ref={recurringRef}>
+          <RecurringPanel
+            items={recurringItems}
+            categories={categories}
+            onUpsert={(item) => upsertRecurring.mutate(item)}
+            onDelete={(id) => deleteRecurring.mutate(id)}
+            onApply={() => applyRecurring.mutate({
+              budgetId: budget.id,
+              items: recurringItems.filter(r => r.is_active),
+            })}
+          />
+        </div>
       )}
     </div>
   );
