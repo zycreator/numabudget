@@ -210,6 +210,7 @@ interface BudgetViewProps {
 }
 
 const BudgetView = ({ budget, showSettings, showRecurring, exportRef }: BudgetViewProps) => {
+  const recurringRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { data: items = [], isLoading } = useBudgetItems(budget.id);
   const { data: categories = [] } = useCategories();
